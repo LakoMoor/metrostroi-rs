@@ -249,7 +249,7 @@ fn main() -> Result<()> {
                 sim.tick(1.0 / 60.0);
             }
         }
-        car::apply_state(&r, &mut scene, &names, &sim.state());
+        car::apply_state(&r, &mut scene, &names, &sim.state(), 1.0);
         log::info!("scene built in {:?}", t.elapsed());
         if let Some(list) = arg_value(&args, "--pose") {
             for kv in list.split(',') {

@@ -57,6 +57,8 @@ pub struct Signals {
     lead: usize,
     /// The map's static props: (object, pose in map space, origin).
     statics: Vec<(usize, Mat4, Vec3)>,
+    /// Luminance of the ambient light at each static prop (same order as `statics`).
+    ambient: Vec<f32>,
 }
 
 fn vec(t: &mlua::Table) -> Vec3 {
@@ -192,7 +194,7 @@ impl Signals {
             Ok(k) => k,
             Err(e) => {
                 log::warn!("signal models: {e:#}");
-                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: 0, statics: Vec::new() };
+                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: 0, statics: Vec::new(), ambient: Vec::new() };
             }
         };
         let mut lights = Vec::new();
@@ -277,7 +279,7 @@ impl Signals {
             }
         }
         let lead = n_lead.min(trains.len());
-        Signals { lights, signs, trains, lead, statics: Vec::new() }
+        Signals { lights, signs, trains, lead, statics: Vec::new(), ambient: Vec::new() }
     }
 
     /// Place the map's static props (station architecture, lamps, ...); only those near the train are drawn.
@@ -298,6 +300,7 @@ impl Signals {
             let origin = Vec3::from(p.origin) * SCALE;
             let pose = Mat4::from_translation(origin) * source_angles(p.angles[0], p.angles[1], p.angles[2]);
             self.statics.push((scene.objects.len(), pose, origin));
+            self.ambient.push(p.ambient[0] * 0.3 + p.ambient[1] * 0.59 + p.ambient[2] * 0.11);
             r.add_object(scene, "static prop", id, pose, false);
             // ambient from the map's light cube, brightened like the lightmaps (x4 decode)
             let a = p.ambient.map(|c| (c * 7.0).clamp(0.35, 1.6));
@@ -305,6 +308,18 @@ impl Signals {
         }
         log::info!("{} of {} static props placed ({} models)", self.statics.len(), props.len(), ids.values().filter(|v| v.is_some()).count());
         self
+    }
+
+    /// Ambient light around `train` (map space): mean luminance of the static props within 25 m, if any.
+    pub fn ambient_near(&self, train: Vec3) -> Option<f32> {
+        let (mut sum, mut n) = (0.0, 0);
+        for (i, &(_, _, o)) in self.statics.iter().enumerate() {
+            if (o - train).length() < 25.0 {
+                sum += self.ambient[i];
+                n += 1;
+            }
+        }
+        (n > 0).then(|| sum / n as f32)
     }
 
     /// Follow the world transform; show only lights near the train, lit by their free-line aspect.

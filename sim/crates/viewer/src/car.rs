@@ -36,9 +36,13 @@ pub fn index(scene: &Scene) -> HashMap<String, usize> {
 }
 
 /// Show exactly the props the cab's Lua reports, with their pose-parameter values.
-pub fn apply_state(r: &Renderer, scene: &mut Scene, names: &HashMap<String, usize>, state: &HashMap<String, (Option<f32>, f32)>) {
+pub fn apply_state(r: &Renderer, scene: &mut Scene, names: &HashMap<String, usize>, state: &HashMap<String, (Option<f32>, f32)>, light: f32) {
     for (name, &i) in names {
-        if name == "body" || name == "model" || name == "world" {
+        if name == "world" {
+            continue;
+        }
+        if name == "body" || name == "model" {
+            scene.objects[i].tint = [light, light, light, 1.0];
             continue;
         }
         let shown = state.get(name).filter(|s| s.1 > 0.02);
@@ -48,6 +52,8 @@ pub fn apply_state(r: &Renderer, scene: &mut Scene, names: &HashMap<String, usiz
                 let n = name.to_ascii_lowercase();
                 n.contains("lamp") || n.contains("light")
             };
+            // lamps shine on their own; everything else follows the light around the car
+            let a = if lamp { a } else { a * light };
             scene.objects[i].tint = [a, a, a, if lamp { 2.0 } else { 1.0 }];
         }
     }

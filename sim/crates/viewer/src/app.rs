@@ -130,6 +130,8 @@ struct App {
     cursor: (f64, f64),
     press_at: (f64, f64),
     frames: u64,
+    /// Brightness of the car body and cab from the light around it (smoothed).
+    car_light: f32,
     held: Option<String>,
     ground: Option<crate::ground::Ground>,
     /// W, S, A, D, Shift while walking
@@ -342,7 +344,7 @@ impl App {
                 }
             }
             self.frames += 1;
-            crate::car::apply_state(&g.renderer, scene, &self.names, &s.state());
+            crate::car::apply_state(&g.renderer, scene, &self.names, &s.state(), self.car_light);
             // the train stays at the origin; the map moves around it
             if let (Some((pos, dir)), Some(w)) = (s.world_pose(), scene.objects.iter_mut().find(|o| o.name == "world")) {
                 let x = dir.normalize_or_zero();
@@ -358,6 +360,11 @@ impl App {
                 }
 
                 let (xf, show) = (w.transform, w.visible);
+                // light on the car: tunnel ambient measured at the train, eased so it fades in and out
+                if let Some(sg) = &self.signals {
+                    let target = sg.ambient_near(origin).map_or(1.0, |a| (a * 5.0).clamp(0.55, 1.15));
+                    self.car_light += (target - self.car_light) * (dt * 2.0).min(1.0);
+                }
                 if let Some(sg) = &self.signals {
                     sg.update(scene, xf, pos, show, &|g| s.aspect(g), &s.lead_poses());
                 }
@@ -670,6 +677,7 @@ pub fn run(
         cursor: (0.0, 0.0),
         press_at: (0.0, 0.0),
         frames: 0,
+        car_light: 1.0,
         held: None,
         ground: None,
         move_keys: [false; 5],
