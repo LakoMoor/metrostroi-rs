@@ -1,4 +1,4 @@
-//! Source engine static models: `.mdl` (v48/49) + `.vvd` + `.dx90.vtx` (LOD 0).
+//! Source engine static models: `.mdl` (v44-49) + `.vvd` + `.dx90.vtx` (LOD 0).
 //!
 //! Geometry stays in Source space (Z up, inches); the renderer converts.
 
@@ -193,7 +193,7 @@ pub fn load(mdl: &[u8], vvd: &[u8], vtx: &[u8]) -> Result<Model> {
     let r = Rd(mdl);
     ensure!(mdl.len() > 240 && &mdl[..4] == b"IDST", "bad MDL header");
     let version = r.i32(4)?;
-    if version != 48 && version != 49 {
+    if !(44..=49).contains(&version) {
         bail!("unsupported MDL version {version}");
     }
     let ntex = r.i32(204)? as usize;
