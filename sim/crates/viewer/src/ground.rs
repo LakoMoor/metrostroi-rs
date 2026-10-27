@@ -147,7 +147,7 @@ mod tests {
         use super::*;
         // a vertical wall in the plane x = 5, spanning y 0..10, z 0..3
         let quad = |a: Vec3, b: Vec3, c: Vec3, d: Vec3| {
-            let v = |p: Vec3| formats::mdl::Vertex { pos: p.to_array(), normal: [1.0, 0.0, 0.0], uv: [0.0, 0.0], joints: [0; 3], weights: [1.0, 0.0, 0.0], nbones: 0 };
+            let v = |p: Vec3| formats::mdl::Vertex { pos: p.to_array(), normal: [1.0, 0.0, 0.0], uv: [0.0, 0.0], uv2: [0.0, 0.0], joints: [0; 3], weights: [1.0, 0.0, 0.0], nbones: 0 };
             formats::mdl::Mesh { material: String::new(), vertices: vec![v(a), v(b), v(c), v(d)], indices: vec![0, 1, 2, 0, 2, 3] }
         };
         let wall = quad(Vec3::new(5.0, 0.0, 0.0), Vec3::new(5.0, 10.0, 0.0), Vec3::new(5.0, 10.0, 3.0), Vec3::new(5.0, 0.0, 3.0));
@@ -168,7 +168,7 @@ mod floor_tests {
             material: String::new(),
             vertices: [[0.0, 0.0, z], [10.0, 0.0, z], [0.0, 10.0, z]]
                 .into_iter()
-                .map(|p| formats::mdl::Vertex { pos: p, normal: [0.0, 0.0, 1.0], uv: [0.0, 0.0], joints: [0; 3], weights: [1.0, 0.0, 0.0], nbones: 0 })
+                .map(|p| formats::mdl::Vertex { pos: p, normal: [0.0, 0.0, 1.0], uv: [0.0, 0.0], uv2: [0.0, 0.0], joints: [0; 3], weights: [1.0, 0.0, 0.0], nbones: 0 })
                 .collect(),
             indices: vec![0, 1, 2],
         };
