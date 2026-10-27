@@ -229,6 +229,17 @@ pub fn entities(data: &[u8]) -> Result<Vec<std::collections::HashMap<String, Str
 #[cfg(test)]
 mod tests {
     #[test]
+    fn crossline_c4_static_props() {
+        let Ok(data) = std::fs::read(r"E:\metrostroi2pz\game\content\maps\crossline_c4\map.bsp") else { return };
+        let p = super::static_props(&data).unwrap();
+        let mut names: Vec<&str> = p.iter().map(|x| x.model.as_str()).collect();
+        names.sort();
+        names.dedup();
+        println!("{} static props, {} distinct models, e.g. {:?}", p.len(), names.len(), &names[..names.len().min(8)]);
+        assert!(!p.is_empty());
+    }
+
+    #[test]
     fn crossline_c4_world_geometry() {
         let p = std::path::Path::new(&std::env::var("TEMP").unwrap_or_default()).join("c4.bsp");
         let Ok(data) = std::fs::read(&p) else { return };
@@ -240,4 +251,66 @@ mod tests {
         println!("pakfile: {} files", files.len());
         assert!(files.iter().any(|f| f.0.ends_with(".vtf")));
     }
+}
+
+/// A static prop placed by the map compiler (game lump `sprp`).
+#[derive(Debug, Clone)]
+pub struct StaticProp {
+    /// Model path as in the map, e.g. `models/props_c17/lamp.mdl`.
+    pub model: String,
+    pub origin: [f32; 3],
+    /// Source angles: pitch, yaw, roll (degrees).
+    pub angles: [f32; 3],
+    pub skin: i32,
+}
+
+/// Static props from the game lump directory (lump 35).
+pub fn static_props(data: &[u8]) -> Result<Vec<StaticProp>> {
+    ensure!(data.len() > 1036 && &data[0..4] == b"VBSP", "not a VBSP file");
+    let dir = Bsp(data).lump(35);
+    let n = i32_at(dir, 0).max(0) as usize;
+    for i in 0..n {
+        let o = 4 + i * 16;
+        if &dir[o..o + 4] != b"prps" && &dir[o..o + 4] != b"sprp" {
+            continue;
+        }
+        // dgamelump_t: id(4) flags(2) version(2) fileofs(4) filelen(4)
+        let (ofs, lump_len) = (i32_at(dir, o + 8) as usize, i32_at(dir, o + 12) as usize);
+        if dir[o + 4] & 1 != 0 || ofs + lump_len > data.len() {
+            return Ok(Vec::new()); // compressed or truncated: skip
+        }
+        let g = &data[ofs..ofs + lump_len];
+        let dict_n = i32_at(g, 0).max(0) as usize;
+        let mut names = Vec::with_capacity(dict_n);
+        for k in 0..dict_n {
+            let s = &g[4 + k * 128..4 + (k + 1) * 128];
+            let end = s.iter().position(|&c| c == 0).unwrap_or(128);
+            names.push(String::from_utf8_lossy(&s[..end]).to_string());
+        }
+        let mut p = 4 + dict_n * 128;
+        let leaves = i32_at(g, p).max(0) as usize;
+        p += 4 + leaves * 2;
+        let count = i32_at(g, p).max(0) as usize;
+        p += 4;
+        if count == 0 {
+            return Ok(Vec::new());
+        }
+        // entry size depends on the lump version; the entries fill the rest of the lump
+        let stride = lump_len.saturating_sub(p) / count;
+        ensure!(stride >= 56, "unexpected static prop stride {stride}");
+        let mut out = Vec::with_capacity(count);
+        for k in 0..count {
+            let e = p + k * stride;
+            let idx = u16_at(g, e + 24) as usize;
+            let Some(model) = names.get(idx) else { continue };
+            out.push(StaticProp {
+                model: model.clone(),
+                origin: [f32_at(g, e), f32_at(g, e + 4), f32_at(g, e + 8)],
+                angles: [f32_at(g, e + 12), f32_at(g, e + 16), f32_at(g, e + 20)],
+                skin: i32_at(g, e + 32),
+            });
+        }
+        return Ok(out);
+    }
+    Ok(Vec::new())
 }

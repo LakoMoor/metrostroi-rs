@@ -116,6 +116,7 @@ fn main() -> Result<()> {
     if shot.is_none() {
         let controls_path = PathBuf::from(&controls);
         let start_cab = args.iter().any(|a| a == "--cab");
+        let no_props = args.iter().any(|a| a == "--noprops");
         let lightmaps = !args.iter().any(|a| a == "--nolightmap");
         let map_bsp = cfg.resolve(game.as_deref(), &cfg.map).join("map.bsp");
         let with_world = !cfg.map.is_empty() && map_bsp.exists() && !args.iter().any(|a| a == "--noworld");
@@ -159,7 +160,8 @@ fn main() -> Result<()> {
                             r.set_lightmap(lm);
                             scene.objects.last_mut().unwrap().tint[3] = 3.0;
                         }
-                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead));
+                        let statics = if no_props { Vec::new() } else { formats::bsp::static_props(&data).unwrap_or_default() };
+                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead).with_statics(r, &mut scene, &vfs, &statics));
                     }
                     Ok(scene)
                 }
@@ -246,6 +248,22 @@ fn main() -> Result<()> {
             if let (Some(lm), true) = (&lightmap, !args.iter().any(|a| a == "--nolightmap")) {
                 r.set_lightmap(lm);
                 scene.objects.last_mut().unwrap().tint[3] = 3.0;
+            }
+            if !args.iter().any(|a| a == "--noprops") {
+                // static props near the camera spot, for a quick look (the live view streams them by distance)
+                let tr0 = track::Track::load(&cfg.resolve(game.as_deref(), &cfg.map).join("track.lua"))?;
+                let c = tr0.main().at(s).pos;
+                let near: Vec<_> = formats::bsp::static_props(&data)?
+                    .into_iter()
+                    .filter(|p| (glam::Vec3::from(p.origin) * renderer::SCALE - c).length() < 250.0)
+                    .collect();
+                for p in &near {
+                    if let Ok(id) = r.load_model(&mut scene, &vfs, p.model.trim_end_matches(".mdl")) {
+                        let t = Mat4::from_translation(glam::Vec3::from(p.origin) * renderer::SCALE) * renderer::source_angles(p.angles[0], p.angles[1], p.angles[2]);
+                        r.add_object(&mut scene, "static prop", id, t, true);
+                    }
+                }
+                log::info!("{} static props near the spot", near.len());
             }
             let tr = track::Track::load(&cfg.resolve(game.as_deref(), &cfg.map).join("track.lua"))?;
             let p = tr.main().at(s);

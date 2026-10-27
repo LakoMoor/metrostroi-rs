@@ -55,6 +55,8 @@ pub struct Signals {
     trains: Vec<(usize, Mat4)>,
     /// How many of the trailing `trains` are moving ones (poses come from the sim every frame).
     lead: usize,
+    /// The map's static props: (object, pose in map space, origin).
+    statics: Vec<(usize, Mat4, Vec3)>,
 }
 
 fn vec(t: &mlua::Table) -> Vec3 {
@@ -190,7 +192,7 @@ impl Signals {
             Ok(k) => k,
             Err(e) => {
                 log::warn!("signal models: {e:#}");
-                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: 0 };
+                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: 0, statics: Vec::new() };
             }
         };
         let mut lights = Vec::new();
@@ -275,7 +277,31 @@ impl Signals {
             }
         }
         let lead = n_lead.min(trains.len());
-        Signals { lights, signs, trains, lead }
+        Signals { lights, signs, trains, lead, statics: Vec::new() }
+    }
+
+    /// Place the map's static props (station architecture, lamps, ...); only those near the train are drawn.
+    pub fn with_statics(mut self, r: &Renderer, scene: &mut Scene, vfs: &Vfs, props: &[formats::bsp::StaticProp]) -> Signals {
+        let mut ids: std::collections::HashMap<&str, Option<usize>> = std::collections::HashMap::new();
+        for p in props {
+            let id = *ids.entry(p.model.as_str()).or_insert_with(|| {
+                let key = p.model.trim_end_matches(".mdl");
+                match r.load_model(scene, vfs, key) {
+                    Ok(id) => Some(id),
+                    Err(e) => {
+                        log::debug!("static prop {key}: {e}");
+                        None
+                    }
+                }
+            });
+            let Some(id) = id else { continue };
+            let origin = Vec3::from(p.origin) * SCALE;
+            let pose = Mat4::from_translation(origin) * source_angles(p.angles[0], p.angles[1], p.angles[2]);
+            self.statics.push((scene.objects.len(), pose, origin));
+            r.add_object(scene, "static prop", id, pose, false);
+        }
+        log::info!("{} of {} static props placed ({} models)", self.statics.len(), props.len(), ids.values().filter(|v| v.is_some()).count());
+        self
     }
 
     /// Follow the world transform; show only lights near the train, lit by their free-line aspect.
@@ -290,6 +316,13 @@ impl Signals {
             let o = &mut scene.objects[obj];
             o.visible = show && (pose.w_axis.truncate() - train).length() < 600.0;
             o.transform = world * pose;
+        }
+        for &(obj, pose, origin) in &self.statics {
+            let o = &mut scene.objects[obj];
+            o.visible = show && (origin - train).length() < 300.0;
+            if o.visible {
+                o.transform = world * pose;
+            }
         }
         for l in &self.lights {
             let s = &self.signs[l.sign];
