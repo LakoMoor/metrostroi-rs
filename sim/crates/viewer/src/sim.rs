@@ -72,6 +72,35 @@ const HELPERS: &str = r#"
         end
     end
     -- buttons the cab currently hides (same test as the cab's own mouse code)
+    -- Metrostroi's failure simulator (the original ages objects in Turbostroi's C++ side)
+    FAIL_AUTO = false
+    function __fail_age(dt)
+        if not (FAIL_AUTO and FailSim and FailSim.Objects) then return end
+        for obj in pairs(FailSim.Objects) do FailSim.Age(obj, dt) end
+    end
+    function __fail_now()
+        if not (FailSim and FailSim.RandomFailure) then return nil end
+        local out, p = nil, print
+        print = function(...)
+            local t = {}
+            for i, v in ipairs({...}) do t[i] = tostring(v) end
+            local s = table.concat(t, " ")
+            if s:find("[!FAIL!]", 1, true) then out = s end
+        end
+        local ok = pcall(FailSim.RandomFailure)
+        print = p
+        return ok and out or nil
+    end
+    function __fail_list()
+        local r = {}
+        for obj, o in pairs(FailSim.Objects or {}) do
+            for _, prm in pairs(o.Parameters) do
+                for _, f in pairs(prm.failures or {}) do r[#r + 1] = f.name .. " (" .. tostring(obj.Name or "?") .. ")" end
+            end
+        end
+        return r
+    end
+    function __fail_reset() if FailSim and FailSim.Reset then FailSim.Reset() end end
     function __hidden_buttons()
         local H, out = C.Hidden, {}
         for _, panel in pairs(C.ButtonMap) do
@@ -233,6 +262,8 @@ pub struct Sim {
     station_names: RefCell<HashMap<u32, String>>,
     /// Tail position (m along the main line) of the moving train ahead, if any.
     lead: RefCell<Vec<f32>>,
+    auto_fail: std::cell::Cell<bool>,
+    fail_clock: std::cell::Cell<f32>,
     /// Position of the red signal ahead; running past it trips the autostop.
     red_ahead: std::cell::Cell<Option<f32>>,
     moving: std::cell::Cell<bool>,
@@ -355,7 +386,7 @@ impl Sim {
         rt.lua.globals().set("T", train)?;
         rt.lua.globals().set("__rail", 750.0)?;
         rt.exec(HELPERS, "@sim_helpers")?;
-        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
+        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), auto_fail: std::cell::Cell::new(false), fail_clock: std::cell::Cell::new(0.0), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
     }
 
     /// The body model of the train (`ENT.Model`, no extension), e.g. `models/metrostroi_train/81-717/81-717_mvm`.
@@ -470,6 +501,17 @@ impl Sim {
     }
 
     pub fn tick(&self, dt: f32) {
+        if self.auto_fail.get() {
+            let t = self.fail_clock.get() + dt;
+            if t >= 1.0 {
+                self.fail_clock.set(0.0);
+                if let Ok(f) = self.rt.lua.globals().get::<mlua::Function>("__fail_age") {
+                    let _ = f.call::<()>(t as f64);
+                }
+            } else {
+                self.fail_clock.set(t);
+            }
+        }
         for s in self.lead.borrow_mut().iter_mut() {
             *s += LEAD_SPEED * dt;
         }
@@ -527,6 +569,35 @@ impl Sim {
 
     pub fn ars_tripped(&self) -> bool {
         self.ars_tripped.get()
+    }
+
+    /// Switch ageing of relays and contactors (random failures over time) on or off.
+    pub fn set_auto_failures(&self, on: bool) {
+        self.auto_fail.set(on);
+        let _ = self.rt.lua.load(&format!("FAIL_AUTO = {on}")).exec();
+    }
+
+    pub fn auto_failures(&self) -> bool {
+        self.auto_fail.get()
+    }
+
+    /// A random failure like `metrostroi_fail`: the description of what broke.
+    pub fn trigger_failure(&self) -> Option<String> {
+        let f: mlua::Function = self.rt.lua.globals().get("__fail_now").ok()?;
+        f.call::<Option<String>>(()).ok().flatten().map(|s| s.replace("[!FAIL!]", "").trim().to_string())
+    }
+
+    /// Like `metrostroi_fail_reset`.
+    pub fn reset_failures(&self) {
+        if let Ok(f) = self.rt.lua.globals().get::<mlua::Function>("__fail_reset") {
+            let _ = f.call::<()>(());
+        }
+    }
+
+    /// Descriptions of the failures that are active now.
+    pub fn failures(&self) -> Vec<String> {
+        let Ok(f) = self.rt.lua.globals().get::<mlua::Function>("__fail_list") else { return Vec::new() };
+        f.call::<mlua::Table>(()).map(|t| t.sequence_values::<String>().flatten().collect()).unwrap_or_default()
     }
 
     /// Release the autostop (what the driver does with the UAVA key).

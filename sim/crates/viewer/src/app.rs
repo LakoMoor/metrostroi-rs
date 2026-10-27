@@ -132,6 +132,8 @@ struct App {
     frames: u64,
     /// Brightness of the car body and cab from the light around it (smoothed).
     car_light: f32,
+    /// Last failure message and when it was shown (F7/F8/F9).
+    fail_note: Option<(String, std::time::Instant)>,
     held: Option<String>,
     ground: Option<crate::ground::Ground>,
     /// W, S, A, D, Shift while walking
@@ -409,6 +411,12 @@ impl App {
             if self.menu.settings.hud {
                 if let Some(s) = &self.sim {
                     draw_hud(&mut g.ui, s);
+                    if let Some((msg, at)) = &self.fail_note {
+                        if at.elapsed().as_secs_f32() < 6.0 {
+                            let (sw, _) = g.ui.screen;
+                            g.ui.text(sw * 0.5 - 220.0, 60.0, 24.0, msg, [1.0, 0.6, 0.4, 1.0]);
+                        }
+                    }
                 }
             }
         } else {
@@ -591,6 +599,24 @@ impl ApplicationHandler for App {
                                 cam.mode = Mode::Walk;
                             }
                         }
+                        KeyCode::F7 if down => {
+                            if let Some(s) = &self.sim {
+                                self.fail_note = Some((s.trigger_failure().unwrap_or_else(|| "отказ не создан".into()), std::time::Instant::now()));
+                            }
+                        }
+                        KeyCode::F8 if down => {
+                            if let Some(s) = &self.sim {
+                                s.reset_failures();
+                                self.fail_note = Some(("отказы сброшены".into(), std::time::Instant::now()));
+                            }
+                        }
+                        KeyCode::F9 if down => {
+                            if let Some(s) = &self.sim {
+                                let on = !s.auto_failures();
+                                s.set_auto_failures(on);
+                                self.fail_note = Some((if on { "отказы со временем: вкл" } else { "отказы со временем: выкл" }.into(), std::time::Instant::now()));
+                            }
+                        }
                         KeyCode::F6 if down => {
                             if let Some(s) = &self.sim {
                                 s.reset_autostop();
@@ -678,6 +704,7 @@ pub fn run(
         press_at: (0.0, 0.0),
         frames: 0,
         car_light: 1.0,
+        fail_note: None,
         held: None,
         ground: None,
         move_keys: [false; 5],

@@ -80,14 +80,23 @@ impl Dynamics {
             // motor: positive power pushes along `e`, negative power resists the motion
             let mp = if b.motor_power > 0.0 { b.motor_power } else { b.motor_power * sign };
             let mp = mp.clamp(-1.0, 1.0);
-            let motor = b.motor_force * mp;
+            // gmod_train_bogey: forces grow on slopes steeper than 3 degrees
+            let pitch = (self.grade / 1000.0).atan().to_degrees() * sign;
+            let mut slopemul = 1.0;
+            if mp < 0.0 && pitch > 3.0 {
+                slopemul += ((pitch.abs() - 3.0) / 3.0).clamp(0.0, 1.0) * 1.5;
+            } else {
+                slopemul += ((pitch - 3.0) / 3.0).clamp(0.0, 1.0) * 1.5;
+            }
+            let slopemulb = if pitch.abs() > 3.0 { 1.0 + ((pitch.abs() - 3.0) / 3.0).clamp(0.0, 1.0) * 0.7 } else { 1.0 };
+            let motor = b.motor_force * mp * slopemul;
             traction += motor.abs();
 
             // friction brakes
             let bcp = (((b.brake_cylinder / 2.7 + b.parking / 1.6).max(0.0)).powf(b.pneumatic_pow) * 2.7) / 4.5;
             let factor = (0.5 * abs).clamp(0.0, 1.0) * (1.0 + ((2.0 - abs) / 2.0).clamp(0.0, 1.0) * 0.5);
-            let pneumatic = if bcp >= 0.05 { -sign * factor * b.pneumatic_force * bcp * BRAKE_SCALE } else { 0.0 };
-            if bcp * 4.5 > 1.5 && abs < 1.0 {
+            let pneumatic = if bcp >= 0.05 { -sign * factor * b.pneumatic_force * bcp * BRAKE_SCALE * slopemulb } else { 0.0 };
+            if bcp * 4.5 > 1.5 - pitch.abs().clamp(0.0, 1.0) && abs < 1.0 {
                 hold = true;
             }
 
