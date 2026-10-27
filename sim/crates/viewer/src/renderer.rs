@@ -265,7 +265,7 @@ impl Renderer {
                         attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x2, 3 => Float32x2],
                     })],
                 },
-                primitive: wgpu::PrimitiveState { cull_mode: Some(wgpu::Face::Back), ..Default::default() },
+                primitive: wgpu::PrimitiveState { cull_mode: if std::env::var_os("MS_NOCULL").is_some() { None } else { Some(wgpu::Face::Back) }, ..Default::default() },
                 depth_stencil: Some(wgpu::DepthStencilState {
                     format: DEPTH_FORMAT,
                     depth_write_enabled: Some(depth_write),

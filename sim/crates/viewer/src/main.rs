@@ -151,9 +151,10 @@ fn main() -> Result<()> {
                     let mut scene = car::load(r, &vfs, "models/metrostroi_train/81-717/81-717_mvm", &props)?;
                     if with_world {
                         let data = std::fs::read(&map_bsp)?;
-                        let (meshes, lightmap) = formats::bsp::load_lit(&data)?;
+                        let (mut meshes, lightmap) = formats::bsp::load_lit(&data)?;
                         vfs.mount_files(formats::bsp::pakfile(&data)?);
                         ground::store(ground::Ground::build(&meshes, renderer::SCALE));
+                        formats::bsp::double_sided(&mut meshes);
                         let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);
                         r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
                         if let (Some(lm), true) = (&lightmap, lightmaps) {
@@ -240,7 +241,8 @@ fn main() -> Result<()> {
             let s: f32 = sv.parse().unwrap_or(0.0);
             let bsp = cfg.resolve(game.as_deref(), &cfg.map).join("map.bsp");
             let data = std::fs::read(&bsp).with_context(|| format!("{} (extract the map first)", bsp.display()))?;
-            let (meshes, lightmap) = formats::bsp::load_lit(&data)?;
+            let (mut meshes, lightmap) = formats::bsp::load_lit(&data)?;
+            formats::bsp::double_sided(&mut meshes);
             let mut vfs = vfs;
             vfs.mount_files(formats::bsp::pakfile(&data)?);
             let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);

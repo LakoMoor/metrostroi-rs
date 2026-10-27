@@ -157,6 +157,19 @@ pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
             };
             m.vertices.push(Vertex { pos: p, normal: nrm, uv: [dot(sv) / tw, dot(tv) / th], uv2, nbones: 0, ..Default::default() });
         };
+        // Winding: the compiler's edge order is clockwise about the plane normal whatever `side` says, so
+        // decide per face from the geometry: the emitted triangles must have cross(p1-p0, p2-p0) . normal < 0.
+        let flip = {
+            // Newell's method: robust against collinear leading vertices
+            let mut cr = [0.0f32; 3];
+            for k in 0..poly.len() {
+                let (a, b) = (poly[k], poly[(k + 1) % poly.len()]);
+                cr[0] += (a[1] - b[1]) * (a[2] + b[2]);
+                cr[1] += (a[2] - b[2]) * (a[0] + b[0]);
+                cr[2] += (a[0] - b[0]) * (a[1] + b[1]);
+            }
+            cr[0] * nrm[0] + cr[1] * nrm[1] + cr[2] * nrm[2] > 0.0
+        };
         if disp >= 0 {
             let di = disp as usize * 176;
             let start = [f32_at(dispinfo, di), f32_at(dispinfo, di + 4), f32_at(dispinfo, di + 8)];
@@ -185,7 +198,11 @@ pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
                 for col in 0..g as u32 - 1 {
                     let i = base + row * g as u32 + col;
                     let g = g as u32;
-                    m.indices.extend_from_slice(&[i, i + 1, i + g + 1, i, i + g + 1, i + g]);
+                    if !flip {
+                        m.indices.extend_from_slice(&[i, i + 1, i + g + 1, i, i + g + 1, i + g]);
+                    } else {
+                        m.indices.extend_from_slice(&[i, i + g + 1, i + 1, i, i + g, i + g + 1]);
+                    }
                 }
             }
             continue;
@@ -194,7 +211,11 @@ pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
             mk(p, p, None);
         }
         for k in 1..n as u32 - 1 {
-            m.indices.extend_from_slice(&[base, base + k, base + k + 1]);
+            if !flip {
+                m.indices.extend_from_slice(&[base, base + k, base + k + 1]);
+            } else {
+                m.indices.extend_from_slice(&[base, base + k + 1, base + k]);
+            }
         }
     }
     if blocks.is_empty() {
@@ -301,6 +322,18 @@ mod tests {
         let files = super::pakfile(&data).unwrap();
         println!("pakfile: {} files", files.len());
         assert!(files.iter().any(|f| f.0.ends_with(".vtf")));
+    }
+}
+
+/// Make every triangle visible from both sides (map faces whose edge order disagrees with their plane would
+/// otherwise be culled). Call after anything that needs the winding, e.g. collision.
+pub fn double_sided(meshes: &mut [Mesh]) {
+    for m in meshes {
+        let n = m.indices.len();
+        for t in 0..n / 3 {
+            let (a, b, c) = (m.indices[t * 3], m.indices[t * 3 + 1], m.indices[t * 3 + 2]);
+            m.indices.extend_from_slice(&[a, c, b]);
+        }
     }
 }
 
