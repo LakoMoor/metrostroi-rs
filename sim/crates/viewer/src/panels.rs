@@ -168,13 +168,14 @@ impl Panels {
         self.panels.iter().map(|p| p.buttons.len()).sum()
     }
 
-    /// Nearest button under the ray (panels are two-sided, like the 3D2D hit test).
+    /// Nearest button under the ray (one-sided, like Metrostroi's panel hit test).
     pub fn pick(&self, origin: Vec3, dir: Vec3, hidden: &std::collections::HashSet<String>) -> Option<Hit> {
         let mut best: Option<(f32, &Button, Vec3)> = None;
         for p in &self.panels {
             let n = p.axes.z_axis.truncate();
             let denom = dir.dot(n);
-            if denom.abs() < 1e-6 {
+            // Metrostroi only reacts to a panel seen from its front (aim vector against the panel's up)
+            if denom > -1e-6 {
                 continue;
             }
             let t = (p.origin - origin).dot(n) / denom;

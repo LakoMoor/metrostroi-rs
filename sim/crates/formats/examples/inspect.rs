@@ -38,6 +38,7 @@ fn main() -> anyhow::Result<()> {
                     }
                 }
             }
+            println!("  zrange src units {:.1}..{:.1}", mn[2], mx[2]);
             println!("  bodypart '{}' model {i}: meshes={} verts={v} tris={} size(m)={:.2} x {:.2} x {:.2}",
                 bp.name, sm.meshes.len(), ix / 3,
                 (mx[0]-mn[0])*0.0254, (mx[1]-mn[1])*0.0254, (mx[2]-mn[2])*0.0254);
