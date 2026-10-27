@@ -373,7 +373,7 @@ impl App {
                     self.car_light += (target - self.car_light) * (dt * 2.0).min(1.0);
                 }
                 if let Some(sg) = &self.signals {
-                    sg.update(scene, xf, pos, show, &|g| s.aspect(g), &s.lead_poses());
+                    sg.update(scene, xf, pos, show, &|g| s.aspect(g), &s.other_poses());
                 }
                 if let Some(sky) = scene.objects.iter_mut().find(|o| o.name == "sky") {
                     // fixed in map space, centred on the train

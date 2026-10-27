@@ -267,6 +267,7 @@ pub struct Sim {
     station_names: RefCell<HashMap<u32, String>>,
     /// Tail position (m along the main line) of the moving train ahead, if any.
     lead: RefCell<Vec<f32>>,
+    cars: std::cell::Cell<usize>,
     auto_fail: std::cell::Cell<bool>,
     fail_clock: std::cell::Cell<f32>,
     /// Position of the red signal ahead; running past it trips the autostop.
@@ -276,6 +277,9 @@ pub struct Sim {
     stop_report: std::cell::Cell<Option<(f32, f32)>>,
     ars_tripped: std::cell::Cell<bool>,
 }
+
+/// Distance between the centres of coupled 81-717 cars, metres.
+const CAR_PITCH: f32 = 19.2;
 
 impl Sim {
     /// Contact-rail voltage seen by both bogeys (0 = dead section).
@@ -296,6 +300,35 @@ impl Sim {
         let z = x.cross(y);
         let o = p.pos + glam::Vec3::Z * crate::app::car_above_rail();
         Some(glam::Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), o.extend(1.0)))
+    }
+
+    /// Pose of a car whose centre is `s` metres along the main line; behind the start the line is extended straight back.
+    fn car_pose_at(&self, s: f32) -> Option<glam::Mat4> {
+        let tr = self.track.borrow();
+        let main = tr.as_ref()?.main();
+        let p = main.at(s.max(0.0));
+        let x = p.dir.normalize_or_zero();
+        let y = glam::Vec3::Z.cross(x).normalize_or_zero();
+        let z = x.cross(y);
+        let o = p.pos + x * s.min(0.0) + glam::Vec3::Z * crate::app::car_above_rail();
+        Some(glam::Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), o.extend(1.0)))
+    }
+
+    /// Cars coupled behind the driven one (the consist has `cars` in total).
+    pub fn set_cars(&self, n: usize) {
+        self.cars.set(n.clamp(1, 8));
+    }
+
+    pub fn tail_poses(&self) -> Vec<glam::Mat4> {
+        let s = self.dynamics.borrow().pos as f32;
+        (1..self.cars.get()).filter_map(|k| self.car_pose_at(s - CAR_PITCH * k as f32)).collect()
+    }
+
+    /// Everything that is drawn as a separate train: the leads, then our own tail cars.
+    pub fn other_poses(&self) -> Vec<glam::Mat4> {
+        let mut v = self.lead_poses();
+        v.extend(self.tail_poses());
+        v
     }
 
     /// Trains running ahead at LEAD_SPEED; each counts as an occupied block for the signals.
@@ -391,7 +424,7 @@ impl Sim {
         rt.lua.globals().set("T", train)?;
         rt.lua.globals().set("__rail", 750.0)?;
         rt.exec(HELPERS, "@sim_helpers")?;
-        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), auto_fail: std::cell::Cell::new(false), fail_clock: std::cell::Cell::new(0.0), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
+        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), cars: std::cell::Cell::new(1), auto_fail: std::cell::Cell::new(false), fail_clock: std::cell::Cell::new(0.0), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
     }
 
     /// The body model of the train (`ENT.Model`, no extension), e.g. `models/metrostroi_train/81-717/81-717_mvm`.
@@ -925,6 +958,27 @@ mod tests {
         sim.tick(1.0);
         assert!((sim.lead.borrow()[0] - 100.0 - LEAD_SPEED).abs() < 1e-3);
         assert_eq!(sim.all_obstacles().len(), 2);
+    }
+
+    #[test]
+    fn coupled_cars_trail_the_head_car_by_one_car_length() {
+        let f = Path::new("E:/metrostroi2pz/game/content/maps/crossline_c4/track.lua");
+        if !f.exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        sim.set_track(crate::track::Track::load(f).unwrap());
+        sim.set_cars(4);
+        sim.set_position(500.0);
+        let tail = sim.tail_poses();
+        assert_eq!(tail.len(), 3);
+        let head = sim.car_pose_at(500.0).unwrap().w_axis.truncate();
+        let d1 = (tail[0].w_axis.truncate() - head).length();
+        assert!((d1 - CAR_PITCH).abs() < 0.5, "first tail car {d1} m behind");
+        // at the very start the tail runs back along the line instead of piling up
+        sim.set_position(0.0);
+        let t = sim.tail_poses();
+        assert!((t[2].w_axis.truncate() - t[1].w_axis.truncate()).length() > 15.0);
     }
 
     #[test]

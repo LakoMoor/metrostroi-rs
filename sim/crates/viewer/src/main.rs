@@ -113,6 +113,7 @@ fn main() -> Result<()> {
         .and_then(|d| std::fs::read(d.join("map.bsp")).ok())
         .and_then(|b| formats::bsp::entities(&b).ok())
         .unwrap_or_default();
+    let cars: usize = arg_value(&args, "--cars").and_then(|v| v.parse().ok()).unwrap_or(1);
     let lead: Vec<f32> = arg_value(&args, "--lead").map(|v| v.split(',').filter_map(|x| x.parse().ok()).collect()).unwrap_or_default();
     let make_sim = move || -> Result<sim::Sim> {
         let sim = sim::Sim::new(&train, &lua_root).context("train simulation")?;
@@ -134,6 +135,7 @@ fn main() -> Result<()> {
         }
         sim.set_obstacles(obstacles.clone());
         sim.set_leads(lead.clone());
+        sim.set_cars(cars);
         Ok(sim)
     };
     let sim = make_sim()?;
@@ -158,7 +160,7 @@ fn main() -> Result<()> {
         }
         let signs = sim.signs();
         let mut standing: Vec<Mat4> = sim.obstacles().iter().filter_map(|&s| sim.standing_pose(s)).collect();
-        let leads = sim.lead_poses();
+        let leads = sim.other_poses();
         let n_lead = leads.len();
         standing.extend(leads);
         let lua_root = PathBuf::from(cfg.resolve(game.as_deref(), &cfg.lua_root));
