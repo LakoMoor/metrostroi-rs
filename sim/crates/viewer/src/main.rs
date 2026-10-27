@@ -68,6 +68,7 @@ fn main() -> Result<()> {
         .and_then(|d| std::fs::read(d.join("map.bsp")).ok())
         .and_then(|b| formats::bsp::entities(&b).ok())
         .unwrap_or_default();
+    let lead: Option<f32> = arg_value(&args, "--lead").and_then(|s| s.parse().ok());
     let make_sim = move || -> Result<sim::Sim> {
         let sim = sim::Sim::new(&train, &lua_root).context("train simulation")?;
         if let Some(dir) = &map_dir {
@@ -87,6 +88,9 @@ fn main() -> Result<()> {
             sim.set_position(s);
         }
         sim.set_obstacles(obstacles.clone());
+        if let Some(s) = lead {
+            sim.set_lead(s);
+        }
         Ok(sim)
     };
     let sim = make_sim()?;
@@ -106,7 +110,11 @@ fn main() -> Result<()> {
             log::warn!("no audio device");
         }
         let signs = sim.signs();
-        let standing: Vec<Mat4> = sim.obstacles().iter().filter_map(|&s| sim.standing_pose(s)).collect();
+        let mut standing: Vec<Mat4> = sim.obstacles().iter().filter_map(|&s| sim.standing_pose(s)).collect();
+        let has_lead = sim.lead_pose().is_some();
+        if let Some(p) = sim.lead_pose() {
+            standing.push(p);
+        }
         let lua_root = PathBuf::from(cfg.resolve(game.as_deref(), &cfg.lua_root));
         let tips = controls_path.parent().map(|d| d.join("tooltips_ru.json"));
         let panels = match sim.panels(tips.as_deref()) {
@@ -133,7 +141,7 @@ fn main() -> Result<()> {
                         ground::store(ground::Ground::build(&meshes, renderer::SCALE));
                         let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);
                         r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
-                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing));
+                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, has_lead));
                     }
                     Ok(scene)
                 }

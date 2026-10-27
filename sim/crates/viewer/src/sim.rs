@@ -220,6 +220,9 @@ pub struct PropDef {
     pub ang: [f32; 3],
 }
 
+/// Speed of the train ahead, m/s (~43 km/h).
+const LEAD_SPEED: f32 = 12.0;
+
 pub struct Sim {
     rt: lua::Runtime,
     dynamics: RefCell<Dynamics>,
@@ -228,6 +231,8 @@ pub struct Sim {
     obstacles: RefCell<Vec<f32>>,
     platforms: RefCell<Vec<crate::station::Platform>>,
     station_names: RefCell<HashMap<u32, String>>,
+    /// Tail position (m along the main line) of the moving train ahead, if any.
+    lead: std::cell::Cell<Option<f32>>,
     /// Position of the red signal ahead; running past it trips the autostop.
     red_ahead: std::cell::Cell<Option<f32>>,
     moving: std::cell::Cell<bool>,
@@ -255,6 +260,22 @@ impl Sim {
         let z = x.cross(y);
         let o = p.pos + glam::Vec3::Z * 1.9;
         Some(glam::Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), o.extend(1.0)))
+    }
+
+    /// A train running ahead at LEAD_SPEED; it counts as an occupied block for the signals.
+    pub fn set_lead(&self, s: f32) {
+        self.lead.set(Some(s));
+    }
+
+    pub fn lead_pose(&self) -> Option<glam::Mat4> {
+        self.standing_pose(self.lead.get()?)
+    }
+
+    /// Standing trains plus the moving one.
+    fn all_obstacles(&self) -> Vec<f32> {
+        let mut o = self.obstacles.borrow().clone();
+        o.extend(self.lead.get());
+        o
     }
 
     pub fn obstacles(&self) -> Vec<f32> {
@@ -289,7 +310,7 @@ impl Sim {
     pub fn aspect(&self, sign: &crate::track::Sign) -> Option<u8> {
         let tr = self.track.borrow();
         let main = tr.as_ref()?.main();
-        crate::track::aspect(&self.signs.borrow(), main, sign, &self.obstacles.borrow())
+        crate::track::aspect(&self.signs.borrow(), main, sign, &self.all_obstacles())
     }
 
     pub fn set_signs(&self, s: Vec<crate::track::Sign>) {
@@ -302,7 +323,7 @@ impl Sim {
         let main = tr.as_ref()?.main();
         let signs = self.signs.borrow();
         let (d, g) = crate::track::next_signal(&signs, main, self.dynamics.borrow().pos as f32)?;
-        Some((d, g.name.clone(), crate::track::aspect(&signs, main, g, &self.obstacles.borrow())?))
+        Some((d, g.name.clone(), crate::track::aspect(&signs, main, g, &self.all_obstacles())?))
     }
 
     pub fn set_track(&self, t: crate::track::Track) {
@@ -334,7 +355,7 @@ impl Sim {
         rt.lua.globals().set("T", train)?;
         rt.lua.globals().set("__rail", 750.0)?;
         rt.exec(HELPERS, "@sim_helpers")?;
-        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
+        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: std::cell::Cell::new(None), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
     }
 
     /// Material replacements chosen by the train's skins (texture basename -> material path).
@@ -443,6 +464,9 @@ impl Sim {
     }
 
     pub fn tick(&self, dt: f32) {
+        if let Some(s) = self.lead.get() {
+            self.lead.set(Some(s + LEAD_SPEED * dt));
+        }
         // the start-up script runs 6x faster than real time
         for _ in 0..if self.quick_start_active() { 6 } else { 1 } {
             self.tick_once(dt);
@@ -810,6 +834,15 @@ mod tests {
         println!("{changed} props changed of {}", before.len());
         let dbg: String = sim.rt.lua.load("local n='R_RadioToggle' local a=C.Anims[n] local e=C.ClientEnts[n] return string.format('anim=%s val=%s value=%s hidden=%s hanim=%s ent=%s pose=%s', tostring(a), a and tostring(a.val), a and tostring(a.value), tostring(C.Hidden[n]), tostring(C.Hidden.anim[n]), tostring(e), e and tostring(e.__pose and e.__pose.position))").eval().unwrap();
         println!("{dbg}");
+    }
+
+    #[test]
+    fn lead_train_moves_and_counts_as_obstacle() {
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        sim.set_lead(100.0);
+        sim.tick(1.0);
+        assert!((sim.lead.get().unwrap() - 100.0 - LEAD_SPEED).abs() < 1e-3);
+        assert_eq!(sim.all_obstacles().len(), 1);
     }
 
     #[test]

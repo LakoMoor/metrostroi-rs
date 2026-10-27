@@ -53,6 +53,8 @@ pub struct Signals {
     signs: Vec<Sign>,
     /// Standing trains: (object, pose in map space).
     trains: Vec<(usize, Mat4)>,
+    /// Index into `trains` of the moving lead train (its pose comes from the sim every frame).
+    lead: Option<usize>,
 }
 
 fn vec(t: &mlua::Table) -> Vec3 {
@@ -183,12 +185,12 @@ fn lit_colour(ars: Option<u8>) -> char {
 }
 
 impl Signals {
-    pub fn spawn(r: &Renderer, scene: &mut Scene, vfs: &Vfs, lua_root: &Path, signs: Vec<Sign>, train_poses: Vec<Mat4>) -> Signals {
+    pub fn spawn(r: &Renderer, scene: &mut Scene, vfs: &Vfs, lua_root: &Path, signs: Vec<Sign>, train_poses: Vec<Mat4>, has_lead: bool) -> Signals {
         let (kits, base) = match load_kits(lua_root) {
             Ok(k) => k,
             Err(e) => {
                 log::warn!("signal models: {e:#}");
-                return Signals { lights: Vec::new(), signs, trains: Vec::new() };
+                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: None };
             }
         };
         let mut lights = Vec::new();
@@ -272,12 +274,16 @@ impl Signals {
                 }
             }
         }
-        Signals { lights, signs, trains }
+        let lead = if has_lead && !trains.is_empty() { Some(trains.len() - 1) } else { None };
+        Signals { lights, signs, trains, lead }
     }
 
     /// Follow the world transform; show only lights near the train, lit by their free-line aspect.
-    pub fn update(&self, scene: &mut Scene, world: Mat4, train: Vec3, show: bool, code: &dyn Fn(&Sign) -> Option<u8>) {
-        for &(obj, pose) in &self.trains {
+    pub fn update(&self, scene: &mut Scene, world: Mat4, train: Vec3, show: bool, code: &dyn Fn(&Sign) -> Option<u8>, lead: Option<Mat4>) {
+        for (i, &(obj, mut pose)) in self.trains.iter().enumerate() {
+            if let (Some(l), true) = (lead, self.lead == Some(i)) {
+                pose = l;
+            }
             let o = &mut scene.objects[obj];
             o.visible = show && (pose.w_axis.truncate() - train).length() < 600.0;
             o.transform = world * pose;
