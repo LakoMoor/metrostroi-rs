@@ -232,7 +232,7 @@ pub struct Sim {
     platforms: RefCell<Vec<crate::station::Platform>>,
     station_names: RefCell<HashMap<u32, String>>,
     /// Tail position (m along the main line) of the moving train ahead, if any.
-    lead: std::cell::Cell<Option<f32>>,
+    lead: RefCell<Vec<f32>>,
     /// Position of the red signal ahead; running past it trips the autostop.
     red_ahead: std::cell::Cell<Option<f32>>,
     moving: std::cell::Cell<bool>,
@@ -262,19 +262,19 @@ impl Sim {
         Some(glam::Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), o.extend(1.0)))
     }
 
-    /// A train running ahead at LEAD_SPEED; it counts as an occupied block for the signals.
-    pub fn set_lead(&self, s: f32) {
-        self.lead.set(Some(s));
+    /// Trains running ahead at LEAD_SPEED; each counts as an occupied block for the signals.
+    pub fn set_leads(&self, s: Vec<f32>) {
+        *self.lead.borrow_mut() = s;
     }
 
-    pub fn lead_pose(&self) -> Option<glam::Mat4> {
-        self.standing_pose(self.lead.get()?)
+    pub fn lead_poses(&self) -> Vec<glam::Mat4> {
+        self.lead.borrow().iter().filter_map(|&s| self.standing_pose(s)).collect()
     }
 
     /// Standing trains plus the moving one.
     fn all_obstacles(&self) -> Vec<f32> {
         let mut o = self.obstacles.borrow().clone();
-        o.extend(self.lead.get());
+        o.extend(self.lead.borrow().iter());
         o
     }
 
@@ -355,7 +355,7 @@ impl Sim {
         rt.lua.globals().set("T", train)?;
         rt.lua.globals().set("__rail", 750.0)?;
         rt.exec(HELPERS, "@sim_helpers")?;
-        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: std::cell::Cell::new(None), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
+        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
     }
 
     /// Material replacements chosen by the train's skins (texture basename -> material path).
@@ -464,8 +464,8 @@ impl Sim {
     }
 
     pub fn tick(&self, dt: f32) {
-        if let Some(s) = self.lead.get() {
-            self.lead.set(Some(s + LEAD_SPEED * dt));
+        for s in self.lead.borrow_mut().iter_mut() {
+            *s += LEAD_SPEED * dt;
         }
         // the start-up script runs 6x faster than real time
         for _ in 0..if self.quick_start_active() { 6 } else { 1 } {
@@ -839,10 +839,10 @@ mod tests {
     #[test]
     fn lead_train_moves_and_counts_as_obstacle() {
         let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
-        sim.set_lead(100.0);
+        sim.set_leads(vec![100.0, 300.0]);
         sim.tick(1.0);
-        assert!((sim.lead.get().unwrap() - 100.0 - LEAD_SPEED).abs() < 1e-3);
-        assert_eq!(sim.all_obstacles().len(), 1);
+        assert!((sim.lead.borrow()[0] - 100.0 - LEAD_SPEED).abs() < 1e-3);
+        assert_eq!(sim.all_obstacles().len(), 2);
     }
 
     #[test]

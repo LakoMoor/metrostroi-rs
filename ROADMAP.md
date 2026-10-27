@@ -112,4 +112,4 @@ Walking collides with map walls (`Ground::blocked`, triangle-vs-capsule samples 
 car shell. `share/metrostroi-rs` (built by `tools/make_share.py`) holds everything to rebuild on another PC plus
 `AGENTS.md`/`CLAUDE.md`/`SETUP.md`. `site/` is a static GitHub Pages site (no Workshop assets, only screenshots).
 
-- Moving lead train: `--lead <metres>` spawns a 717 running ahead at 12 m/s (43 km/h); it is an occupied block for the signals, so lights behind it go red/yellow and the ARS stand-in reacts. Reset (menu) restarts it. Next: several AI trains, switches/path connectivity.
+- Moving lead train: `--lead <m>[,<m>...]` spawns one or more 717s running ahead at 12 m/s (43 km/h); it is an occupied block for the signals, so lights behind it go red/yellow and the ARS stand-in reacts. Reset (menu) restarts it. Next: several AI trains, switches/path connectivity.

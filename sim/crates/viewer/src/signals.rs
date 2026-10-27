@@ -53,8 +53,8 @@ pub struct Signals {
     signs: Vec<Sign>,
     /// Standing trains: (object, pose in map space).
     trains: Vec<(usize, Mat4)>,
-    /// Index into `trains` of the moving lead train (its pose comes from the sim every frame).
-    lead: Option<usize>,
+    /// How many of the trailing `trains` are moving ones (poses come from the sim every frame).
+    lead: usize,
 }
 
 fn vec(t: &mlua::Table) -> Vec3 {
@@ -185,12 +185,12 @@ fn lit_colour(ars: Option<u8>) -> char {
 }
 
 impl Signals {
-    pub fn spawn(r: &Renderer, scene: &mut Scene, vfs: &Vfs, lua_root: &Path, signs: Vec<Sign>, train_poses: Vec<Mat4>, has_lead: bool) -> Signals {
+    pub fn spawn(r: &Renderer, scene: &mut Scene, vfs: &Vfs, lua_root: &Path, signs: Vec<Sign>, train_poses: Vec<Mat4>, n_lead: usize) -> Signals {
         let (kits, base) = match load_kits(lua_root) {
             Ok(k) => k,
             Err(e) => {
                 log::warn!("signal models: {e:#}");
-                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: None };
+                return Signals { lights: Vec::new(), signs, trains: Vec::new(), lead: 0 };
             }
         };
         let mut lights = Vec::new();
@@ -274,15 +274,18 @@ impl Signals {
                 }
             }
         }
-        let lead = if has_lead && !trains.is_empty() { Some(trains.len() - 1) } else { None };
+        let lead = n_lead.min(trains.len());
         Signals { lights, signs, trains, lead }
     }
 
     /// Follow the world transform; show only lights near the train, lit by their free-line aspect.
-    pub fn update(&self, scene: &mut Scene, world: Mat4, train: Vec3, show: bool, code: &dyn Fn(&Sign) -> Option<u8>, lead: Option<Mat4>) {
+    pub fn update(&self, scene: &mut Scene, world: Mat4, train: Vec3, show: bool, code: &dyn Fn(&Sign) -> Option<u8>, lead: &[Mat4]) {
         for (i, &(obj, mut pose)) in self.trains.iter().enumerate() {
-            if let (Some(l), true) = (lead, self.lead == Some(i)) {
-                pose = l;
+            let first = self.trains.len() - self.lead;
+            if i >= first {
+                if let Some(&l) = lead.get(i - first) {
+                    pose = l;
+                }
             }
             let o = &mut scene.objects[obj];
             o.visible = show && (pose.w_axis.truncate() - train).length() < 600.0;

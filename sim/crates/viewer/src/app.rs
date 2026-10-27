@@ -358,7 +358,7 @@ impl App {
                 }
                 if let Some(sg) = &self.signals {
                     let (xf, show) = (w.transform, w.visible);
-                    sg.update(scene, xf, pos, show, &|g| s.aspect(g), s.lead_pose());
+                    sg.update(scene, xf, pos, show, &|g| s.aspect(g), &s.lead_poses());
                 }
             }
         }
