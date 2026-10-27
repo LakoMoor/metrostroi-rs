@@ -60,6 +60,8 @@ pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
     let tex_table = b.lump(44);
     let tex_strings = b.lump(43);
     let lighting = b.lump(8);
+    let dispinfo = b.lump(26);
+    let dispverts = b.lump(33);
 
     let name_of = |td: usize| -> String {
         let id = i32_at(texdata, td * 32 + 12) as usize;
@@ -81,16 +83,25 @@ pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
         let (first, n) = (i32_at(faces, fo + 4) as usize, i16_at(faces, fo + 8) as usize);
         let ti = i16_at(faces, fo + 10);
         let disp = i16_at(faces, fo + 12);
-        if disp >= 0 || ti < 0 || n < 3 {
+        if std::env::var_os("MS_BSPLOG").is_some() && (ti < 0 || n < 3 || disp >= 0) {
+            eprintln!("FACE ti {ti} n {n} disp {disp} dispinfo_len {}", dispinfo.len() / 176);
+        }
+        if ti < 0 || n < 3 || (disp >= 0 && (n != 4 || (disp as usize + 1) * 176 > dispinfo.len())) {
             continue;
         }
         let ti = ti as usize;
         if i32_at(texinfo, ti * 72 + 64) & SURF_SKIP_MASK != 0 {
+            if std::env::var_os("MS_BSPLOG").is_some() {
+                eprintln!("SKIPFLAG {} flags {:x}", name_of(i32_at(texinfo, ti * 72 + 68) as usize), i32_at(texinfo, ti * 72 + 64));
+            }
             continue;
         }
         let td = i32_at(texinfo, ti * 72 + 68) as usize;
         let name = name_of(td);
         if name.starts_with("tools/") {
+            if std::env::var_os("MS_BSPLOG").is_some() {
+                eprintln!("TOOLS {name}");
+            }
             continue;
         }
         let (tw, th) = (i32_at(texdata, td * 32 + 16).max(1) as f32, i32_at(texdata, td * 32 + 20).max(1) as f32);
@@ -127,20 +138,60 @@ pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
         let (lmin_s, lmin_t) = (i32_at(faces, fo + 28) as f32, i32_at(faces, fo + 32) as f32);
         let lv = |k: usize| [f32_at(texinfo, ti * 72 + 32 + k * 16), f32_at(texinfo, ti * 72 + 32 + k * 16 + 4), f32_at(texinfo, ti * 72 + 32 + k * 16 + 8), f32_at(texinfo, ti * 72 + 32 + k * 16 + 12)];
         let (ls, lt) = (lv(0), lv(1));
-        for k in 0..n {
-            let se = i32_at(surfedges, (first + k) * 4);
-            let e = se.unsigned_abs() as usize;
-            let vi = u16_at(edges, e * 4 + if se < 0 { 2 } else { 0 }) as usize;
-            let p = vert(vi);
-            let dot = |v: [f32; 4]| p[0] * v[0] + p[1] * v[1] + p[2] * v[2] + v[3];
+        let poly: Vec<[f32; 3]> = (0..n)
+            .map(|k| {
+                let se = i32_at(surfedges, (first + k) * 4);
+                let e = se.unsigned_abs() as usize;
+                vert(u16_at(edges, e * 4 + if se < 0 { 2 } else { 0 }) as usize)
+            })
+            .collect();
+        // one vertex: final position, flat position (texture/lightmap coordinates come from it), lightmap luxel override
+        let mut mk = |p: [f32; 3], flat: [f32; 3], lm: Option<(f32, f32)>| {
+            let dot = |v: [f32; 4]| flat[0] * v[0] + flat[1] * v[1] + flat[2] * v[2] + v[3];
             let uv2 = if lit {
-                let s = (dot(ls) - lmin_s).clamp(0.0, (lw - 1) as f32);
-                let t = (dot(lt) - lmin_t).clamp(0.0, (lh - 1) as f32);
+                let (s, t) = lm.unwrap_or((dot(ls) - lmin_s, dot(lt) - lmin_t));
+                let (s, t) = (s.clamp(0.0, (lw - 1) as f32), t.clamp(0.0, (lh - 1) as f32));
                 [bx as f32 + s + 0.5, by as f32 + t + 0.5]
             } else {
                 [1.5, 1.5]
             };
             m.vertices.push(Vertex { pos: p, normal: nrm, uv: [dot(sv) / tw, dot(tv) / th], uv2, nbones: 0, ..Default::default() });
+        };
+        if disp >= 0 {
+            let di = disp as usize * 176;
+            let start = [f32_at(dispinfo, di), f32_at(dispinfo, di + 4), f32_at(dispinfo, di + 8)];
+            let vstart = i32_at(dispinfo, di + 12).max(0) as usize;
+            let power = i32_at(dispinfo, di + 20).clamp(2, 4) as u32;
+            let g = (1usize << power) + 1;
+            if (vstart + g * g) * 20 > dispverts.len() {
+                continue;
+            }
+            // rotate the quad so that corner 0 is the displacement's start point
+            let d2 = |a: [f32; 3]| (a[0] - start[0]).powi(2) + (a[1] - start[1]).powi(2) + (a[2] - start[2]).powi(2);
+            let c0 = (0..4).min_by(|&a, &b| d2(poly[a]).total_cmp(&d2(poly[b]))).unwrap_or(0);
+            let q = |k: usize| poly[(c0 + k) % 4];
+            let lerp = |a: [f32; 3], b: [f32; 3], t: f32| [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+            for row in 0..g {
+                for col in 0..g {
+                    let (u, v) = (col as f32 / (g - 1) as f32, row as f32 / (g - 1) as f32);
+                    let flat = lerp(lerp(q(0), q(1), u), lerp(q(3), q(2), u), v);
+                    let o = (vstart + row * g + col) * 20;
+                    let dist = f32_at(dispverts, o + 12);
+                    let p = [flat[0] + f32_at(dispverts, o) * dist, flat[1] + f32_at(dispverts, o + 4) * dist, flat[2] + f32_at(dispverts, o + 8) * dist];
+                    mk(p, flat, Some((u * (lw - 1) as f32, v * (lh - 1) as f32)));
+                }
+            }
+            for row in 0..g as u32 - 1 {
+                for col in 0..g as u32 - 1 {
+                    let i = base + row * g as u32 + col;
+                    let g = g as u32;
+                    m.indices.extend_from_slice(&[i, i + 1, i + g + 1, i, i + g + 1, i + g]);
+                }
+            }
+            continue;
+        }
+        for &p in &poly {
+            mk(p, p, None);
         }
         for k in 1..n as u32 - 1 {
             m.indices.extend_from_slice(&[base, base + k, base + k + 1]);

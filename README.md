@@ -46,6 +46,10 @@ target/release/metrostroi-rs.exe --cab --at 300
 | [1095130789](https://steamcommunity.com/sharedfiles/filedetails/?id=1095130789) | Lua-скрипты Metrostroi (лежат в `game/lua`) |
 | [3018420076](https://steamcommunity.com/sharedfiles/filedetails/?id=3018420076) | текстуры карт Metrostroi |
 | [674649096](https://steamcommunity.com/sharedfiles/filedetails/?id=674649096) | Gm_Mus_Loopline: туннельные модели и текстуры Metrostroi |
+| [302370120](https://steamcommunity.com/sharedfiles/filedetails/?id=302370120) | Garrygrad Metropoliten [pack 1/5]: модели станций |
+| [1122422169](https://steamcommunity.com/sharedfiles/filedetails/?id=1122422169) | Garrygrad Metropoliten [pack 4/5] |
+| [1563918075](https://steamcommunity.com/sharedfiles/filedetails/?id=1563918075) | Garrygrad Metropoliten [pack 5/5] |
+| [1123150860](https://steamcommunity.com/sharedfiles/filedetails/?id=1123150860) | Gm_Mus_Loopline map and content (доп. файлы) |
 | [3340000198](https://steamcommunity.com/sharedfiles/filedetails/?id=3340000198) | карта gm_metro_crossline_c4 |
 
 Идеи архитектуры взяты из [openOMSI](https://github.com/openOMSI-org/openOMSI) (AGPL-3.0), код не копировался.

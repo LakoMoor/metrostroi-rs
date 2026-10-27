@@ -7,7 +7,7 @@
    `game/content/maps`; the map geometry `map.bsp` is not (third-party). Extract it from item 3340000198:
    `cd sim && cargo run --release -p formats --example extract -- <path to that item's .gma> crossline_c4.bsp ../game/content/maps/crossline_c4/map.bsp`
    (use `--example findall` to list entries). Without it the game still runs, just without the world.
-   The tunnel models (`models/metrostroi/tracks/*`) come from item 674649096; the map's own textures from 3340000198 and 3018420076 (both listed first in `packs`); base-game
+   Station/prop models come from the Garrygrad packs (302370120, 1122422169, 1563918075, 1123150860). The tunnel models (`models/metrostroi/tracks/*`) come from item 674649096; the map's own textures from 3340000198 and 3018420076 (both listed first in `packs`); base-game
    HL2/CSS textures are read from your Garry's Mod install (`steamapps/common/GarrysMod/{garrysmod,sourceengine}/*_dir.vpk`,
    found relative to the `workshop` path) — install Garry's Mod for the world to look right.
 3. **Config:** edit `game/config/game.json` → `"workshop"` = the folder that contains the item-id folders, e.g.
