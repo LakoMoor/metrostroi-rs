@@ -9,6 +9,8 @@ pub struct Vertex {
     pub pos: [f32; 3],
     pub normal: [f32; 3],
     pub uv: [f32; 2],
+    /// Lightmap atlas coordinates (map faces only).
+    pub uv2: [f32; 2],
     /// Up to three bone influences (`weights` sum to 1); `nbones` of them are used.
     pub joints: [u8; 3],
     pub weights: [f32; 3],
@@ -89,6 +91,7 @@ fn load_vvd(b: &[u8]) -> Result<Vec<Vertex>> {
             pos: [r.f32(o)?, r.f32(o + 4)?, r.f32(o + 8)?],
             normal: [r.f32(o + 12)?, r.f32(o + 16)?, r.f32(o + 20)?],
             uv: [r.f32(o + 24)?, r.f32(o + 28)?],
+            uv2: [0.0, 0.0],
         });
     }
     if nfix == 0 {

@@ -32,8 +32,20 @@ fn f32_at(b: &[u8], o: usize) -> f32 {
 
 const SURF_SKIP_MASK: i32 = 0x2 | 0x4 | 0x40 | 0x80 | 0x100 | 0x200; // sky2d, sky, trigger, nodraw, hint, skip
 
+/// All face lightmaps packed into one RGBA8 atlas (linear light / 2, so values up to 2.0 fit).
+pub struct Lightmap {
+    pub width: u32,
+    pub height: u32,
+    pub rgba: Vec<u8>,
+}
+
 /// World geometry grouped by material name (lowercase, no extension).
 pub fn load(data: &[u8]) -> Result<Vec<Mesh>> {
+    Ok(load_lit(data)?.0)
+}
+
+/// World geometry plus the packed lightmaps (`uv2` of every vertex addresses the atlas).
+pub fn load_lit(data: &[u8]) -> Result<(Vec<Mesh>, Option<Lightmap>)> {
     ensure!(data.len() > 1036 && &data[0..4] == b"VBSP", "not a VBSP file");
     let ver = i32_at(data, 4);
     ensure!(ver == 19 || ver == 20, "unsupported BSP version {ver}");
@@ -47,6 +59,7 @@ pub fn load(data: &[u8]) -> Result<Vec<Mesh>> {
     let surfedges = b.lump(13);
     let tex_table = b.lump(44);
     let tex_strings = b.lump(43);
+    let lighting = b.lump(8);
 
     let name_of = |td: usize| -> String {
         let id = i32_at(texdata, td * 32 + 12) as usize;
@@ -58,6 +71,10 @@ pub fn load(data: &[u8]) -> Result<Vec<Mesh>> {
 
     let mut meshes: Vec<Mesh> = Vec::new();
     let mut by_name: HashMap<String, usize> = HashMap::new();
+    // atlas: shelf packing, 2048 wide; the first 4x4 block is white for faces without a lightmap
+    const AW: u32 = 2048;
+    let mut blocks: Vec<(u32, u32, u32, u32, usize)> = Vec::new(); // x, y, w, h, byte offset in the lighting lump
+    let (mut sx, mut sy, mut shelf) = (4u32, 0u32, 4u32);
     for f in 0..faces.len() / 56 {
         let fo = f * 56;
         let (plane, side) = (u16_at(faces, fo) as usize, faces[fo + 2]);
@@ -90,19 +107,82 @@ pub fn load(data: &[u8]) -> Result<Vec<Mesh>> {
         });
         let m = &mut meshes[idx];
         let base = m.vertices.len() as u32;
+        // lightmap block of this face
+        let (lw, lh) = ((i32_at(faces, fo + 36) + 1).max(1) as u32, (i32_at(faces, fo + 40) + 1).max(1) as u32);
+        let lofs = i32_at(faces, fo + 20);
+        let lit = lofs >= 0 && faces[fo + 16] != 255 && lofs as usize + (lw * lh * 4) as usize <= lighting.len() && lw < 512 && lh < 512;
+        let (mut bx, mut by) = (1u32, 1u32);
+        if lit {
+            let (pw, ph) = (lw + 2, lh + 2);
+            if sx + pw > AW {
+                sx = 0;
+                sy += shelf;
+                shelf = 0;
+            }
+            (bx, by) = (sx + 1, sy + 1);
+            blocks.push((bx, by, lw, lh, lofs as usize));
+            sx += pw;
+            shelf = shelf.max(ph);
+        }
+        let (lmin_s, lmin_t) = (i32_at(faces, fo + 28) as f32, i32_at(faces, fo + 32) as f32);
+        let lv = |k: usize| [f32_at(texinfo, ti * 72 + 32 + k * 16), f32_at(texinfo, ti * 72 + 32 + k * 16 + 4), f32_at(texinfo, ti * 72 + 32 + k * 16 + 8), f32_at(texinfo, ti * 72 + 32 + k * 16 + 12)];
+        let (ls, lt) = (lv(0), lv(1));
         for k in 0..n {
             let se = i32_at(surfedges, (first + k) * 4);
             let e = se.unsigned_abs() as usize;
             let vi = u16_at(edges, e * 4 + if se < 0 { 2 } else { 0 }) as usize;
             let p = vert(vi);
             let dot = |v: [f32; 4]| p[0] * v[0] + p[1] * v[1] + p[2] * v[2] + v[3];
-            m.vertices.push(Vertex { pos: p, normal: nrm, uv: [dot(sv) / tw, dot(tv) / th], nbones: 0, ..Default::default() });
+            let uv2 = if lit {
+                let s = (dot(ls) - lmin_s).clamp(0.0, (lw - 1) as f32);
+                let t = (dot(lt) - lmin_t).clamp(0.0, (lh - 1) as f32);
+                [bx as f32 + s + 0.5, by as f32 + t + 0.5]
+            } else {
+                [1.5, 1.5]
+            };
+            m.vertices.push(Vertex { pos: p, normal: nrm, uv: [dot(sv) / tw, dot(tv) / th], uv2, nbones: 0, ..Default::default() });
         }
         for k in 1..n as u32 - 1 {
             m.indices.extend_from_slice(&[base, base + k, base + k + 1]);
         }
     }
-    Ok(meshes)
+    if blocks.is_empty() {
+        for m in &mut meshes {
+            for v in &mut m.vertices {
+                v.uv2 = [0.5, 0.5];
+            }
+        }
+        return Ok((meshes, None));
+    }
+    let ah = (sy + shelf).next_power_of_two().max(8);
+    let mut rgba = vec![0u8; (AW * ah * 4) as usize];
+    for y in 0..4 {
+        for x in 0..4 {
+            let o = ((y * AW + x) * 4) as usize;
+            rgba[o..o + 4].copy_from_slice(&[128, 128, 128, 255]); // 1.0 after the x2 decode
+        }
+    }
+    for &(bx, by, w, h, off) in &blocks {
+        for y in 0..h {
+            for x in 0..w {
+                let s = off + ((y * w + x) * 4) as usize;
+                let e = (lighting[s + 3] as i8) as i32;
+                let k = 2f32.powi(e) / 255.0 / 2.0;
+                let o = (((by + y) * AW + bx + x) * 4) as usize;
+                for c in 0..3 {
+                    rgba[o + c] = (lighting[s + c] as f32 * k * 255.0).round().clamp(0.0, 255.0) as u8;
+                }
+                rgba[o + 3] = 255;
+            }
+        }
+    }
+    let (fw, fh) = (AW as f32, ah as f32);
+    for m in &mut meshes {
+        for v in &mut m.vertices {
+            v.uv2 = [v.uv2[0] / fw, v.uv2[1] / fh];
+        }
+    }
+    Ok((meshes, Some(Lightmap { width: AW, height: ah, rgba })))
 }
 
 /// Files embedded in the map (lump 40 is a zip): `materials/...`, `models/...` and so on.

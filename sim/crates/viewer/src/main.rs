@@ -116,6 +116,7 @@ fn main() -> Result<()> {
     if shot.is_none() {
         let controls_path = PathBuf::from(&controls);
         let start_cab = args.iter().any(|a| a == "--cab");
+        let lightmaps = !args.iter().any(|a| a == "--nolightmap");
         let map_bsp = cfg.resolve(game.as_deref(), &cfg.map).join("map.bsp");
         let with_world = !cfg.map.is_empty() && map_bsp.exists() && !args.iter().any(|a| a == "--noworld");
         let vfs = std::sync::Arc::new(std::sync::Mutex::new(vfs));
@@ -149,11 +150,15 @@ fn main() -> Result<()> {
                     let mut scene = car::load(r, &vfs, "models/metrostroi_train/81-717/81-717_mvm", &props)?;
                     if with_world {
                         let data = std::fs::read(&map_bsp)?;
-                        let meshes = formats::bsp::load(&data)?;
+                        let (meshes, lightmap) = formats::bsp::load_lit(&data)?;
                         vfs.mount_files(formats::bsp::pakfile(&data)?);
                         ground::store(ground::Ground::build(&meshes, renderer::SCALE));
                         let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);
                         r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
+                        if let (Some(lm), true) = (&lightmap, lightmaps) {
+                            r.set_lightmap(lm);
+                            scene.objects.last_mut().unwrap().tint[3] = 3.0;
+                        }
                         signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead));
                     }
                     Ok(scene)
@@ -233,11 +238,15 @@ fn main() -> Result<()> {
             let s: f32 = sv.parse().unwrap_or(0.0);
             let bsp = cfg.resolve(game.as_deref(), &cfg.map).join("map.bsp");
             let data = std::fs::read(&bsp).with_context(|| format!("{} (extract the map first)", bsp.display()))?;
-            let meshes = formats::bsp::load(&data)?;
+            let (meshes, lightmap) = formats::bsp::load_lit(&data)?;
             let mut vfs = vfs;
             vfs.mount_files(formats::bsp::pakfile(&data)?);
             let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);
             r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
+            if let (Some(lm), true) = (&lightmap, !args.iter().any(|a| a == "--nolightmap")) {
+                r.set_lightmap(lm);
+                scene.objects.last_mut().unwrap().tint[3] = 3.0;
+            }
             let tr = track::Track::load(&cfg.resolve(game.as_deref(), &cfg.map).join("track.lua"))?;
             let p = tr.main().at(s);
             // track points are in metres at Metrostroi's scale; the world is drawn at SCALE

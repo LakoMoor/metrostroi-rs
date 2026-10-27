@@ -18,6 +18,7 @@ struct GpuVertex {
     pos: [f32; 3],
     normal: [f32; 3],
     uv: [f32; 2],
+    uv2: [f32; 2],
 }
 
 #[repr(C)]
@@ -126,7 +127,9 @@ pub struct Renderer {
     pub device: wgpu::Device,
     pub queue: wgpu::Queue,
     globals: wgpu::Buffer,
-    globals_bind: wgpu::BindGroup,
+    globals_bind: std::cell::RefCell<wgpu::BindGroup>,
+    globals_layout: wgpu::BindGroupLayout,
+    lm_sampler: wgpu::Sampler,
     material_layout: wgpu::BindGroupLayout,
     object_layout: wgpu::BindGroupLayout,
     object_buf: std::cell::RefCell<(wgpu::Buffer, u64)>,
@@ -182,17 +185,37 @@ impl Renderer {
         };
         let globals_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("globals layout"),
-            entries: &[uniform_entry(false, None)],
+            entries: &[
+                uniform_entry(false, None),
+                wgpu::BindGroupLayoutEntry {
+                    binding: 1,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture {
+                        sample_type: wgpu::TextureSampleType::Float { filterable: true },
+                        view_dimension: wgpu::TextureViewDimension::D2,
+                        multisampled: false,
+                    },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 2,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering),
+                    count: None,
+                },
+            ],
         });
         let object_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("object layout"),
             entries: &[uniform_entry(true, Some(80))],
         });
-        let globals_bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
-            label: Some("globals bind"),
-            layout: &globals_layout,
-            entries: &[wgpu::BindGroupEntry { binding: 0, resource: globals.as_entire_binding() }],
+        let lm_sampler = device.create_sampler(&wgpu::SamplerDescriptor {
+            mag_filter: wgpu::FilterMode::Linear,
+            min_filter: wgpu::FilterMode::Linear,
+            ..Default::default()
         });
+        let white = Self::lightmap_view(&device, &queue, 1, 1, &[128, 128, 128, 255]);
+        let globals_bind = Self::make_globals_bind(&device, &globals_layout, &globals, &white, &lm_sampler);
         let material_layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("material layout"),
             entries: &[
@@ -239,7 +262,7 @@ impl Renderer {
                     buffers: &[Some(wgpu::VertexBufferLayout {
                         array_stride: std::mem::size_of::<GpuVertex>() as u64,
                         step_mode: wgpu::VertexStepMode::Vertex,
-                        attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x2],
+                        attributes: &wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3, 2 => Float32x2, 3 => Float32x2],
                     })],
                 },
                 primitive: wgpu::PrimitiveState { cull_mode: Some(wgpu::Face::Back), ..Default::default() },
@@ -273,7 +296,9 @@ impl Renderer {
             device,
             queue,
             globals,
-            globals_bind,
+            globals_bind: std::cell::RefCell::new(globals_bind),
+            globals_layout,
+            lm_sampler,
             material_layout,
             object_layout,
             object_buf: std::cell::RefCell::new((obuf, 1)),
@@ -286,6 +311,44 @@ impl Renderer {
             unlit: std::cell::Cell::new(false),
             skin: Default::default(),
         }
+    }
+
+    fn lightmap_view(device: &wgpu::Device, queue: &wgpu::Queue, w: u32, h: u32, rgba: &[u8]) -> wgpu::TextureView {
+        let tex = device.create_texture(&wgpu::TextureDescriptor {
+            label: Some("lightmap"),
+            size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+            mip_level_count: 1,
+            sample_count: 1,
+            dimension: wgpu::TextureDimension::D2,
+            format: wgpu::TextureFormat::Rgba8Unorm,
+            usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+            view_formats: &[],
+        });
+        queue.write_texture(
+            wgpu::TexelCopyTextureInfo { texture: &tex, mip_level: 0, origin: wgpu::Origin3d::ZERO, aspect: wgpu::TextureAspect::All },
+            rgba,
+            wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(w * 4), rows_per_image: Some(h) },
+            wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+        );
+        tex.create_view(&Default::default())
+    }
+
+    fn make_globals_bind(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, globals: &wgpu::Buffer, lm: &wgpu::TextureView, smp: &wgpu::Sampler) -> wgpu::BindGroup {
+        device.create_bind_group(&wgpu::BindGroupDescriptor {
+            label: Some("globals bind"),
+            layout,
+            entries: &[
+                wgpu::BindGroupEntry { binding: 0, resource: globals.as_entire_binding() },
+                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::TextureView(lm) },
+                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::Sampler(smp) },
+            ],
+        })
+    }
+
+    /// Use the map's lightmap atlas for objects tinted with alpha 3 (see the shader).
+    pub fn set_lightmap(&self, lm: &formats::bsp::Lightmap) {
+        let view = Self::lightmap_view(&self.device, &self.queue, lm.width, lm.height, &lm.rgba);
+        *self.globals_bind.borrow_mut() = Self::make_globals_bind(&self.device, &self.globals_layout, &self.globals, &view, &self.lm_sampler);
     }
 
     fn make_object_buffer(device: &wgpu::Device, layout: &wgpu::BindGroupLayout, n: u64) -> (wgpu::Buffer, wgpu::BindGroup) {
@@ -412,6 +475,7 @@ impl Renderer {
                         pos: [v.pos[0] * SCALE, v.pos[1] * SCALE, v.pos[2] * SCALE],
                         normal: v.normal,
                         uv: v.uv,
+                        uv2: [0.0; 2],
                     })
                     .collect();
                 for v in &verts {
@@ -473,7 +537,7 @@ impl Renderer {
         let mut out = Vec::new();
         let (mut mn, mut mx) = (Vec3::splat(f32::MAX), Vec3::splat(f32::MIN));
         for me in meshes {
-            let verts: Vec<GpuVertex> = me.vertices.iter().map(|v| GpuVertex { pos: v.pos.map(|c| c * scale), normal: v.normal, uv: v.uv }).collect();
+            let verts: Vec<GpuVertex> = me.vertices.iter().map(|v| GpuVertex { pos: v.pos.map(|c| c * scale), normal: v.normal, uv: v.uv, uv2: v.uv2 }).collect();
             for v in &verts {
                 mn = mn.min(Vec3::from(v.pos));
                 mx = mx.max(Vec3::from(v.pos));
@@ -546,7 +610,7 @@ impl Renderer {
                         pp += m.transform_point3(p) * w;
                         nn += m.transform_vector3(nrm) * w;
                     }
-                    GpuVertex { pos: (pp * SCALE).into(), normal: nn.normalize_or_zero().into(), uv: v.uv }
+                    GpuVertex { pos: (pp * SCALE).into(), normal: nn.normalize_or_zero().into(), uv: v.uv, uv2: [0.0; 2] }
                 })
                 .collect();
             self.queue.write_buffer(buf, 0, bytemuck::cast_slice(&verts));
@@ -612,7 +676,7 @@ impl Renderer {
                 occlusion_query_set: None,
                 multiview_mask: None,
             });
-            pass.set_bind_group(0, &self.globals_bind, &[]);
+            pass.set_bind_group(0, &*self.globals_bind.borrow(), &[]);
             for blend in [Blend::Opaque, Blend::AlphaTest, Blend::Translucent] {
                 pass.set_pipeline(match blend {
                     Blend::Opaque => &self.pipe_opaque,
