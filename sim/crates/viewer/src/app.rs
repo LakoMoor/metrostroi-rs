@@ -17,7 +17,12 @@ use winit::window::{Window, WindowId};
 
 /// Driver's eye in car space, metres (Source axes: X forward, Y left, Z up).
 /// Height of the car body origin over the rail head, metres.
-const CAR_ABOVE_RAIL: f32 = 1.6;
+/// Car origin above the track node, metres. The 81-717 models put the wheel treads 2.22 m below the origin;
+/// 1.6 looks right against the map's rails. Override with `MS_CAR_HEIGHT` to compare.
+pub fn car_above_rail() -> f32 {
+    static H: std::sync::OnceLock<f32> = std::sync::OnceLock::new();
+    *H.get_or_init(|| std::env::var("MS_CAR_HEIGHT").ok().and_then(|v| v.parse().ok()).unwrap_or(1.6))
+}
 /// Standing eye height above the feet, metres.
 const EYE_HEIGHT: f32 = 1.7;
 /// Car floor in car space, and the interior / outer-wall half-widths and half-length (metres).
@@ -353,7 +358,7 @@ impl App {
                 let y = Vec3::Z.cross(x).normalize_or_zero();
                 let z = x.cross(y);
                 // the car's origin sits this far above the rails
-                let origin = pos + Vec3::Z * CAR_ABOVE_RAIL;
+                let origin = pos + Vec3::Z * car_above_rail();
                 w.transform = Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), origin.extend(1.0)).inverse();
                 // from outside the car the tunnel walls would hide it; the map is for the cab view
                 w.visible = self.camera.as_ref().is_some_and(|c| c.mode != Mode::Orbit);
