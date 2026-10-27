@@ -202,6 +202,16 @@ const HELPERS: &str = r#"
     end
     function C.SetSoundState(self, id, vol, pitch) if id then SND.loops[id] = { vol or 0, pitch or 1 } end end
     local function once(self, id, loc, vol, pitch)
+        -- switches, valves and the like map to sounds by their client definition (ENT.ClientSounds, see shared.lua PlayOnce)
+        local cs = C.ClientSounds and C.ClientSounds[id]
+        if cs then
+            for _, e in ipairs(cs) do
+                local ok, sid = pcall(e[2], C, vol or 0, loc)
+                local f = ok and sid and sound_files(sid)
+                if f then SND.once[#SND.once + 1] = { f, e[3] or 1, (e[4] or 1) * (pitch or 1) } end
+            end
+            return
+        end
         local f = sound_files(id)
         if f and (vol or 0.8) > 0 then SND.once[#SND.once + 1] = { f, vol or 0.8, pitch or 1 } end
     end
@@ -1012,6 +1022,22 @@ mod tests {
         run(&sim, 1.0);
         let (_, once) = sim.sounds();
         println!("once sounds: {}", once.len());
+    }
+
+    #[test]
+    fn pressing_a_switch_queues_a_click_sound() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        run(&sim, 3.0);
+        let _ = sim.sounds();
+        for id in ["VBToggle", "A1Toggle", "VUToggle"] {
+            sim.press(id);
+            run(&sim, 0.3);
+            let (_, once) = sim.sounds();
+            println!("{id}: {} one-shot sounds {:?}", once.len(), once.iter().map(|o| o.files.first().cloned()).collect::<Vec<_>>());
+        }
     }
 
     #[test]

@@ -24,11 +24,13 @@ pub struct Settings {
     pub hud: bool,
     /// Reserved for the sound phase.
     pub volume: f32,
+    /// 0 = standard, 1 = high (4x MSAA), 2 = ultra (4x MSAA + the heavier effects as they land).
+    pub quality: u8,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8 }
+        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, quality: 1 }
     }
 }
 
@@ -72,6 +74,7 @@ enum Field {
     Mouse,
     Volume,
     Hud,
+    Quality,
 }
 
 pub struct Menu {
@@ -130,6 +133,7 @@ impl Menu {
                 Item::Slider("Угол обзора", Field::Fov),
                 Item::Slider("Чувствительность мыши", Field::Mouse),
                 Item::Slider("Громкость (на будущее)", Field::Volume),
+                Item::Slider("Графика", Field::Quality),
                 Item::Toggle("Показывать приборы на экране", Field::Hud),
                 Item::Back,
             ],
@@ -153,6 +157,7 @@ impl Menu {
             Field::Fov => (format!("{:.0}°", self.settings.fov), (self.settings.fov - 50.0) / 50.0),
             Field::Mouse => (format!("{:.1}×", self.settings.mouse), (self.settings.mouse - 0.3) / 1.7),
             Field::Volume => (format!("{:.0}%", self.settings.volume * 100.0), self.settings.volume),
+            Field::Quality => ((["обычная", "высокая", "ультра"][self.settings.quality.min(2) as usize]).to_string(), self.settings.quality as f32 / 2.0),
             Field::Hud => (if self.settings.hud { "вкл".into() } else { "выкл".into() }, 0.0),
         }
     }
@@ -162,6 +167,7 @@ impl Menu {
             Field::Fov => self.settings.fov = (self.settings.fov + dir * 5.0).clamp(50.0, 100.0),
             Field::Mouse => self.settings.mouse = ((self.settings.mouse + dir * 0.1) * 10.0).round() / 10.0,
             Field::Volume => self.settings.volume = ((self.settings.volume + dir * 0.1) * 10.0).round() / 10.0,
+            Field::Quality => self.settings.quality = (self.settings.quality as i32 + if dir < 0.0 { -1 } else { 1 }).clamp(0, 2) as u8,
             Field::Hud => self.settings.hud = !self.settings.hud,
         }
         self.settings.mouse = self.settings.mouse.clamp(0.3, 2.0);

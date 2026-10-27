@@ -115,6 +115,8 @@ struct Gfx {
     config: wgpu::SurfaceConfiguration,
     renderer: Renderer,
     depth: wgpu::TextureView,
+    /// Multisampled colour target (high/ultra quality).
+    msaa: Option<wgpu::TextureView>,
     ui: Ui,
 }
 
@@ -185,7 +187,9 @@ impl App {
         surface.configure(&device, &config);
 
         let renderer = Renderer::new(device, queue, config.format);
+        renderer.samples.set(if self.menu.settings.quality >= 1 { 4 } else { 1 });
         let depth = renderer.depth_view(config.width, config.height);
+        let msaa = renderer.msaa_view(config.width, config.height);
         let load = self.vfs_scene.take().expect("scene loader");
         let scene = load(&renderer)?;
         let (mn, mx) = scene.bounds();
@@ -212,7 +216,7 @@ impl App {
         self.ground = crate::ground::take();
         self.scene = Some(scene);
         let ui = Ui::new(&renderer.device, &renderer.queue, config.format);
-        self.gfx = Some(Gfx { window, surface, config, renderer, depth, ui });
+        self.gfx = Some(Gfx { window, surface, config, renderer, depth, msaa, ui });
         Ok(())
     }
 
@@ -314,9 +318,12 @@ impl App {
             None
         };
         if let (Some(s), Some(g), Some(scene)) = (&self.sim, &self.gfx, &mut self.scene) {
+            let t_tick = std::time::Instant::now();
             if playing {
                 s.tick(dt);
             }
+            prof(0, t_tick, self.fps);
+            let t_audio = std::time::Instant::now();
             if let Some(a) = &mut self.audio {
                 if playing {
                     let (loops, once) = s.sounds();
@@ -325,6 +332,7 @@ impl App {
                     a.silence();
                 }
             }
+            prof(4, t_audio, self.fps);
             if let Some(cam) = self.camera.as_mut().filter(|c| playing && c.mode == Mode::Cab) {
                 let k = |i: usize| self.head_keys[i] as i32 as f32;
                 let fwd = Vec3::new(cam.cab_yaw.cos(), cam.cab_yaw.sin(), 0.0);
@@ -356,7 +364,9 @@ impl App {
                 }
             }
             self.frames += 1;
+            let t_state = std::time::Instant::now();
             crate::car::apply_state(&g.renderer, scene, &self.names, &s.state(), self.car_light);
+            prof(1, t_state, self.fps);
             // the train stays at the origin; the map moves around it
             if let (Some((pos, dir)), Some(w)) = (s.world_pose(), scene.objects.iter_mut().find(|o| o.name == "world")) {
                 let x = dir.normalize_or_zero();
@@ -396,9 +406,16 @@ impl App {
             }
             _ => return,
         };
+        let want = if self.menu.settings.quality >= 1 { 4 } else { 1 };
+        if g.renderer.samples.get() != want {
+            g.renderer.samples.set(want);
+            g.depth = g.renderer.depth_view(g.config.width, g.config.height);
+            g.msaa = g.renderer.msaa_view(g.config.width, g.config.height);
+        }
+        let t_render = std::time::Instant::now();
         let view = frame.texture.create_view(&Default::default());
         let aspect = g.config.width as f32 / g.config.height as f32;
-        g.renderer.render(scene, cam.view_proj(aspect, self.menu.settings.fov), &view, &g.depth);
+        g.renderer.render_ms(scene, cam.view_proj(aspect, self.menu.settings.fov), g.msaa.as_ref(), &view, &g.depth);
         g.ui.screen = (g.config.width as f32, g.config.height as f32);
         if self.menu.screen == Screen::Playing {
             let (sw, sh) = g.ui.screen;
@@ -437,6 +454,7 @@ impl App {
         g.ui.flush(&g.renderer.device, &g.renderer.queue, &view);
         g.window.pre_present_notify();
         g.renderer.queue.present(frame);
+        prof(2, t_render, self.fps);
     }
 }
 
@@ -459,6 +477,7 @@ impl ApplicationHandler for App {
                     g.config.height = s.height.max(1);
                     g.surface.configure(&g.renderer.device, &g.config);
                     g.depth = g.renderer.depth_view(g.config.width, g.config.height);
+                    g.msaa = g.renderer.msaa_view(g.config.width, g.config.height);
                 }
             }
             WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {
@@ -651,7 +670,9 @@ impl ApplicationHandler for App {
                 }
             }
             WindowEvent::RedrawRequested => {
+                let t_all = std::time::Instant::now();
                 self.redraw();
+                prof(3, t_all, self.fps);
                 // `MS_EXIT_AFTER=<s>`: quit by itself (used to build asset packages unattended)
                 static T0: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
                 let t0 = *T0.get_or_init(std::time::Instant::now);
@@ -747,6 +768,26 @@ fn window_icon() -> Option<winit::window::Icon> {
 }
 
 /// Speed, ARS limit and next signal in the corner while driving.
+/// `MS_PROFILE=1`: average milliseconds per frame spent in the Lua tick, the state/scene update and rendering+present.
+fn prof(slot: usize, since: std::time::Instant, fps: f32) {
+    use std::sync::Mutex;
+    static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    static ACC: Mutex<([f64; 5], u32)> = Mutex::new(([0.0; 5], 0));
+    if !*ON.get_or_init(|| std::env::var_os("MS_PROFILE").is_some()) {
+        return;
+    }
+    let mut a = ACC.lock().unwrap();
+    a.0[slot] += since.elapsed().as_secs_f64() * 1000.0;
+    if slot == 3 {
+        a.1 += 1;
+        if a.1 == 120 {
+            let n = a.1 as f64;
+            log::info!("profile ms/frame: tick {:.2}  state {:.2}  render+present {:.2}  whole redraw {:.2}  audio {:.2}  ({fps:.0} fps)", a.0[0] / n, a.0[1] / n, a.0[2] / n, a.0[3] / n, a.0[4] / n);
+            *a = ([0.0; 5], 0);
+        }
+    }
+}
+
 fn draw_hud(ui: &mut Ui, s: &Sim) {
     let (kmh, pos) = s.motion();
     let (sw, sh) = ui.screen;

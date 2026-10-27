@@ -135,9 +135,10 @@ pub struct Renderer {
     object_buf: std::cell::RefCell<(wgpu::Buffer, u64)>,
     object_bind: std::cell::RefCell<wgpu::BindGroup>,
     sampler: wgpu::Sampler,
-    pipe_opaque: wgpu::RenderPipeline,
-    pipe_alphatest: wgpu::RenderPipeline,
-    pipe_blend: wgpu::RenderPipeline,
+    /// Pipelines per sample count: index 0 = 1x, index 1 = 4x MSAA.
+    pipes: [[wgpu::RenderPipeline; 3]; 2],
+    /// Current MSAA sample count (1 or 4); `depth_view` and `msaa_view` follow it.
+    pub samples: std::cell::Cell<u32>,
     pub target_format: wgpu::TextureFormat,
     /// Debug: show raw texture colours without lighting.
     pub unlit: std::cell::Cell<bool>,
@@ -251,7 +252,7 @@ impl Renderer {
             bind_group_layouts: &[Some(&globals_layout), Some(&material_layout), Some(&object_layout)],
             immediate_size: 0,
         });
-        let make = |label: &str, fs: &str, blend: Option<wgpu::BlendState>, depth_write: bool| {
+        let make = |label: &str, fs: &str, blend: Option<wgpu::BlendState>, depth_write: bool, samples: u32| {
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some(label),
                 layout: Some(&layout),
@@ -273,7 +274,7 @@ impl Renderer {
                     stencil: Default::default(),
                     bias: Default::default(),
                 }),
-                multisample: Default::default(),
+                multisample: wgpu::MultisampleState { count: samples, ..Default::default() },
                 fragment: Some(wgpu::FragmentState {
                     module: &shader,
                     entry_point: Some(fs),
@@ -288,9 +289,14 @@ impl Renderer {
                 cache: None,
             })
         };
-        let pipe_opaque = make("opaque", "fs_opaque", None, true);
-        let pipe_alphatest = make("alphatest", "fs_alphatest", None, true);
-        let pipe_blend = make("blend", "fs_blend", Some(wgpu::BlendState::ALPHA_BLENDING), false);
+        let set = |n: u32| {
+            [
+                make("opaque", "fs_opaque", None, true, n),
+                make("alphatest", "fs_alphatest", None, true, n),
+                make("blend", "fs_blend", Some(wgpu::BlendState::ALPHA_BLENDING), false, n),
+            ]
+        };
+        let pipes = [set(1), set(4)];
         let (obuf, obind) = Self::make_object_buffer(&device, &object_layout, 1);
         Renderer {
             device,
@@ -304,9 +310,8 @@ impl Renderer {
             object_buf: std::cell::RefCell::new((obuf, 1)),
             object_bind: std::cell::RefCell::new(obind),
             sampler,
-            pipe_opaque,
-            pipe_alphatest,
-            pipe_blend,
+            pipes,
+            samples: std::cell::Cell::new(1),
             target_format,
             unlit: std::cell::Cell::new(false),
             skin: Default::default(),
@@ -624,13 +629,32 @@ impl Renderer {
                 label: Some("depth"),
                 size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
                 mip_level_count: 1,
-                sample_count: 1,
+                sample_count: self.samples.get(),
                 dimension: wgpu::TextureDimension::D2,
                 format: DEPTH_FORMAT,
                 usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
                 view_formats: &[],
             })
             .create_view(&Default::default())
+    }
+
+    /// Multisampled colour target matching the current sample count (None at 1x).
+    pub fn msaa_view(&self, w: u32, h: u32) -> Option<wgpu::TextureView> {
+        let n = self.samples.get();
+        (n > 1).then(|| {
+            self.device
+                .create_texture(&wgpu::TextureDescriptor {
+                    label: Some("msaa colour"),
+                    size: wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
+                    mip_level_count: 1,
+                    sample_count: n,
+                    dimension: wgpu::TextureDimension::D2,
+                    format: self.target_format,
+                    usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
+                    view_formats: &[],
+                })
+                .create_view(&Default::default())
+        })
     }
 
     fn upload_objects(&self, scene: &Scene) {
@@ -650,6 +674,12 @@ impl Renderer {
     }
 
     pub fn render(&self, scene: &Scene, view_proj: Mat4, color: &wgpu::TextureView, depth: &wgpu::TextureView) {
+        self.render_ms(scene, view_proj, None, color, depth)
+    }
+
+    /// Like `render`; with `msaa` the scene is drawn multisampled and resolved into `color`.
+    pub fn render_ms(&self, scene: &Scene, view_proj: Mat4, msaa: Option<&wgpu::TextureView>, color: &wgpu::TextureView, depth: &wgpu::TextureView) {
+        let pipes = &self.pipes[(msaa.is_some() && self.samples.get() > 1) as usize];
         let g = Globals { view_proj: view_proj.to_cols_array_2d(), light: [0.4, -0.3, 0.85, if self.unlit.get() { 1.0 } else { 0.0 }] };
         self.queue.write_buffer(&self.globals, 0, bytemuck::bytes_of(&g));
         self.upload_objects(scene);
@@ -659,12 +689,12 @@ impl Renderer {
             let mut pass = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("main"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
-                    view: color,
+                    view: msaa.unwrap_or(color),
                     depth_slice: None,
-                    resolve_target: None,
+                    resolve_target: msaa.map(|_| color),
                     ops: wgpu::Operations {
                         load: wgpu::LoadOp::Clear(wgpu::Color { r: 0.05, g: 0.06, b: 0.08, a: 1.0 }),
-                        store: wgpu::StoreOp::Store,
+                        store: if msaa.is_some() { wgpu::StoreOp::Discard } else { wgpu::StoreOp::Store },
                     },
                 })],
                 depth_stencil_attachment: Some(wgpu::RenderPassDepthStencilAttachment {
@@ -679,9 +709,9 @@ impl Renderer {
             pass.set_bind_group(0, &*self.globals_bind.borrow(), &[]);
             for blend in [Blend::Opaque, Blend::AlphaTest, Blend::Translucent] {
                 pass.set_pipeline(match blend {
-                    Blend::Opaque => &self.pipe_opaque,
-                    Blend::AlphaTest => &self.pipe_alphatest,
-                    Blend::Translucent => &self.pipe_blend,
+                    Blend::Opaque => &pipes[0],
+                    Blend::AlphaTest => &pipes[1],
+                    Blend::Translucent => &pipes[2],
                 });
                 for (i, o) in scene.objects.iter().enumerate().filter(|(_, o)| o.visible) {
                     pass.set_bind_group(2, &*obj_bind, &[(i as u64 * OBJ_STRIDE) as u32]);
