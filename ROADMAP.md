@@ -54,7 +54,7 @@ Out of scope for now: Project Zomboid and Minecraft ports (paused), other train 
 - [x] Cab/rear/compartment doors (`CabinDoor`, `PassengerDoor`, `RearDoor`) are ordinary ButtonMap buttons: clickable with Russian tags, animated by the Lua, sounds via PlayOnce (test `cab_doors_swing`); [x] station names in the HUD (parsed from `Metrostroi.StationConfigurations`); [ ] announcements, door-side lamps
 - [ ] Tunnel/station models, lighting, skybox
 - [ ] Passenger doors and platforms; multi-car consists (coupling, train wires)
-- [ ] Second train type to prove the loader is not 717-specific
+- [x] Second train type: `--train gmod_subway_81-717_lvz` loads the LVZ cab (own panels, props and body model from `ENT.Model`) with no 717-specific code; other families (720/722/em508) untested
 
 ### M4 — Sound and polish
 - [ ] Sound: workshop WAV/MP3/OGG, sound positions and loops from the entity tables

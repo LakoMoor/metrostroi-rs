@@ -50,3 +50,5 @@ See ROADMAP.md. Done: formats, renderer, Lua host, cab controls (353/353), dynam
 signals/plates, block occupancy (standing trains), stations/platforms, doors, sound, menu/HUD, tooltips, walking incl.
 collisions. Next: moving AI trains and switches (needs path connectivity), lightmaps/static props/sky, announcements and
 station names, real BARS chain, multi-car consists, a second train type.
+
+Try another cab: `metrostroi-rs.exe --train gmod_subway_81-717_lvz --cab` (any `entities/gmod_subway_*` that the Lua host can spawn).

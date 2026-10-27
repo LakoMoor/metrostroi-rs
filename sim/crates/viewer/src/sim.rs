@@ -358,6 +358,12 @@ impl Sim {
         Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
     }
 
+    /// The body model of the train (`ENT.Model`, no extension), e.g. `models/metrostroi_train/81-717/81-717_mvm`.
+    pub fn body_model(&self) -> Option<String> {
+        let m: String = self.rt.lua.load("return C.Model or (ENT and ENT.Model)").eval().ok()?;
+        Some(m.trim_end_matches(".mdl").to_string())
+    }
+
     /// Material replacements chosen by the train's skins (texture basename -> material path).
     pub fn skin_map(&self) -> HashMap<String, String> {
         let f: mlua::Function = self.rt.lua.globals().get("__skin_map").unwrap();

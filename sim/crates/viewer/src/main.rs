@@ -103,7 +103,7 @@ fn main() -> Result<()> {
     let map_dir = if cfg.map.is_empty() { None } else { Some(cfg.resolve(game.as_deref(), &cfg.map)) };
     let at: Option<f32> = arg_value(&args, "--at").and_then(|s| s.parse().ok());
     let lua_root = cfg.resolve(game.as_deref(), &cfg.lua_root).to_string_lossy().into_owned();
-    let train = cfg.train.clone();
+    let train = arg_value(&args, "--train").unwrap_or_else(|| cfg.train.clone());
     let mut obstacles = cfg.obstacles.clone();
     if let Some(b) = arg_value(&args, "--block").and_then(|s| s.parse().ok()) {
         obstacles.push(b);
@@ -138,6 +138,8 @@ fn main() -> Result<()> {
     };
     let sim = make_sim()?;
     let props = sim.props();
+    let body_model = sim.body_model().unwrap_or_else(|| "models/metrostroi_train/81-717/81-717_mvm".into());
+    log::info!("body {body_model}");
     let skin = sim.skin_map();
     log::info!("{} skin texture replacements", skin.len());
     log::info!("{} client props", props.len());
@@ -177,7 +179,7 @@ fn main() -> Result<()> {
                 None => {
                     let mut vfs = vfs.lock().unwrap();
                     *r.skin.borrow_mut() = skin;
-                    let mut scene = car::load(r, &vfs, "models/metrostroi_train/81-717/81-717_mvm", &props)?;
+                    let mut scene = car::load(r, &vfs, &body_model, &props)?;
                     if with_world {
                         let data = std::fs::read(&map_bsp)?;
                         let (mut meshes, lightmap) = formats::bsp::load_lit(&data)?;
@@ -230,7 +232,7 @@ fn main() -> Result<()> {
                 r.add_object(&mut s, "model", id, Mat4::IDENTITY, true);
                 s
             }
-            None => car::load(&r, &vfs, "models/metrostroi_train/81-717/81-717_mvm", &props)?,
+            None => car::load(&r, &vfs, &body_model, &props)?,
         };
         let mut scene = scene;
         car::reset_poses(&r, &mut scene);
