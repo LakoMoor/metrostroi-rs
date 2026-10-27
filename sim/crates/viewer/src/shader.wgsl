@@ -27,6 +27,10 @@ fn shade(i: VOut, c: vec4<f32>) -> vec3<f32> {
     if (g.light.w > 0.5) {
         return c.rgb * obj.tint.rgb;
     }
+    // tint.a == 2 marks a lamp: self-lit, so it glows regardless of the sun/ambient
+    if (obj.tint.a > 1.5) {
+        return min(c.rgb * 1.6, vec3<f32>(1.0)) * obj.tint.rgb;
+    }
     // sky/floor hemisphere ambient plus one directional light, scaled by the object's tint (lamp glow)
     let n = normalize(i.normal);
     let hemi = mix(0.45, 0.8, n.z * 0.5 + 0.5);

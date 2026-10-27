@@ -44,7 +44,11 @@ pub fn apply_state(r: &Renderer, scene: &mut Scene, names: &HashMap<String, usiz
         let shown = state.get(name).filter(|s| s.1 > 0.02);
         scene.objects[i].visible = shown.is_some();
         if let Some(&(_, a)) = shown {
-            scene.objects[i].tint = [a, a, a, 1.0];
+            let lamp = {
+                let n = name.to_ascii_lowercase();
+                n.contains("lamp") || n.contains("light")
+            };
+            scene.objects[i].tint = [a, a, a, if lamp { 2.0 } else { 1.0 }];
         }
     }
     for (name, (pose, _)) in state {

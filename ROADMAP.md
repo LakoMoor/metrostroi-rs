@@ -29,7 +29,7 @@ Out of scope for now: Project Zomboid and Minecraft ports (paused), other train 
 - [x] Black surfaces: cab textures are genuinely dark (lit by cab lights in-game); skin textures from the Lua applied, exposure raised
 - [x] Live window: hover shows button + tooltip, click reaches the Lua (`R_RadioToggle = 1`); [x] VB + all A* breakers pressed through ButtonEvent: switches latch and the panel lamp set (LUDS, red lamps, AVU…) comes on; the 717's Electric has no `Aux80V` output (only set with `PowerSupply`), so lights depend on other switches
 - [x] Hover tooltip (window title); [x] keyboard: all keys go through the entity's own `OnKeyEvent`/`KeyMap` (camera on F2/F3); needs the real start-up (VB, `KVWrenchKV`, `KVReverserUp`) before KV keys act
-- [ ] Lamp glow for panel lights (additive sprites / `$selfillum`)
+- [x] Lamp glow: props with "lamp"/"light" in the name are drawn self-lit (tint.a = 2 in the shader), brightness follows the Lua value; [ ] additive halo sprites
 - [ ] Doors, seats/masks/ARS variants chosen by the Lua (not defaults)
 - [ ] Proper cab camera (head position, look limits) and a first-person feel
 
