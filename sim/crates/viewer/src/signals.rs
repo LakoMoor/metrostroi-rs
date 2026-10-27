@@ -299,6 +299,9 @@ impl Signals {
             let pose = Mat4::from_translation(origin) * source_angles(p.angles[0], p.angles[1], p.angles[2]);
             self.statics.push((scene.objects.len(), pose, origin));
             r.add_object(scene, "static prop", id, pose, false);
+            // ambient from the map's light cube, brightened like the lightmaps (x4 decode)
+            let a = p.ambient.map(|c| (c * 7.0).clamp(0.35, 1.6));
+            scene.objects.last_mut().unwrap().tint = [a[0], a[1], a[2], 5.0];
         }
         log::info!("{} of {} static props placed ({} models)", self.statics.len(), props.len(), ids.values().filter(|v| v.is_some()).count());
         self

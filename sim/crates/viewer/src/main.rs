@@ -304,6 +304,8 @@ fn main() -> Result<()> {
                     if let Ok(id) = r.load_model(&mut scene, &vfs, p.model.trim_end_matches(".mdl")) {
                         let t = Mat4::from_translation(glam::Vec3::from(p.origin) * renderer::SCALE) * renderer::source_angles(p.angles[0], p.angles[1], p.angles[2]);
                         r.add_object(&mut scene, "static prop", id, t, true);
+                        let a = p.ambient.map(|c| (c * 7.0).clamp(0.35, 1.6));
+                        scene.objects.last_mut().unwrap().tint = [a[0], a[1], a[2], 5.0];
                     }
                 }
                 log::info!("{} static props near the spot", near.len());

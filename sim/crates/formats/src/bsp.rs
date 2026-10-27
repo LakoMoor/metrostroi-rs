@@ -346,12 +346,15 @@ pub struct StaticProp {
     /// Source angles: pitch, yaw, roll (degrees).
     pub angles: [f32; 3],
     pub skin: i32,
+    /// Linear ambient light at the prop (average of the leaf's ambient cube), 1.0 = full.
+    pub ambient: [f32; 3],
 }
 
 /// Static props from the game lump directory (lump 35).
 pub fn static_props(data: &[u8]) -> Result<Vec<StaticProp>> {
     ensure!(data.len() > 1036 && &data[0..4] == b"VBSP", "not a VBSP file");
     let dir = Bsp(data).lump(35);
+    let (amb_index, amb_light) = (Bsp(data).lump(52), Bsp(data).lump(56));
     let n = i32_at(dir, 0).max(0) as usize;
     for i in 0..n {
         let o = 4 + i * 16;
@@ -373,6 +376,7 @@ pub fn static_props(data: &[u8]) -> Result<Vec<StaticProp>> {
         }
         let mut p = 4 + dict_n * 128;
         let leaves = i32_at(g, p).max(0) as usize;
+        let leaf_list = p + 4;
         p += 4 + leaves * 2;
         let count = i32_at(g, p).max(0) as usize;
         p += 4;
@@ -387,11 +391,35 @@ pub fn static_props(data: &[u8]) -> Result<Vec<StaticProp>> {
             let e = p + k * stride;
             let idx = u16_at(g, e + 24) as usize;
             let Some(model) = names.get(idx) else { continue };
+            let (first_leaf, n_leaf) = (u16_at(g, e + 26) as usize, u16_at(g, e + 28) as usize);
+            let mut amb = [0.0f32; 3];
+            let mut n = 0.0;
+            for k in first_leaf..(first_leaf + n_leaf).min(leaves) {
+                let leaf = u16_at(g, leaf_list + k * 2) as usize;
+                if (leaf + 1) * 4 > amb_index.len() {
+                    continue;
+                }
+                let (cnt, first) = (u16_at(amb_index, leaf * 4) as usize, u16_at(amb_index, leaf * 4 + 2) as usize);
+                if cnt == 0 || (first + 1) * 28 > amb_light.len() {
+                    continue;
+                }
+                let s = first * 28;
+                for face in 0..6 {
+                    let c = s + face * 4;
+                    let k2 = 2f32.powi(amb_light[c + 3] as i8 as i32) / 255.0;
+                    for ch in 0..3 {
+                        amb[ch] += amb_light[c + ch] as f32 * k2 / 6.0;
+                    }
+                }
+                n += 1.0;
+            }
+            let ambient = if n > 0.0 { [amb[0] / n, amb[1] / n, amb[2] / n] } else { [0.5; 3] };
             out.push(StaticProp {
                 model: model.clone(),
                 origin: [f32_at(g, e), f32_at(g, e + 4), f32_at(g, e + 8)],
                 angles: [f32_at(g, e + 12), f32_at(g, e + 16), f32_at(g, e + 20)],
                 skin: i32_at(g, e + 32),
+                ambient,
             });
         }
         return Ok(out);

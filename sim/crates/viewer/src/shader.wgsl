@@ -22,7 +22,7 @@ fn vs(@location(0) pos: vec3<f32>, @location(1) normal: vec3<f32>, @location(2) 
     var o: VOut;
     o.pos = g.view_proj * (obj.model * vec4<f32>(pos, 1.0));
     // tint.a == 4 marks the skybox: pinned just inside the far plane so every real surface covers it
-    if (obj.tint.a > 3.5) {
+    if (obj.tint.a > 3.5 && obj.tint.a < 4.5) {
         o.pos.z = o.pos.w * 0.99999;
     }
     o.normal = (obj.model * vec4<f32>(normal, 0.0)).xyz;
@@ -34,6 +34,11 @@ fn vs(@location(0) pos: vec3<f32>, @location(1) normal: vec3<f32>, @location(2) 
 fn shade(i: VOut, c: vec4<f32>) -> vec3<f32> {
     if (g.light.w > 0.5) {
         return c.rgb * obj.tint.rgb;
+    }
+    // tint.a == 5: a static prop lit by the map's ambient cube (tint.rgb = ambient colour)
+    if (obj.tint.a > 4.5) {
+        let hemi = 0.75 + 0.25 * (normalize(i.normal).z * 0.5 + 0.5);
+        return min(c.rgb * obj.tint.rgb * hemi, vec3<f32>(1.0));
     }
     if (obj.tint.a > 3.5) {
         return c.rgb;
