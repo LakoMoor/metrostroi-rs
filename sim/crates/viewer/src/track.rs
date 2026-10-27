@@ -88,6 +88,24 @@ impl Track {
             paths.push(Path3 { pts, cum });
         }
         paths.sort_by(|a, b| b.length().total_cmp(&a.length()));
+        // The running line continues onto a path that starts within reach of its end (the return track of a
+        // loop line), so the train does not dead-end; side branches (depots, crossovers) are not followed.
+        if paths.len() > 1 {
+            let end = *paths[0].pts.last().unwrap();
+            let next = (1..paths.len())
+                .filter(|&i| paths[i].length() > 1000.0)
+                .min_by(|&a, &b| paths[a].pts[0].distance(end).total_cmp(&paths[b].pts[0].distance(end)));
+            if let Some(i) = next.filter(|&i| paths[i].pts[0].distance(end) < 30.0) {
+                let tail = paths.remove(i);
+                let main = &mut paths[0];
+                main.pts.extend(tail.pts);
+                let mut cum = vec![0.0];
+                for w in main.pts.windows(2) {
+                    cum.push(cum.last().unwrap() + w[0].distance(w[1]));
+                }
+                main.cum = cum;
+            }
+        }
         Ok(Track { paths })
     }
 
@@ -100,6 +118,17 @@ impl Track {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn crossline_c4_main_line_continues_onto_the_return_track() {
+        let f = Path::new("E:/metrostroi2pz/game/content/maps/crossline_c4/track.lua");
+        if !f.exists() {
+            return;
+        }
+        let t = Track::load(f).unwrap();
+        println!("main line {:.0} m", t.main().length());
+        assert!(t.main().length() > 20_000.0);
+    }
 
     #[test]
     fn b46_lite_loads_and_has_gradients() {
