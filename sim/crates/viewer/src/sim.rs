@@ -207,6 +207,13 @@ const HELPERS: &str = r#"
     end
     C.PlayOnce = once
     T.PlayOnce = once
+    -- the announcer (UPO/ASNP) plays whole files by name on the train entity
+    T.RenderClientEnts = true
+    function T.PlayOnceFromPos(self, id, file, vol, pitch)
+        if (id == "announcer" or id == "announcer1") and type(file) == "string" and file ~= "_STOP" and (vol or 1) > 0 then
+            SND.once[#SND.once + 1] = { { file }, math.min(vol or 1, 1), pitch or 1 }
+        end
+    end
     function __sounds()
         local loops = {}
         for id, s in pairs(SND.loops) do
@@ -979,6 +986,26 @@ mod tests {
         sim.set_position(0.0);
         let t = sim.tail_poses();
         assert!((t[2].w_axis.truncate() - t[1].w_axis.truncate()).length() > 15.0);
+    }
+
+    #[test]
+    fn announcer_messages_reach_the_audio_queue() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        run(&sim, 1.0);
+        let r: String = sim
+            .rt
+            .lua
+            .load("local A = T.Announcer if not A then return 'no announcer' end local n = 0 for k,v in pairs(Metrostroi[A.AnnTable or ''] and Metrostroi[A.AnnTable][1] or {}) do n = n + 1 end return tostring(A.AnnTable)..' '..n")
+            .eval()
+            .unwrap();
+        println!("announcer: {r}");
+        sim.rt.lua.load("T.Announcer:Queue{'buzz_start'} T.Announcer:Think() T.Announcer:Think()").exec().unwrap();
+        run(&sim, 1.0);
+        let (_, once) = sim.sounds();
+        println!("once sounds: {}", once.len());
     }
 
     #[test]

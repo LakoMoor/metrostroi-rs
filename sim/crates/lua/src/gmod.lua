@@ -63,7 +63,33 @@ file = { Exists = function(p) return __read_lua(p) ~= nil end, Find = function(p
 hook = { Add = noop, Remove = noop, Run = noop, Call = noop }
 timer = { Simple = noop, Create = noop, Remove = noop, Exists = function() return false end, Destroy = noop }
 concommand = { Add = noop }
-net = setmetatable({}, { __index = function() return noop end })
+-- Loopback net library: messages sent by the server code are handed straight to the registered receivers
+-- (the host is both server and client).
+do
+    local receivers, out, inbox = {}, nil, nil
+    local function writer() return function(v) if out then out[#out + 1] = v end end end
+    local function reader() return function() if inbox then return table.remove(inbox, 1) end end end
+    net = setmetatable({
+        Receive = function(name, fn) receivers[name] = fn end,
+        Start = function(name) out = { __name = name } return true end,
+        WriteEntity = writer(), WriteString = writer(), WriteFloat = writer(), WriteUInt = writer(), WriteInt = writer(),
+        WriteBool = writer(), WriteVector = writer(), WriteAngle = writer(), WriteTable = writer(), WriteDouble = writer(), WriteData = writer(),
+        ReadEntity = reader(), ReadString = reader(), ReadFloat = reader(), ReadUInt = reader(), ReadInt = reader(),
+        ReadBool = reader(), ReadVector = reader(), ReadAngle = reader(), ReadTable = reader(), ReadDouble = reader(),
+    }, { __index = function() return noop end })
+    local function send()
+        local m = out
+        out = nil
+        local fn = m and receivers[m.__name]
+        if fn then
+            inbox = m
+            local ok, err = pcall(fn, #m, nil)
+            inbox = nil
+            if not ok then print("net " .. tostring(m.__name) .. ": " .. tostring(err)) end
+        end
+    end
+    net.Broadcast, net.Send, net.SendPAS, net.SendPVS, net.SendOmit, net.SendToServer = send, send, send, send, send, send
+end
 util = setmetatable({}, { __index = function() return noop end })
 util.AddNetworkString = noop
 util.TraceLine = function() return { Hit = false, HitPos = Vector(0, 0, 0), Entity = nil } end
