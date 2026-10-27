@@ -131,6 +131,9 @@ impl Panels {
         if let Some(t) = tips_file.and_then(|f| std::fs::read_to_string(f).ok()) {
             out.tips = serde_json::from_str(&t).unwrap_or_default();
         }
+        for (id, tip) in [("CabinDoor", "Дверь кабины"), ("PassengerDoor", "Дверь в салон"), ("RearDoor", "Задняя дверь")] {
+            out.tips.entry(id.to_string()).or_insert_with(|| tip.to_string());
+        }
         out
     }
 

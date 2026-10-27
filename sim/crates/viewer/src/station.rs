@@ -62,6 +62,31 @@ pub fn load(ents: &[HashMap<String, String>], main: &Path3) -> Vec<Platform> {
     out
 }
 
+/// Station names (Russian) from the map's `Metrostroi.StationConfigurations` table, found by scanning the Lua text.
+pub fn names(lua_file: &std::path::Path) -> HashMap<u32, String> {
+    let mut out = HashMap::new();
+    let Ok(text) = std::fs::read_to_string(lua_file) else { return out };
+    let mut cur: Option<u32> = None;
+    for line in text.lines() {
+        let l = line.trim();
+        if let Some(rest) = l.strip_prefix('[') {
+            if let Some((n, tail)) = rest.split_once(']') {
+                if tail.trim_start().starts_with('=') {
+                    cur = n.trim().parse().ok();
+                }
+            }
+        } else if let (Some(id), Some(rest)) = (cur, l.strip_prefix("names")) {
+            if let Some(q) = rest.split('"').nth(1) {
+                let mut c = q.chars();
+                let cap: String = c.next().map(|f| f.to_uppercase().collect::<String>() + c.as_str()).unwrap_or_default();
+                out.insert(id, cap);
+                cur = None;
+            }
+        }
+    }
+    out
+}
+
 /// The platform the train is on or the next one ahead: (platform, metres to its start (<= 0 when alongside)).
 pub fn ahead(platforms: &[Platform], s: f32) -> Option<(&Platform, f32)> {
     platforms.iter().filter(|p| p.to > s).min_by(|a, b| a.from.total_cmp(&b.from)).map(|p| (p, p.from - s))
@@ -72,6 +97,17 @@ mod tests {
     use super::*;
     use crate::track::Track;
     use std::path::Path;
+
+    #[test]
+    fn station_names_are_read_from_the_map_lua() {
+        let f = Path::new(r"E:\metrostroi2pz\src\scripts\lua\metrostroi\maps\crossline.lua");
+        if !f.exists() {
+            return;
+        }
+        let n = names(f);
+        assert_eq!(n.get(&110).map(String::as_str), Some("Международная"));
+        assert!(n.len() > 5, "{n:?}");
+    }
 
     #[test]
     fn crossline_c4_has_platforms_along_the_main_line() {

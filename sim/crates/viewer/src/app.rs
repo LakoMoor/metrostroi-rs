@@ -704,12 +704,13 @@ fn draw_hud(ui: &mut Ui, s: &Sim) {
     ui.text(x, y + 98.0, 20.0, &format!("путь {pos:.0} м"), [0.6, 0.7, 0.85, 1.0]);
     if let Some((st, pl, d, side, left)) = s.platform_ahead() {
         let side = if side == crate::station::Side::Left { "слева" } else { "справа" };
+        let st = s.station_name(st).unwrap_or_else(|| format!("Ст. {st}"));
         let line = if d > 0.0 {
-            format!("Ст. {st} п.{pl} через {d:.0} м · двери {side}")
+            format!("{st} п.{pl} через {d:.0} м · двери {side}")
         } else {
-            format!("Ст. {st} п.{pl} · до конца {left:.0} м · двери {side}")
+            format!("{st} п.{pl} · до конца {left:.0} м · двери {side}")
         };
-        ui.rect(x - 12.0, y - 40.0, 330.0, 28.0, [0.0, 0.03, 0.08, 0.55]);
+        ui.rect(x - 12.0, y - 40.0, 420.0, 28.0, [0.0, 0.03, 0.08, 0.55]);
         ui.text(x, y - 36.0, 20.0, &line, [0.75, 1.0, 0.8, 1.0]);
     }
     let (dl, dr) = s.doors_open();

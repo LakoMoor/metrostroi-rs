@@ -51,7 +51,7 @@ Out of scope for now: Project Zomboid and Minecraft ports (paused), other train 
 - [ ] Make the real BARS chain work (find why EPKC/RPB stay 0) and drop the stand-in
 - [x] Cold and dark: `game/docs/COLD_AND_DARK.md`; test `cold_and_dark_manual_start` drives from the spawn state with cab controls only (battery, valve cocks, wrench, reverser, VUD+VAD, RP reset by a held button, T1->0->X3 -> 43 km/h). Mouse buttons are now held while pressed (`Sim::button`)
 - [x] Doors: props start at pose 0 (they were drawn in their open bind pose), poses default to 0 for re-created models and are cached per object; passenger doors follow `DoorL1..4/DoorR1..4` from the Lua pneumatics. Keys: `A` open left, `D` open right (hold), `V` close (VUD1). Verified live: right doors open on D, close on V (~6 s). The map is only drawn in the cab view
-- [ ] Doors: cab/rear/compartment doors (`door1..3`, `door_otsek*`) have no interaction, no door sound, no platform side/stations
+- [x] Cab/rear/compartment doors (`CabinDoor`, `PassengerDoor`, `RearDoor`) are ordinary ButtonMap buttons: clickable with Russian tags, animated by the Lua, sounds via PlayOnce (test `cab_doors_swing`); [x] station names in the HUD (parsed from `Metrostroi.StationConfigurations`); [ ] announcements, door-side lamps
 - [ ] Tunnel/station models, lighting, skybox
 - [ ] Passenger doors and platforms; multi-car consists (coupling, train wires)
 - [ ] Second train type to prove the loader is not 717-specific

@@ -77,6 +77,7 @@ fn main() -> Result<()> {
                         sim.set_signs(s);
                     }
                     sim.set_platforms(station::load(&map_ents, t.main()));
+                    sim.set_station_names(station::names(&std::path::Path::new(&lua_root).join("metrostroi/maps/crossline.lua")));
                     sim.set_track(t);
                 }
                 Err(e) => log::warn!("no track: {e:#}"),

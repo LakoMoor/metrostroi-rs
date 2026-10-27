@@ -227,6 +227,7 @@ pub struct Sim {
     signs: RefCell<Vec<crate::track::Sign>>,
     obstacles: RefCell<Vec<f32>>,
     platforms: RefCell<Vec<crate::station::Platform>>,
+    station_names: RefCell<HashMap<u32, String>>,
     /// Position of the red signal ahead; running past it trips the autostop.
     red_ahead: std::cell::Cell<Option<f32>>,
     moving: std::cell::Cell<bool>,
@@ -258,6 +259,14 @@ impl Sim {
 
     pub fn obstacles(&self) -> Vec<f32> {
         self.obstacles.borrow().clone()
+    }
+
+    pub fn set_station_names(&self, n: HashMap<u32, String>) {
+        *self.station_names.borrow_mut() = n;
+    }
+
+    pub fn station_name(&self, id: u32) -> Option<String> {
+        self.station_names.borrow().get(&id).cloned()
     }
 
     pub fn set_platforms(&self, p: Vec<crate::station::Platform>) {
@@ -325,7 +334,7 @@ impl Sim {
         rt.lua.globals().set("T", train)?;
         rt.lua.globals().set("__rail", 750.0)?;
         rt.exec(HELPERS, "@sim_helpers")?;
-        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
+        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
     }
 
     /// Material replacements chosen by the train's skins (texture basename -> material path).
@@ -801,6 +810,24 @@ mod tests {
         println!("{changed} props changed of {}", before.len());
         let dbg: String = sim.rt.lua.load("local n='R_RadioToggle' local a=C.Anims[n] local e=C.ClientEnts[n] return string.format('anim=%s val=%s value=%s hidden=%s hanim=%s ent=%s pose=%s', tostring(a), a and tostring(a.val), a and tostring(a.value), tostring(C.Hidden[n]), tostring(C.Hidden.anim[n]), tostring(e), e and tostring(e.__pose and e.__pose.position))").eval().unwrap();
         println!("{dbg}");
+    }
+
+    #[test]
+    fn cab_doors_swing() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        run(&sim, 2.0);
+        let before = sim.state();
+        for id in ["CabinDoor", "RearDoor", "PassengerDoor"] {
+            println!("press {id}: {:?}", sim.press(id));
+        }
+        run(&sim, 2.0);
+        let after = sim.state();
+        for k in ["door1", "door2", "door3"] {
+            println!("{k}: {:?} -> {:?}", before.get(k), after.get(k));
+        }
     }
 
     #[test]
