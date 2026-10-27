@@ -17,7 +17,7 @@ use winit::window::{Window, WindowId};
 
 /// Driver's eye in car space, metres (Source axes: X forward, Y left, Z up).
 /// Height of the car body origin over the rail head, metres.
-const CAR_ABOVE_RAIL: f32 = 1.9;
+const CAR_ABOVE_RAIL: f32 = 1.6;
 /// Standing eye height above the feet, metres.
 const EYE_HEIGHT: f32 = 1.7;
 /// Car floor in car space, and the interior / outer-wall half-widths and half-length (metres).
@@ -356,9 +356,15 @@ impl App {
                 if let Some(c) = self.camera.as_mut() {
                     c.world = w.transform;
                 }
+
+                let (xf, show) = (w.transform, w.visible);
                 if let Some(sg) = &self.signals {
-                    let (xf, show) = (w.transform, w.visible);
                     sg.update(scene, xf, pos, show, &|g| s.aspect(g), &s.lead_poses());
+                }
+                if let Some(sky) = scene.objects.iter_mut().find(|o| o.name == "sky") {
+                    // fixed in map space, centred on the train
+                    sky.visible = show;
+                    sky.transform = xf * Mat4::from_translation(origin);
                 }
             }
         }

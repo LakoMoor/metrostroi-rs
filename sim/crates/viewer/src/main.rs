@@ -49,6 +49,35 @@ pub fn mount_workshop(cfg: &config::Config) -> Result<Vfs> {
     Ok(vfs)
 }
 
+/// The map's `skyname` (worldspawn key).
+fn sky_name(bsp: &[u8]) -> Option<String> {
+    formats::bsp::entities(bsp).ok()?.into_iter().find_map(|e| e.get("skyname").cloned())
+}
+
+/// A cube of six skybox faces (Source space, half-size 5000 units) with the `<sky><face>` materials.
+fn sky_meshes(name: &str) -> Vec<formats::mdl::Mesh> {
+    const S: f32 = 5000.0;
+    // face suffix, four corners (top-left, top-right, bottom-right, bottom-left as seen from inside)
+    let faces: [(&str, [[f32; 3]; 4]); 6] = [
+        ("ft", [[S, S, S], [S, -S, S], [S, -S, -S], [S, S, -S]]),
+        ("bk", [[-S, -S, S], [-S, S, S], [-S, S, -S], [-S, -S, -S]]),
+        ("lf", [[-S, S, S], [S, S, S], [S, S, -S], [-S, S, -S]]),
+        ("rt", [[S, -S, S], [-S, -S, S], [-S, -S, -S], [S, -S, -S]]),
+        ("up", [[S, -S, S], [S, S, S], [-S, S, S], [-S, -S, S]]),
+        ("dn", [[S, S, -S], [S, -S, -S], [-S, -S, -S], [-S, S, -S]]),
+    ];
+    faces
+        .iter()
+        .map(|(suffix, c)| {
+            let uv = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
+            let vertices = (0..4)
+                .map(|i| formats::mdl::Vertex { pos: c[i], normal: [0.0, 0.0, 1.0], uv: uv[i], ..Default::default() })
+                .collect();
+            formats::mdl::Mesh { material: format!("skybox/{name}{suffix}"), vertices, indices: vec![0, 1, 2, 0, 2, 3, 0, 2, 1, 0, 3, 2] }
+        })
+        .collect()
+}
+
 fn arg_value(args: &[String], key: &str) -> Option<String> {
     args.iter().position(|a| a == key).and_then(|i| args.get(i + 1)).cloned()
 }
@@ -157,6 +186,11 @@ fn main() -> Result<()> {
                         formats::bsp::double_sided(&mut meshes);
                         let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);
                         r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
+                        if let Some(sky) = sky_name(&data) {
+                            let id = r.load_meshes(&mut scene, &vfs, "sky", &sky_meshes(&sky), renderer::SCALE);
+                            r.add_object(&mut scene, "sky", id, Mat4::IDENTITY, false);
+                            scene.objects.last_mut().unwrap().tint = [1.0, 1.0, 1.0, 4.0];
+                        }
                         if let (Some(lm), true) = (&lightmap, lightmaps) {
                             r.set_lightmap(lm);
                             scene.objects.last_mut().unwrap().tint[3] = 3.0;
@@ -247,6 +281,11 @@ fn main() -> Result<()> {
             vfs.mount_files(formats::bsp::pakfile(&data)?);
             let id = r.load_meshes(&mut scene, &vfs, "world", &meshes, renderer::SCALE);
             r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
+            if let Some(sky) = sky_name(&data) {
+                let id = r.load_meshes(&mut scene, &vfs, "sky", &sky_meshes(&sky), renderer::SCALE);
+                r.add_object(&mut scene, "sky", id, Mat4::IDENTITY, true);
+                scene.objects.last_mut().unwrap().tint = [1.0, 1.0, 1.0, 4.0];
+            }
             if let (Some(lm), true) = (&lightmap, !args.iter().any(|a| a == "--nolightmap")) {
                 r.set_lightmap(lm);
                 scene.objects.last_mut().unwrap().tint[3] = 3.0;

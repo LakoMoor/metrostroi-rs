@@ -258,7 +258,7 @@ impl Sim {
         let x = p.dir.normalize_or_zero();
         let y = glam::Vec3::Z.cross(x).normalize_or_zero();
         let z = x.cross(y);
-        let o = p.pos + glam::Vec3::Z * 1.9;
+        let o = p.pos + glam::Vec3::Z * 1.6;
         Some(glam::Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), o.extend(1.0)))
     }
 

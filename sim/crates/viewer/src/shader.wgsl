@@ -21,6 +21,10 @@ struct VOut {
 fn vs(@location(0) pos: vec3<f32>, @location(1) normal: vec3<f32>, @location(2) uv: vec2<f32>, @location(3) uv2: vec2<f32>) -> VOut {
     var o: VOut;
     o.pos = g.view_proj * (obj.model * vec4<f32>(pos, 1.0));
+    // tint.a == 4 marks the skybox: pinned just inside the far plane so every real surface covers it
+    if (obj.tint.a > 3.5) {
+        o.pos.z = o.pos.w * 0.99999;
+    }
     o.normal = (obj.model * vec4<f32>(normal, 0.0)).xyz;
     o.uv = uv;
     o.uv2 = uv2;
@@ -30,6 +34,9 @@ fn vs(@location(0) pos: vec3<f32>, @location(1) normal: vec3<f32>, @location(2) 
 fn shade(i: VOut, c: vec4<f32>) -> vec3<f32> {
     if (g.light.w > 0.5) {
         return c.rgb * obj.tint.rgb;
+    }
+    if (obj.tint.a > 3.5) {
+        return c.rgb;
     }
     // tint.a == 3 marks the lightmapped map: baked light (stored /2) times the texture
     if (obj.tint.a > 2.5) {
