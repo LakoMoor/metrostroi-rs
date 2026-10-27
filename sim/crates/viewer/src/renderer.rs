@@ -347,12 +347,20 @@ impl Renderer {
                 } else if m.flag("$alphatest") {
                     blend = Blend::AlphaTest;
                 }
+                if m.base_texture().is_none() {
+                    log::warn!("material {name}: no base texture (shader {})", m.shader);
+                }
                 if let Some(t) = m.base_texture() {
                     let p = format!("materials/{}.vtf", t.replace('\\', "/"));
                     match vfs.read(&p).map(vtf::decode) {
                         Some(Ok(v)) => {
                             let px = &v.mips[0];
                             let lum: f32 = px.chunks_exact(4).map(|c| (c[0] as f32 + c[1] as f32 + c[2] as f32) / 765.0).sum::<f32>() / (px.len() / 4).max(1) as f32;
+                            if std::env::var_os("MS_MATLOG").is_some() {
+                                let n = (px.len() / 4).max(1) as f32;
+                                let avg: Vec<f32> = (0..3).map(|k| px.chunks_exact(4).map(|c| c[k] as f32).sum::<f32>() / n).collect();
+                                eprintln!("MAT {name} {p} fmt avg {:?}", avg);
+                            }
                             if lum < 0.04 {
                                 log::warn!("dark material {name} -> {p} (avg {lum:.3}, shader {})", m.shader);
                             }
@@ -701,5 +709,7 @@ fn placeholder_colour(name: &str) -> [u8; 4] {
         }
     }
     let h = name.bytes().fold(2166136261u32, |h, b| (h ^ b as u32).wrapping_mul(16777619));
-    [110 + (h & 0x3f) as u8, 110 + ((h >> 8) & 0x3f) as u8, 110 + ((h >> 16) & 0x3f) as u8, 255]
+    // unknown addon texture: a neutral stone-like grey that varies a little by name
+    let v = (h & 0x1f) as u8;
+    [150 + v, 146 + v, 138 + v, 255]
 }

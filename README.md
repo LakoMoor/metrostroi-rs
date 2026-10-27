@@ -43,6 +43,7 @@ target/release/metrostroi-rs.exe --cab --at 300
 | [1973160540](https://steamcommunity.com/sharedfiles/filedetails/?id=1973160540) | пакет контента Metrostroi |
 | [261801217](https://steamcommunity.com/sharedfiles/filedetails/?id=261801217) | пакет контента Metrostroi |
 | [1095130789](https://steamcommunity.com/sharedfiles/filedetails/?id=1095130789) | Lua-скрипты Metrostroi (лежат в `game/lua`) |
+| [3018420076](https://steamcommunity.com/sharedfiles/filedetails/?id=3018420076) | текстуры карт Metrostroi |
 | [3340000198](https://steamcommunity.com/sharedfiles/filedetails/?id=3340000198) | карта gm_metro_crossline_c4 |
 
 Идеи архитектуры взяты из [openOMSI](https://github.com/openOMSI-org/openOMSI) (AGPL-3.0), код не копировался.

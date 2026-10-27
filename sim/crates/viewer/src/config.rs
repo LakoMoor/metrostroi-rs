@@ -21,7 +21,7 @@ impl Default for Config {
     fn default() -> Self {
         Config {
             workshop: r"E:\Games\steamapps\workshop\content\4000".into(),
-            packs: ["1812142201", "1095094174", "1095098251", "1095100683", "1095105863", "1095109617", "1095111608", "1973160540", "261801217"]
+            packs: ["3340000198", "1812142201", "1095094174", "1095098251", "1095100683", "1095105863", "1095109617", "1095111608", "1973160540", "261801217"]
                 .map(String::from)
                 .to_vec(),
             lua_root: r"E:\metrostroi2pz\src\scripts\lua".into(),

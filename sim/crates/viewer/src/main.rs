@@ -30,6 +30,22 @@ pub fn mount_workshop(cfg: &config::Config) -> Result<Vfs> {
             .with_context(|| format!("no .gma in {}", dir.display()))?;
         vfs.mount(&gma)?;
     }
+    // base-game content (HL2/CSS textures the map uses): <steam>/steamapps/common/GarrysMod/{garrysmod,sourceengine}
+    let gmod = Path::new(&cfg.workshop).ancestors().nth(3).map(|a| a.join("common/GarrysMod"));
+    let mut mounted = 0;
+    for sub in ["garrysmod", "sourceengine"] {
+        let Some(dir) = gmod.as_ref().map(|g| g.join(sub)) else { continue };
+        let Ok(rd) = std::fs::read_dir(&dir) else { continue };
+        let mut files: Vec<_> = rd.filter_map(|e| e.ok()).map(|e| e.path()).filter(|p| p.to_string_lossy().ends_with("_dir.vpk")).collect();
+        files.sort();
+        for f in files {
+            match vfs.mount_vpk(&f) {
+                Ok(()) => mounted += 1,
+                Err(e) => log::warn!("vpk {}: {e:#}", f.display()),
+            }
+        }
+    }
+    log::info!("mounted {mounted} base-game packages");
     Ok(vfs)
 }
 
