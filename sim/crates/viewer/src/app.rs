@@ -398,6 +398,7 @@ impl App {
             }
         }
         let (Some(g), Some(scene), Some(cam)) = (&mut self.gfx, &self.scene, &self.camera) else { return };
+        let t_acq = std::time::Instant::now();
         let frame = match g.surface.get_current_texture() {
             wgpu::CurrentSurfaceTexture::Success(t) | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
             wgpu::CurrentSurfaceTexture::Outdated | wgpu::CurrentSurfaceTexture::Lost => {
@@ -406,6 +407,7 @@ impl App {
             }
             _ => return,
         };
+        prof(5, t_acq, self.fps);
         let want = if self.menu.settings.quality >= 1 { 4 } else { 1 };
         if g.renderer.samples.get() != want {
             g.renderer.samples.set(want);
@@ -772,7 +774,7 @@ fn window_icon() -> Option<winit::window::Icon> {
 fn prof(slot: usize, since: std::time::Instant, fps: f32) {
     use std::sync::Mutex;
     static ON: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
-    static ACC: Mutex<([f64; 5], u32)> = Mutex::new(([0.0; 5], 0));
+    static ACC: Mutex<([f64; 6], u32)> = Mutex::new(([0.0; 6], 0));
     if !*ON.get_or_init(|| std::env::var_os("MS_PROFILE").is_some()) {
         return;
     }
@@ -782,8 +784,8 @@ fn prof(slot: usize, since: std::time::Instant, fps: f32) {
         a.1 += 1;
         if a.1 == 120 {
             let n = a.1 as f64;
-            log::info!("profile ms/frame: tick {:.2}  state {:.2}  render+present {:.2}  whole redraw {:.2}  audio {:.2}  ({fps:.0} fps)", a.0[0] / n, a.0[1] / n, a.0[2] / n, a.0[3] / n, a.0[4] / n);
-            *a = ([0.0; 5], 0);
+            log::info!("profile ms/frame: tick {:.2}  state {:.2}  render+present {:.2}  whole redraw {:.2}  audio {:.2}  acquire {:.2}  ({fps:.0} fps)", a.0[0] / n, a.0[1] / n, a.0[2] / n, a.0[3] / n, a.0[4] / n, a.0[5] / n);
+            *a = ([0.0; 6], 0);
         }
     }
 }
