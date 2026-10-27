@@ -11,6 +11,22 @@ const LUA_ROOT: &str = r"E:\metrostroi2pz\src\scripts\lua";
 
 const HELPERS: &str = r#"
     C = Metrostroi.CreateClient(T)
+    -- the cab's button panels as the Lua defines them (positions already evaluated)
+    function __panels()
+        local r = {}
+        for id, panel in pairs(C.ButtonMap) do
+            if type(panel) == "table" and panel.buttons and panel.pos and panel.ang then
+                local bl = {}
+                for _, b in ipairs(panel.buttons) do
+                    bl[#bl + 1] = { ID = b.ID, x = b.x, y = b.y, w = b.w, h = b.h, radius = b.radius, tooltip = b.tooltip }
+                end
+                r[#r + 1] = { name = id, pos = { x = panel.pos.x, y = panel.pos.y, z = panel.pos.z },
+                    ang = { p = panel.ang.p, y = panel.ang.y, r = panel.ang.r },
+                    scale = panel.scale, width = panel.width, height = panel.height, buttons = bl }
+            end
+        end
+        return r
+    end
     function __props()
         local r = {}
         for name, p in pairs(C.ClientProps) do
@@ -332,6 +348,14 @@ impl Sim {
                 ang: [r.get(6).unwrap_or(0.0), r.get(7).unwrap_or(0.0), r.get(8).unwrap_or(0.0)],
             })
             .collect()
+    }
+
+    /// The cab's button panels straight from the running Lua.
+    pub fn panels(&self, tips_file: Option<&Path>) -> Option<crate::panels::Panels> {
+        let f: mlua::Function = self.rt.lua.globals().get("__panels").ok()?;
+        let t: mlua::Table = f.call(()).ok()?;
+        let p = crate::panels::Panels::from_lua(&t, tips_file);
+        (p.button_count() > 0).then_some(p)
     }
 
     /// Currently shown props: pose-parameter value (if the cab code set one) and brightness 0..1.
@@ -777,5 +801,24 @@ mod tests {
         println!("{changed} props changed of {}", before.len());
         let dbg: String = sim.rt.lua.load("local n='R_RadioToggle' local a=C.Anims[n] local e=C.ClientEnts[n] return string.format('anim=%s val=%s value=%s hidden=%s hanim=%s ent=%s pose=%s', tostring(a), a and tostring(a.val), a and tostring(a.value), tostring(C.Hidden[n]), tostring(C.Hidden.anim[n]), tostring(e), e and tostring(e.__pose and e.__pose.position))").eval().unwrap();
         println!("{dbg}");
+    }
+
+    #[test]
+    fn button_tags_sit_on_their_models() {
+        let controls = Path::new("E:/metrostroi2pz/game/content/trains/81-717_mvm/controls.json");
+        if !Path::new(LUA_ROOT).exists() || !controls.exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        let panels = crate::panels::Panels::load(controls).unwrap();
+        let props = sim.props();
+        for id in ["R_RadioToggle", "VBToggle", "R_UNchToggle", "KVSet0", "VozvratRPSet", "A1Toggle"] {
+            let Some(pr) = props.iter().find(|p| p.name == id) else { println!("{id}: no prop"); continue };
+            let model = glam::Vec3::from(pr.pos) * crate::renderer::SCALE;
+            let (tag, n) = panels.button_pos(id).unwrap();
+            let d = tag - model;
+            println!("{id}: {:?}", panels.debug_coords(id, model));
+            println!("{id}: |tag-model| {:.3} m, along normal {:.3} m, across {:.3} m", d.length(), d.dot(n), (d - n * d.dot(n)).length());
+        }
     }
 }

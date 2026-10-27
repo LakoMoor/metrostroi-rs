@@ -45,6 +45,13 @@ pub struct Panels {
     tips: HashMap<String, String>,
 }
 
+/// Panel axes as Metrostroi's `PositionFromPanel` uses them: x along the rotated X, y *down* (it negates y before rotating).
+fn panel_axes(pitch: f32, yaw: f32, roll: f32) -> Mat4 {
+    let mut m = source_angles(pitch, yaw, roll);
+    m.y_axis = -m.y_axis;
+    m
+}
+
 fn vec3(v: &Value, key: &str) -> Option<Vec3> {
     let a = v.get(key)?.as_object()?.values().next()?.as_array()?;
     Some(Vec3::new(a.first()?.as_f64()? as f32, a.get(1)?.as_f64()? as f32, a.get(2)?.as_f64()? as f32))
@@ -77,7 +84,7 @@ impl Panels {
                 .collect();
             out.panels.push(Panel {
                 origin: pos * SCALE,
-                axes: source_angles(ang.x, ang.y, ang.z),
+                axes: panel_axes(ang.x, ang.y, ang.z),
                 scale: num(p, "scale") * SCALE,
                 name: name.clone(),
                 size: (num(p, "width"), num(p, "height")),
@@ -90,6 +97,68 @@ impl Panels {
             }
         }
         Ok(out)
+    }
+
+    /// The panels exactly as the running cab defines them (`ENT.ButtonMap`), so positions follow the Lua's own
+    /// expressions (the JSON export flattens things like `44+25.5*3`).
+    pub fn from_lua(map: &mlua::Table, tips_file: Option<&Path>) -> Panels {
+        let mut out = Panels::default();
+        for panel in map.clone().pairs::<mlua::Value, mlua::Table>().flatten().map(|p| p.1) {
+            let (Ok(pos), Ok(ang), Ok(scale)) = (panel.get::<mlua::Table>("pos"), panel.get::<mlua::Table>("ang"), panel.get::<f32>("scale")) else { continue };
+            let Ok(list) = panel.get::<mlua::Table>("buttons") else { continue };
+            let f = |t: &mlua::Table, k: &str| t.get::<f32>(k).unwrap_or(0.0);
+            let buttons = list
+                .sequence_values::<mlua::Table>()
+                .flatten()
+                .filter_map(|b| {
+                    let id: String = b.get("ID").ok()?;
+                    let shape = match (b.get::<f32>("w"), b.get::<f32>("h")) {
+                        (Ok(w), Ok(h)) => Shape::Rect { w, h },
+                        _ => Shape::Circle { r: b.get::<f32>("radius").unwrap_or(10.0) },
+                    };
+                    Some(Button { id, tooltip: b.get::<String>("tooltip").unwrap_or_default(), x: f(&b, "x"), y: f(&b, "y"), shape })
+                })
+                .collect();
+            out.panels.push(Panel {
+                origin: Vec3::new(f(&pos, "x"), f(&pos, "y"), f(&pos, "z")) * SCALE,
+                axes: panel_axes(ang.get::<f32>("p").unwrap_or(0.0), ang.get::<f32>("y").unwrap_or(0.0), ang.get::<f32>("r").unwrap_or(0.0)),
+                scale: scale * SCALE,
+                name: panel.get::<String>("name").unwrap_or_default(),
+                size: (f(&panel, "width"), f(&panel, "height")),
+                buttons,
+            });
+        }
+        if let Some(t) = tips_file.and_then(|f| std::fs::read_to_string(f).ok()) {
+            out.tips = serde_json::from_str(&t).unwrap_or_default();
+        }
+        out
+    }
+
+    /// Centre of button `id` on its panel (car space) and the panel normal.
+    pub fn button_pos(&self, id: &str) -> Option<(Vec3, Vec3)> {
+        for p in &self.panels {
+            if let Some(b) = p.buttons.iter().find(|b| b.id == id) {
+                let (cx, cy) = match b.shape {
+                    Shape::Rect { w, h } => (b.x + w / 2.0, b.y + h / 2.0),
+                    Shape::Circle { .. } => (b.x, b.y),
+                };
+                let at = p.origin + (p.axes.x_axis.truncate() * cx + p.axes.y_axis.truncate() * cy) * p.scale;
+                return Some((at, p.axes.z_axis.truncate()));
+            }
+        }
+        None
+    }
+
+    /// Panel coordinates of `point` on the panel holding `id`, with the button's own (x, y) and size.
+    pub fn debug_coords(&self, id: &str, point: Vec3) -> Option<((f32, f32), (f32, f32), String)> {
+        for p in &self.panels {
+            if let Some(b) = p.buttons.iter().find(|b| b.id == id) {
+                let rel = point - p.origin;
+                let (px, py) = (rel.dot(p.axes.x_axis.truncate()) / p.scale, rel.dot(p.axes.y_axis.truncate()) / p.scale);
+                return Some(((px, py), (b.x, b.y), format!("{} size {:?} {}", p.name, p.size, match b.shape { Shape::Rect { w, h } => format!("rect {w}x{h}"), Shape::Circle { r } => format!("circle r{r}") })));
+            }
+        }
+        None
     }
 
     pub fn button_count(&self) -> usize {

@@ -24,9 +24,11 @@ def copy_tree(src, dst, skip=()):
             shutil.copy2(p, t)
 
 
-if OUT.exists():
-    shutil.rmtree(OUT)
-OUT.mkdir(parents=True)
+OUT.mkdir(parents=True, exist_ok=True)
+for child in OUT.iterdir():
+    if child.name == ".git":
+        continue
+    shutil.rmtree(child) if child.is_dir() else child.unlink()
 
 copy_tree(ROOT / "sim", OUT / "sim", skip=("target",))
 copy_tree(ROOT / "game", OUT / "game", skip=("screenshots", "logs"))

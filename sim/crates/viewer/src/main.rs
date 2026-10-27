@@ -107,7 +107,11 @@ fn main() -> Result<()> {
         let signs = sim.signs();
         let standing: Vec<Mat4> = sim.obstacles().iter().filter_map(|&s| sim.standing_pose(s)).collect();
         let lua_root = PathBuf::from(cfg.resolve(game.as_deref(), &cfg.lua_root));
-        let panels = panels::Panels::load(&controls_path)?;
+        let tips = controls_path.parent().map(|d| d.join("tooltips_ru.json"));
+        let panels = match sim.panels(tips.as_deref()) {
+            Some(p) => p,
+            None => panels::Panels::load(&controls_path)?,
+        };
         log::info!("{} buttons on panels", panels.button_count());
         return app::run(
             Box::new(move |r| match single {
