@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Metrostroi-rs — симулятор метро на Rust</title>
+<meta name="description" content="Самостоятельный симулятор метро на Rust и wgpu: оригинальная кабина 81-717, Lua-логика Metrostroi, трасса, сигналы, станции, звук и прогулки по вагону.">
+<meta property="og:title" content="Metrostroi-rs">
+<meta property="og:description" content="Симулятор метро на Rust + wgpu с оригинальной логикой Metrostroi.">
+<meta property="og:image" content="img/tooltip.jpg">
+<link rel="icon" href="assets/favicon.png">
+<style>
+:root {
+  --bg: #0b1220; --bg2: #101a2e; --card: #14203a; --line: #22325a;
+  --text: #e8eefc; --dim: #9fb0d4; --accent: #4fb3ff; --accent2: #7ef0c4; --warn: #ffcf6b;
+  --radius: 16px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+nav {
+  position: sticky; top: 0; z-index: 10; backdrop-filter: blur(10px);
+  background: rgba(11,18,32,.78); border-bottom: 1px solid var(--line);
+}
+nav .wrap { display: flex; align-items: center; gap: 22px; height: 58px; }
+nav .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--text); }
+nav .brand img { width: 28px; height: 28px; border-radius: 7px; }
+nav .links { margin-left: auto; display: flex; gap: 18px; font-size: 14px; }
+nav .links a { color: var(--dim); }
+nav .links a:hover { color: var(--text); text-decoration: none; }
+.hero {
+  position: relative; overflow: hidden; padding: 70px 0 40px;
+  background: radial-gradient(1200px 500px at 70% -10%, rgba(79,179,255,.22), transparent 60%),
+              radial-gradient(900px 400px at 0% 0%, rgba(126,240,196,.12), transparent 55%);
+}
+.hero h1 { font-size: clamp(36px, 6vw, 64px); line-height: 1.05; margin: 0 0 14px; letter-spacing: -.02em; }
+.hero h1 span { background: linear-gradient(90deg, var(--accent), var(--accent2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero p.lead { max-width: 680px; color: var(--dim); font-size: 19px; margin: 0 0 26px; }
+.badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.badge { font-size: 13px; padding: 4px 11px; border: 1px solid var(--line); border-radius: 999px; color: var(--dim); background: var(--bg2); }
+.btns { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn { display: inline-block; padding: 12px 22px; border-radius: 12px; font-weight: 600; border: 1px solid var(--line); color: var(--text); background: var(--card); }
+.btn.primary { background: linear-gradient(135deg, #2b8cff, #19c3a0); border: 0; color: #04101f; }
+.btn:hover { text-decoration: none; filter: brightness(1.12); }
+.shot-hero { margin-top: 44px; border-radius: 20px; border: 1px solid var(--line); box-shadow: 0 30px 80px rgba(0,0,0,.55); overflow: hidden; }
+.shot-hero img { display: block; width: 100%; height: auto; }
+section { padding: 70px 0 10px; }
+h2 { font-size: clamp(26px, 4vw, 38px); margin: 0 0 8px; letter-spacing: -.01em; }
+.sub { color: var(--dim); max-width: 720px; margin: 0 0 30px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+.card h3 { margin: 0 0 6px; font-size: 18px; }
+.card p { margin: 0; color: var(--dim); font-size: 15px; }
+.card .ico { font-size: 26px; margin-bottom: 8px; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.gallery figure { margin: 0; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: var(--card); cursor: zoom-in; }
+.gallery img { display: block; width: 100%; height: auto; transition: transform .3s; }
+.gallery figure:hover img { transform: scale(1.03); }
+.gallery figcaption { padding: 12px 16px; font-size: 14px; color: var(--dim); }
+.gallery figure .imgbox { overflow: hidden; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+@media (max-width: 800px) { .cols { grid-template-columns: 1fr; } nav .links { display: none; } }
+pre {
+  background: #08101e; border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+  overflow-x: auto; font: 14px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; color: #cfe3ff; margin: 0;
+}
+code { font-family: ui-monospace, SFMono-Regular, Consolas, monospace; background: #0d1830; padding: 1px 6px; border-radius: 6px; font-size: .92em; }
+.arch { display: grid; gap: 10px; }
+.arch .row { display: flex; gap: 12px; align-items: stretch; flex-wrap: wrap; }
+.arch .box { flex: 1 1 200px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.arch .box b { display: block; color: var(--accent2); margin-bottom: 3px; }
+.arch .box small { color: var(--dim); }
+.timeline { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--line); }
+.timeline li { position: relative; padding: 0 0 16px 24px; }
+.timeline li::before { content: ""; position: absolute; left: -7px; top: 7px; width: 12px; height: 12px; border-radius: 50%; background: var(--accent2); }
+.timeline li.todo::before { background: var(--bg); border: 2px solid var(--dim); }
+.timeline li b { display: block; }
+.timeline li span { color: var(--dim); font-size: 15px; }
+table { width: 100%; border-collapse: collapse; font-size: 15px; }
+td, th { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { color: var(--dim); font-weight: 600; }
+kbd { background: #0d1830; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; font: 13px ui-monospace, Consolas, monospace; }
+.note { border: 1px solid #5b4a1c; background: #1d1809; color: var(--warn); border-radius: 12px; padding: 14px 18px; font-size: 15px; }
+footer { margin-top: 80px; padding: 30px 0 50px; border-top: 1px solid var(--line); color: var(--dim); font-size: 14px; }
+#lb { position: fixed; inset: 0; background: rgba(4,8,16,.92); display: none; align-items: center; justify-content: center; z-index: 50; padding: 24px; cursor: zoom-out; }
+#lb.on { display: flex; }
+#lb img { max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 20px 80px #000; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/logo.png" alt=""> Metrostroi-rs</a>
+    <div class="links">
+      <a href="#features">Возможности</a>
+      <a href="#gallery">Скриншоты</a>
+      <a href="#how">Как устроено</a>
+      <a href="#roadmap">План</a>
+      <a href="#build">Сборка</a>
+      <a href="https://github.com/LakoMoor/metrostroi-rs">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="wrap">
+    <h1>Симулятор метро<br><span>на Rust и wgpu</span></h1>
+    <p class="lead">Отдельная программа, которая запускает оригинальную кабину <b>81-717</b> и Lua-логику <b>Metrostroi</b> прямо из ваших файлов Steam Workshop. Все 353 кнопки работают как в игре — можно завести холодный и тёмный поезд, поехать по трассе, остановиться на станции и выйти из кабины пройтись по вагону.</p>
+    <div class="badges">
+      <span class="badge">Rust 2021</span><span class="badge">wgpu 30</span><span class="badge">Lua 5.1 (mlua)</span>
+      <span class="badge">Windows</span><span class="badge">без конвертации ассетов</span>
+    </div>
+    <div class="btns">
+      <a class="btn primary" href="#build">Собрать и запустить</a>
+      <a class="btn" href="https://github.com/LakoMoor/metrostroi-rs">GitHub</a>
+      <a class="btn" href="#gallery">Скриншоты</a>
+    </div>
+    <div class="shot-hero"><img src="img/tooltip.jpg" alt="Кабина 81-717 с подсказкой по кнопке и HUD"></div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="wrap">
+    <h2>Что уже работает</h2>
+    <p class="sub">Проект идёт по дорожной карте от просмотрщика моделей до полноценной игры. Вот что собрано сейчас.</p>
+    <div class="grid">
+      <div class="card"><div class="ico">🎛️</div><h3>Кабина 1:1</h3><p>Все 353 кнопки и тумблера нажимаются мышью и вызывают настоящие <code>ButtonEvent</code> Lua. Подсказки — русские описания из языковых файлов Metrostroi.</p></div>
+      <div class="card"><div class="ico">🚆</div><h3>Физика и ARS</h3><p>Тяга, торможение и уклон из полей тележек, которые пишет Lua. АРС-заглушка ограничивает скорость по кодам и срабатывает автостоп.</p></div>
+      <div class="card"><div class="ico">🗺️</div><h3>Трасса и мир</h3><p>Путь и знаки из данных карты, геометрия BSP с встроенными текстурами. Машина стоит в начале координат, мир движется вокруг.</p></div>
+      <div class="card"><div class="ico">🚦</div><h3>Сигналы и блоки</h3><p>Светофоры и путевые знаки расставлены по таблицам сущностей Metrostroi. Стоящий впереди поезд делает сигналы красными и жёлтыми.</p></div>
+      <div class="card"><div class="ico">🚉</div><h3>Станции</h3><p>Платформы из сущностей карты: расстояние, сторона дверей, предупреждения об открытых дверях и точность остановки.</p></div>
+      <div class="card"><div class="ico">🔊</div><h3>Звук</h3><p>Циклы и одиночные звуки из Lua (пневматика, реле, компрессор, качение колёс) играются из ваших Workshop-паков.</p></div>
+      <div class="card"><div class="ico">🚶</div><h3>Ходьба и коллизии</h3><p>Встаньте с кресла и ходите по салону; через открытую дверь выходите на платформу. Стены карты и вагона не пускают.</p></div>
+      <div class="card"><div class="ico">🧭</div><h3>Меню и HUD</h3><p>Главное меню, пауза, настройки (FOV, мышь, громкость), справка, скорость, лимит АРС и следующий сигнал.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="gallery">
+  <div class="wrap">
+    <h2>Скриншоты</h2>
+    <p class="sub">Снято в самой программе. Нажмите, чтобы увеличить. Поверхности карты без текстур Half-Life 2 пока закрашены цветом-заменителем.</p>
+    <div class="gallery">
+      <figure><div class="imgbox"><img loading="lazy" src="img/tooltip.jpg" alt=""></div><figcaption><b>Кабина</b> — подсказка у кнопки, HUD станции и скорости</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/signals.jpg" alt=""></div><figcaption><b>Сигналы и блок</b> — светофоры впереди и стоящий состав за ними</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/salon.jpg" alt=""></div><figcaption><b>Салон</b> — прогулка по вагону от первого лица</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/orbit.jpg" alt=""></div><figcaption><b>Вид снаружи</b> — 81-717 с оригинальным скином из Lua</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/menu.jpg" alt=""></div><figcaption><b>Главное меню</b> — начать с нуля или быстрый старт</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/pause.jpg" alt=""></div><figcaption><b>Пауза</b> — сброс автостопа, поезд в начало, настройки</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/help.jpg" alt=""></div><figcaption><b>Управление</b> — все клавиши в одном месте</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section id="how">
+  <div class="wrap">
+    <h2>Как это устроено</h2>
+    <p class="sub">Смешанная схема: ядро (физика, рендер, ввод) на Rust, системы поезда — оригинальный Lua Metrostroi поверх тонкой прослойки GMod API.</p>
+    <div class="arch">
+      <div class="row">
+        <div class="box"><b>formats</b>GMA и VFS, MDL/VVD/VTX, VTF/VMT, BSP с сущностями и встроенным архивом<br><small>читает Workshop-паки напрямую</small></div>
+        <div class="box"><b>lua</b>mlua 5.1 + <code>gmod.lua</code>/<code>entity.lua</code><br><small>171 из 172 системы загружаются, сущность 717 создаётся целиком</small></div>
+        <div class="box"><b>viewer</b>окно winit, wgpu-рендер, ввод, HUD, меню<br><small>динамика, трасса, станции, сигналы, звук</small></div>
+      </div>
+      <div class="row">
+        <div class="box"><b>Физика</b>Одномерная модель: масса, тяга и тормоз из полей тележек Lua, уклон по трассе</div>
+        <div class="box"><b>Мир</b>Поезд в начале координат, карта сдвигается; ARS-код приходит от ближайшего светофора</div>
+        <div class="box"><b>Звук</b>rodio: циклы с громкостью и высотой, случайные одиночные звуки</div>
+      </div>
+    </div>
+    <div class="cols" style="margin-top:28px">
+      <div>
+        <h3>Управление</h3>
+        <table>
+          <tr><td><kbd>Мышь</kbd></td><td>нажать кнопку, перетаскивание — осмотр</td></tr>
+          <tr><td><kbd>F2</kbd> <kbd>F3</kbd> <kbd>F4</kbd></td><td>снаружи · кабина · встать/сесть</td></tr>
+          <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> <kbd>Shift</kbd></td><td>ходьба (двери — KDL/KDP)</td></tr>
+          <tr><td><kbd>F5</kbd> · <kbd>F6</kbd></td><td>быстрый запуск · сброс автостопа</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>меню паузы</td></tr>
+        </table>
+      </div>
+      <div>
+        <h3>Холодный и тёмный</h3>
+        <p style="color:var(--dim);margin-top:0">Поезд стартует обесточенным. Включите батарею и автоматы, откройте краны машиниста, поставьте реверсор и КВ — и поезд поедет. Подробный порядок — в <code>game/docs/COLD_AND_DARK.md</code>.</p>
+        <p style="color:var(--dim)">Или нажмите <kbd>F5</kbd> и посмотрите, как скрипт проходит процедуру за вас.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="wrap">
+    <h2>Дорожная карта</h2>
+    <p class="sub">Сделано и что дальше.</p>
+    <div class="cols">
+      <ul class="timeline">
+        <li><b>Форматы и рендер</b><span>GMA, MDL со скелетами, VTF, wgpu, скиннинг</span></li>
+        <li><b>Lua-хост и кабина</b><span>353/353 кнопки, анимации из оригинального cl_init</span></li>
+        <li><b>Динамика, трасса, АРС</b><span>езда по карте crossline_c4, автостоп</span></li>
+        <li><b>BSP-мир, сигналы, знаки</b><span>светофоры и таблички по таблицам Metrostroi</span></li>
+        <li><b>Блоки, станции, двери</b><span>стоящий поезд, платформы, предупреждения</span></li>
+        <li><b>Звук, меню, HUD</b><span>циклы и одиночные звуки, настройки</span></li>
+        <li><b>Ходьба и коллизии</b><span>салон, выход через двери, стены</span></li>
+      </ul>
+      <ul class="timeline">
+        <li class="todo"><b>Движущиеся ИИ-поезда и стрелки</b><span>нужна связность путей</span></li>
+        <li class="todo"><b>Лайтмапы, статик-пропы, небо</b><span>сейчас мир закрашен заменителями</span></li>
+        <li class="todo"><b>Названия станций и объявления</b></li>
+        <li class="todo"><b>Настоящая цепочка БАРС</b><span>вместо заглушки</span></li>
+        <li class="todo"><b>Составы из нескольких вагонов</b></li>
+        <li class="todo"><b>Второй тип поезда</b><span>доказать, что загрузчик не привязан к 717</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="build">
+  <div class="wrap">
+    <h2>Сборка и запуск</h2>
+    <p class="sub">Нужны Windows, Rust (MSVC), видеокарта с Vulkan/DX12 и ваши подписки на контент Metrostroi в Steam Workshop.</p>
+    <div class="note" style="margin-bottom:20px"><b>Про ассеты.</b> Модели, текстуры и звуки Metrostroi принадлежат их авторам, поэтому в репозиторий и на этот сайт они не включены. Программа читает их из вашей установки Steam Workshop (GMod, appid 4000) во время запуска; на скриншотах — кадры из самой программы.</div>
+<pre>git clone https://github.com/LakoMoor/metrostroi-rs
+cd metrostroi-rs
+
+# 1) укажите путь к Workshop в game/config/game.json:
+#    "workshop": "C:/Program Files (x86)/Steam/steamapps/workshop/content/4000"
+
+# 2) сборка и запуск
+cd sim
+cargo build --release -p viewer
+target/release/metrostroi-rs.exe --cab --at 300
+
+# параметры: --nomenu  --block &lt;м&gt;  --noworld  --shot out.png</pre>
+    <p class="sub" style="margin-top:18px">Номера Workshop-паков перечислены в <code>game/config/game.json</code>. Подробная инструкция и заметки для ИИ-агентов (Codex, Claude Code) — в <code>SETUP.md</code>, <code>AGENTS.md</code> и <code>CLAUDE.md</code>.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    Metrostroi-rs — неофициальный проект, не связан с авторами Metrostroi и Garry's Mod. Идеи архитектуры — из openOMSI (AGPL-3.0), код не копировался.
+  </div>
+</footer>
+
+<div id="lb"><img alt=""></div>
+<script>
+  const lb = document.getElementById('lb'), lbi = lb.querySelector('img');
+  document.querySelectorAll('.gallery figure, .shot-hero').forEach(f => f.addEventListener('click', () => {
+    lbi.src = f.querySelector('img').src; lb.classList.add('on');
+  }));
+  lb.addEventListener('click', () => lb.classList.remove('on'));
+  addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('on'); });
+</script>
+</body>
+</html>

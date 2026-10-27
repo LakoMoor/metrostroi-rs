@@ -1,0 +1,29 @@
+{
+  "workshop": "C:/Program Files (x86)/Steam/steamapps/workshop/content/4000",
+  "packs": [
+    "1812142201",
+    "1095094174",
+    "1095098251",
+    "1095100683",
+    "1095105863",
+    "1095109617",
+    "1095111608",
+    "1973160540",
+    "261801217"
+  ],
+  "lua_root": "lua",
+  "train": "gmod_subway_81-717_mvm",
+  "controls": "content/trains/81-717_mvm/controls.json",
+  "map": "content/maps/crossline_c4",
+  "window": {
+    "width": 1600,
+    "height": 900,
+    "vsync": true
+  },
+  "audio": {
+    "master": 0.8,
+    "music": 0.5,
+    "cab": 1.0
+  },
+  "keys": {}
+}

@@ -1,0 +1,761 @@
+//! Interactive window: orbit camera outside (key 1), driver's eye in the cab (key 2).
+
+use crate::menu::{Action, Menu, Screen};
+use crate::panels::Panels;
+use crate::sim::Sim;
+use crate::ui::Ui;
+use crate::renderer::{self, Renderer, Scene};
+use anyhow::Result;
+use glam::{Mat4, Vec3};
+use std::sync::Arc;
+use winit::application::ApplicationHandler;
+use winit::dpi::LogicalSize;
+use winit::event::{ElementState, MouseButton, MouseScrollDelta, WindowEvent};
+use winit::event_loop::{ActiveEventLoop, EventLoop};
+use winit::keyboard::{KeyCode, PhysicalKey};
+use winit::window::{Window, WindowId};
+
+/// Driver's eye in car space, metres (Source axes: X forward, Y left, Z up).
+/// Height of the car body origin over the rail head, metres.
+const CAR_ABOVE_RAIL: f32 = 1.9;
+/// Standing eye height above the feet, metres.
+const EYE_HEIGHT: f32 = 1.7;
+/// Car floor in car space, and the interior / outer-wall half-widths and half-length (metres).
+const FLOOR_Z: f32 = -0.85;
+const INNER_Y: f32 = 1.25;
+const OUTER_Y: f32 = 1.45;
+const HALF_LEN: f32 = 9.2;
+/// Passenger door centres along the car (metres) and their half-width.
+const DOOR_X: [f32; 4] = [-6.6, -2.2, 2.2, 6.6];
+const DOOR_HALF: f32 = 0.7;
+/// Driver's eye in Source units of the car model.
+const CAB_EYE: Vec3 = Vec3::new(403.5 * crate::renderer::SCALE, -4.72 * crate::renderer::SCALE, 11.02 * crate::renderer::SCALE);
+
+#[derive(Clone, Copy, PartialEq)]
+enum Mode {
+    Orbit,
+    Cab,
+    /// On foot outside the train.
+    Walk,
+}
+
+struct Camera {
+    mode: Mode,
+    // orbit
+    center: Vec3,
+    radius: f32,
+    yaw: f32,
+    pitch: f32,
+    dist: f32,
+    // cab look direction (yaw 0 = looking along +X)
+    cab_yaw: f32,
+    cab_pitch: f32,
+    /// head offset from the driver's seat, metres (arrows / PgUp / PgDn)
+    head: Vec3,
+    // on foot: feet position in car space, heading (0 = +X) and pitch; `world` maps map space to car space
+    walk_pos: Vec3,
+    walk_yaw: f32,
+    walk_pitch: f32,
+    world: Mat4,
+}
+
+impl Camera {
+    fn view_proj(&self, aspect: f32, fov: f32) -> Mat4 {
+        match self.mode {
+            Mode::Orbit => renderer::orbit_view_proj(self.center, self.radius, self.yaw, self.pitch, self.dist, aspect),
+            Mode::Cab => {
+                let dir = Vec3::new(
+                    self.cab_yaw.cos() * self.cab_pitch.cos(),
+                    self.cab_yaw.sin() * self.cab_pitch.cos(),
+                    self.cab_pitch.sin(),
+                );
+                let view = Mat4::look_to_rh(CAB_EYE + self.head, dir, Vec3::Z);
+                Mat4::perspective_rh(fov.to_radians(), aspect, 0.03, 200.0) * view
+            }
+            Mode::Walk => {
+                let dir = Vec3::new(
+                    self.walk_yaw.cos() * self.walk_pitch.cos(),
+                    self.walk_yaw.sin() * self.walk_pitch.cos(),
+                    self.walk_pitch.sin(),
+                );
+                let view = Mat4::look_to_rh(self.walk_pos + Vec3::Z * EYE_HEIGHT, dir, Vec3::Z);
+                Mat4::perspective_rh(fov.to_radians(), aspect, 0.03, 400.0) * view
+            }
+        }
+    }
+}
+
+/// Where the feet end up if they move to `p` (car space): the car floor inside, through an open door
+/// and the map ground outside. `None` = blocked by a wall or an edge.
+fn floor_at(p: Vec3, z: f32, doors: (bool, bool), ground: &Option<crate::ground::Ground>, world: Mat4) -> Option<f32> {
+    if p.x.abs() < HALF_LEN && p.y.abs() < OUTER_Y {
+        if p.y.abs() < INNER_Y {
+            return Some(FLOOR_Z);
+        }
+        // in the wall: only through an open door on that side
+        let open = if p.y > 0.0 { doors.0 } else { doors.1 };
+        return (open && DOOR_X.iter().any(|d| (p.x - d).abs() < DOOR_HALF)).then_some(FLOOR_Z);
+    }
+    let g = ground.as_ref()?;
+    // ground height in map space, brought back to car space; a step of half a metre at most
+    let inv = world.inverse();
+    let m = inv.transform_point3(Vec3::new(p.x, p.y, z));
+    let h = g.height(m.x, m.y, m.z + 0.5)?;
+    Some(world.transform_point3(Vec3::new(m.x, m.y, h)).z)
+}
+
+struct Gfx {
+    window: Arc<Window>,
+    surface: wgpu::Surface<'static>,
+    config: wgpu::SurfaceConfiguration,
+    renderer: Renderer,
+    depth: wgpu::TextureView,
+    ui: Ui,
+}
+
+struct App {
+    vfs_scene: Option<Box<dyn FnOnce(&Renderer) -> Result<Scene>>>,
+    gfx: Option<Gfx>,
+    scene: Option<Scene>,
+    signals: Option<crate::signals::Signals>,
+    camera: Option<Camera>,
+    dragging: bool,
+    last_cursor: Option<(f64, f64)>,
+    start_cab: bool,
+    panels: Panels,
+    hovered: Option<String>,
+    sim: Option<Sim>,
+    names: std::collections::HashMap<String, usize>,
+    last_tick: std::time::Instant,
+    cursor: (f64, f64),
+    press_at: (f64, f64),
+    frames: u64,
+    held: Option<String>,
+    ground: Option<crate::ground::Ground>,
+    /// W, S, A, D, Shift while walking
+    move_keys: [bool; 5],
+    /// Description of the cab button under the cursor.
+    tip: Option<(String, Vec3)>,
+    /// forward, back, left, right, up, down
+    head_keys: [bool; 6],
+    menu: Menu,
+    make_sim: Box<dyn Fn() -> Result<Sim>>,
+    audio: Option<crate::audio::Audio>,
+}
+
+impl App {
+    fn init(&mut self, el: &ActiveEventLoop) -> Result<()> {
+        let window = Arc::new(
+            el.create_window(
+                Window::default_attributes()
+                    .with_title("Metrostroi-rs")
+                    .with_window_icon(window_icon())
+                    .with_inner_size(LogicalSize::new(1600.0, 900.0)),
+            )?,
+        );
+        let instance = wgpu::Instance::new(wgpu::InstanceDescriptor::new_without_display_handle());
+        let surface = instance.create_surface(window.clone())?;
+        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::HighPerformance,
+            compatible_surface: Some(&surface),
+            ..Default::default()
+        }))?;
+        log::info!("adapter: {}", adapter.get_info().name);
+        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))?;
+        let size = window.inner_size();
+        let mut config = surface
+            .get_default_config(&adapter, size.width.max(1), size.height.max(1))
+            .ok_or_else(|| anyhow::anyhow!("surface not supported by adapter"))?;
+        let caps = surface.get_capabilities(&adapter);
+        if let Some(f) = caps.formats.iter().copied().find(|f| f.is_srgb()) {
+            config.format = f;
+        }
+        config.present_mode = wgpu::PresentMode::AutoVsync;
+        surface.configure(&device, &config);
+
+        let renderer = Renderer::new(device, queue, config.format);
+        let depth = renderer.depth_view(config.width, config.height);
+        let load = self.vfs_scene.take().expect("scene loader");
+        let scene = load(&renderer)?;
+        let (mn, mx) = scene.bounds();
+        let radius = (mx - mn).length() * 0.5;
+        self.camera = Some(Camera {
+            mode: if self.start_cab { Mode::Cab } else { Mode::Orbit },
+            center: (mn + mx) * 0.5,
+            radius,
+            yaw: -0.8,
+            pitch: 0.35,
+            dist: radius * 2.4,
+            cab_yaw: 0.0,
+            cab_pitch: -0.25,
+            head: Vec3::ZERO,
+            walk_pos: Vec3::ZERO,
+            walk_yaw: 0.0,
+            walk_pitch: 0.0,
+            world: Mat4::IDENTITY,
+        });
+        let mut scene = scene;
+        crate::car::reset_poses(&renderer, &mut scene);
+        self.names = crate::car::index(&scene);
+        self.signals = crate::signals::take();
+        self.ground = crate::ground::take();
+        self.scene = Some(scene);
+        let ui = Ui::new(&renderer.device, &renderer.queue, config.format);
+        self.gfx = Some(Gfx { window, surface, config, renderer, depth, ui });
+        Ok(())
+    }
+
+    /// Click on a panel button: flip its latched state and report it in the title.
+    fn cursor_hit(&self) -> Option<crate::panels::Hit> {
+        let (g, cam) = (self.gfx.as_ref()?, self.camera.as_ref()?);
+        if cam.mode == Mode::Orbit {
+            return None;
+        }
+        let (w, h) = (g.config.width as f32, g.config.height as f32);
+        let ndc = glam::Vec2::new(self.cursor.0 as f32 / w * 2.0 - 1.0, 1.0 - self.cursor.1 as f32 / h * 2.0);
+        let inv = cam.view_proj(w / h, self.menu.settings.fov).inverse();
+        let (near, far) = (inv.project_point3(ndc.extend(0.0)), inv.project_point3(ndc.extend(1.0)));
+        let hidden = self.sim.as_ref().map(|s| s.hidden_buttons()).unwrap_or_default();
+        self.panels.pick(near, (far - near).normalize(), &hidden)
+    }
+
+    /// Show the button under the cursor in the window title.
+    fn hover(&mut self) {
+        if self.menu.screen != Screen::Playing {
+            self.menu.hover(self.cursor.0 as f32, self.cursor.1 as f32);
+            return;
+        }
+        let hit = self.cursor_hit();
+        let id = hit.as_ref().map(|h| h.id.clone());
+        log::debug!("cursor {:?} -> {:?}", self.cursor, id);
+        if id == self.hovered {
+            return;
+        }
+        if let Some(g) = &self.gfx {
+            g.window.set_title(&match &hit {
+                Some(h) => format!("Metrostroi-rs | {} {}", h.id, h.tooltip),
+                None => "Metrostroi-rs".to_string(),
+            });
+        }
+        self.hovered = id;
+    }
+
+    fn click(&mut self) {
+        let Some(hit) = self.cursor_hit() else { return };
+        let Some(g) = &self.gfx else { return };
+        let on = self.panels.toggle(&hit.id);
+        let value = self.sim.as_ref().and_then(|s| s.press(&hit.id));
+        let st = value.unwrap_or_else(|| if on { "ON".into() } else { "off".into() });
+        log::info!("button {} -> {} {}", hit.id, st, hit.tooltip);
+        g.window.set_title(&format!("Metrostroi-rs | {} = {} {}", hit.id, st, hit.tooltip));
+    }
+
+    fn handle_action(&mut self, el: &ActiveEventLoop, act: Action) {
+        match act {
+            Action::None | Action::Resume => {}
+            Action::Quit => el.exit(),
+            Action::Start { quick } => {
+                if quick {
+                    if let Some(s) = &self.sim {
+                        s.quick_start();
+                    }
+                }
+            }
+            Action::QuickStart => {
+                if let Some(s) = &self.sim {
+                    s.quick_start();
+                }
+            }
+            Action::ResetAutostop => {
+                if let Some(s) = &self.sim {
+                    s.reset_autostop();
+                }
+            }
+            Action::ResetTrain | Action::ToMain => match (self.make_sim)() {
+                Ok(s) => {
+                    self.sim = Some(s);
+                    if let Some(a) = &mut self.audio {
+                        a.restart();
+                    }
+                    if let (Some(g), Some(scene)) = (&self.gfx, &mut self.scene) {
+                        scene.last_pose.clear();
+                        crate::car::reset_poses(&g.renderer, scene);
+                    }
+                    self.panels.state.clear();
+                }
+                Err(e) => log::error!("reset: {e:#}"),
+            },
+        }
+    }
+
+    fn redraw(&mut self) {
+        let now = std::time::Instant::now();
+        let dt = now.duration_since(self.last_tick).as_secs_f32().min(0.1);
+        self.last_tick = now;
+        let playing = self.menu.screen == Screen::Playing;
+        // the tag belongs to the button under the cursor *now* (the camera may have moved since the mouse did)
+        self.tip = if playing {
+            self.cursor_hit().map(|h| (if h.tooltip.is_empty() { h.id.clone() } else { h.tooltip.clone() }, h.pos))
+        } else {
+            None
+        };
+        if let (Some(s), Some(g), Some(scene)) = (&self.sim, &self.gfx, &mut self.scene) {
+            if playing {
+                s.tick(dt);
+            }
+            if let Some(a) = &mut self.audio {
+                if playing {
+                    let (loops, once) = s.sounds();
+                    a.update(&loops, &once, self.menu.settings.volume);
+                } else {
+                    a.silence();
+                }
+            }
+            if let Some(cam) = self.camera.as_mut().filter(|c| playing && c.mode == Mode::Cab) {
+                let k = |i: usize| self.head_keys[i] as i32 as f32;
+                let fwd = Vec3::new(cam.cab_yaw.cos(), cam.cab_yaw.sin(), 0.0);
+                let right = Vec3::new(cam.cab_yaw.sin(), -cam.cab_yaw.cos(), 0.0);
+                let d = fwd * (k(0) - k(1)) + right * (k(3) - k(2)) + Vec3::Z * (k(4) - k(5));
+                cam.head = (cam.head + d * 0.6 * dt).clamp(Vec3::new(-1.2, -1.2, -0.5), Vec3::new(1.2, 1.2, 0.5));
+            }
+            if let Some(cam) = self.camera.as_mut().filter(|c| playing && c.mode == Mode::Walk) {
+                let k = |i: usize| self.move_keys[i] as i32 as f32;
+                let fwd = Vec3::new(cam.walk_yaw.cos(), cam.walk_yaw.sin(), 0.0);
+                let right = Vec3::new(cam.walk_yaw.sin(), -cam.walk_yaw.cos(), 0.0);
+                let d = fwd * (k(0) - k(1)) + right * (k(3) - k(2));
+                let mut np = cam.walk_pos;
+                if d.length() > 0.0 {
+                    np += d.normalize() * if self.move_keys[4] { 4.5 } else { 1.6 } * dt;
+                }
+                let doors = s.doors_open();
+                let cur = cam.walk_pos;
+                let inv = cam.world.inverse();
+                // the full step first, then sliding along either axis
+                for c in [np, Vec3::new(np.x, cur.y, cur.z), Vec3::new(cur.x, np.y, cur.z)] {
+                    let Some(z) = floor_at(c, cur.z, doors, &self.ground, cam.world) else { continue };
+                    let feet = Vec3::new(c.x, c.y, z);
+                    if self.ground.as_ref().is_some_and(|g| g.blocked(inv.transform_point3(feet), 0.3)) {
+                        continue;
+                    }
+                    cam.walk_pos = feet;
+                    break;
+                }
+            }
+            self.frames += 1;
+            crate::car::apply_state(&g.renderer, scene, &self.names, &s.state());
+            // the train stays at the origin; the map moves around it
+            if let (Some((pos, dir)), Some(w)) = (s.world_pose(), scene.objects.iter_mut().find(|o| o.name == "world")) {
+                let x = dir.normalize_or_zero();
+                let y = Vec3::Z.cross(x).normalize_or_zero();
+                let z = x.cross(y);
+                // the car's origin sits this far above the rails
+                let origin = pos + Vec3::Z * CAR_ABOVE_RAIL;
+                w.transform = Mat4::from_cols(x.extend(0.0), y.extend(0.0), z.extend(0.0), origin.extend(1.0)).inverse();
+                // from outside the car the tunnel walls would hide it; the map is for the cab view
+                w.visible = self.camera.as_ref().is_some_and(|c| c.mode != Mode::Orbit);
+                if let Some(c) = self.camera.as_mut() {
+                    c.world = w.transform;
+                }
+                if let Some(sg) = &self.signals {
+                    let (xf, show) = (w.transform, w.visible);
+                    sg.update(scene, xf, pos, show, &|g| s.aspect(g));
+                }
+            }
+        }
+        let (Some(g), Some(scene), Some(cam)) = (&mut self.gfx, &self.scene, &self.camera) else { return };
+        let frame = match g.surface.get_current_texture() {
+            wgpu::CurrentSurfaceTexture::Success(t) | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
+            wgpu::CurrentSurfaceTexture::Outdated | wgpu::CurrentSurfaceTexture::Lost => {
+                g.surface.configure(&g.renderer.device, &g.config);
+                return;
+            }
+            _ => return,
+        };
+        let view = frame.texture.create_view(&Default::default());
+        let aspect = g.config.width as f32 / g.config.height as f32;
+        g.renderer.render(scene, cam.view_proj(aspect, self.menu.settings.fov), &view, &g.depth);
+        g.ui.screen = (g.config.width as f32, g.config.height as f32);
+        if self.menu.screen == Screen::Playing {
+            let (sw, sh) = g.ui.screen;
+            if cam.mode == Mode::Walk {
+                g.ui.rect(sw / 2.0 - 2.0, sh / 2.0 - 2.0, 4.0, 4.0, [1.0, 1.0, 1.0, 0.8]);
+            }
+            if let (Some((tip, at)), true) = (&self.tip, cam.mode != Mode::Orbit) {
+                // anchored to the button on its panel: project it through the current camera
+                let c = cam.view_proj(aspect, self.menu.settings.fov).project_point3(*at);
+                if c.z > 0.0 && c.z < 1.0 && c.x.abs() < 1.2 && c.y.abs() < 1.2 {
+                    let (bx, by) = ((c.x + 1.0) / 2.0 * sw, (1.0 - c.y) / 2.0 * sh);
+                    let w = g.ui.text_width(tip, 22.0);
+                    let tx = (bx - w / 2.0).clamp(8.0, (sw - w - 8.0).max(8.0));
+                    let ty = (by - 52.0).max(8.0);
+                    g.ui.rect(tx - 8.0, ty - 4.0, w + 16.0, 32.0, [0.0, 0.0, 0.0, 0.85]);
+                    g.ui.rect(bx - 1.0, ty + 28.0, 2.0, (by - ty - 28.0 - 6.0).max(0.0), [1.0, 1.0, 1.0, 0.7]);
+                    g.ui.text(tx, ty, 22.0, tip, [1.0, 1.0, 1.0, 1.0]);
+                }
+            }
+            if self.menu.settings.hud {
+                if let Some(s) = &self.sim {
+                    draw_hud(&mut g.ui, s);
+                }
+            }
+        } else {
+            self.menu.draw(&mut g.ui);
+        }
+        g.ui.flush(&g.renderer.device, &g.renderer.queue, &view);
+        g.window.pre_present_notify();
+        g.renderer.queue.present(frame);
+    }
+}
+
+impl ApplicationHandler for App {
+    fn resumed(&mut self, el: &ActiveEventLoop) {
+        if self.gfx.is_none() {
+            if let Err(e) = self.init(el) {
+                log::error!("init failed: {e:#}");
+                el.exit();
+            }
+        }
+    }
+
+    fn window_event(&mut self, el: &ActiveEventLoop, _id: WindowId, event: WindowEvent) {
+        match event {
+            WindowEvent::CloseRequested => el.exit(),
+            WindowEvent::Resized(s) => {
+                if let Some(g) = &mut self.gfx {
+                    g.config.width = s.width.max(1);
+                    g.config.height = s.height.max(1);
+                    g.surface.configure(&g.renderer.device, &g.config);
+                    g.depth = g.renderer.depth_view(g.config.width, g.config.height);
+                }
+            }
+            WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {
+                if self.menu.screen != Screen::Playing {
+                    if state == ElementState::Pressed {
+                        let act = self.menu.click(self.cursor.0 as f32, self.cursor.1 as f32);
+                        self.handle_action(el, act);
+                    }
+                    return;
+                }
+                if state == ElementState::Pressed {
+                    // pressing on a cab button holds it until the mouse is released
+                    if let Some(hit) = self.cursor_hit() {
+                        let on = self.panels.toggle(&hit.id);
+                        let value = self.sim.as_ref().and_then(|s| s.button(&hit.id, true));
+                        let st = value.unwrap_or_else(|| if on { "ON".into() } else { "off".into() });
+                        log::info!("button {} -> {} {}", hit.id, st, hit.tooltip);
+                        if let Some(g) = &self.gfx {
+                            g.window.set_title(&format!("Metrostroi-rs | {} = {} {}", hit.id, st, hit.tooltip));
+                        }
+                        self.held = Some(hit.id);
+                        return;
+                    }
+                } else if let Some(id) = self.held.take() {
+                    if let Some(s) = &self.sim {
+                        s.button(&id, false);
+                    }
+                    return;
+                }
+                self.dragging = state == ElementState::Pressed;
+                if self.dragging {
+                    self.press_at = self.cursor;
+                } else {
+                    self.last_cursor = None;
+                }
+            }
+            WindowEvent::CursorMoved { position, .. } => {
+                let sens = self.menu.settings.mouse;
+                if let (true, Some((lx, ly)), Some(cam)) = (self.dragging, self.last_cursor, &mut self.camera) {
+                    let (dx, dy) = ((position.x - lx) as f32, (position.y - ly) as f32);
+                    match cam.mode {
+                        Mode::Orbit => {
+                            cam.yaw -= dx * 0.006;
+                            cam.pitch = (cam.pitch + dy * 0.006).clamp(-1.5, 1.5);
+                        }
+                        Mode::Walk => {
+                            cam.walk_yaw -= dx * 0.004 * sens;
+                            cam.walk_pitch = (cam.walk_pitch - dy * 0.004 * sens).clamp(-1.5, 1.5);
+                        }
+                        Mode::Cab => {
+                            cam.cab_yaw -= dx * 0.004 * sens;
+                            cam.cab_pitch = (cam.cab_pitch - dy * 0.004 * sens).clamp(-1.4, 1.4);
+                        }
+                    }
+                }
+                self.last_cursor = Some((position.x, position.y));
+                self.cursor = (position.x, position.y);
+                if !self.dragging {
+                    self.hover();
+                }
+            }
+            WindowEvent::MouseWheel { delta, .. } => {
+                let y = match delta {
+                    MouseScrollDelta::LineDelta(_, y) => y,
+                    MouseScrollDelta::PixelDelta(p) => p.y as f32 / 40.0,
+                };
+                if let Some(cam) = &mut self.camera {
+                    if cam.mode == Mode::Orbit {
+                        cam.dist = (cam.dist * (1.0 - y * 0.1)).clamp(cam.radius * 0.05, cam.radius * 12.0);
+                    }
+                }
+            }
+            WindowEvent::KeyboardInput { event, .. } => {
+                let down = event.state == ElementState::Pressed;
+                if self.menu.screen != Screen::Playing {
+                    if let (true, PhysicalKey::Code(code)) = (down, event.physical_key) {
+                        let act = self.menu.key(code);
+                        self.handle_action(el, act);
+                    }
+                    return;
+                }
+                if let (true, PhysicalKey::Code(KeyCode::Escape)) = (down, event.physical_key) {
+                    // release anything held before pausing
+                    if let (Some(id), Some(s)) = (self.held.take(), &self.sim) {
+                        s.button(&id, false);
+                    }
+                    self.head_keys = [false; 6];
+                    self.menu.escape();
+                    return;
+                }
+                if let (PhysicalKey::Code(code), Some(cam)) = (event.physical_key, &mut self.camera) {
+                    if cam.mode == Mode::Walk {
+                        let k = match code {
+                            KeyCode::KeyW => Some(0),
+                            KeyCode::KeyS => Some(1),
+                            KeyCode::KeyA => Some(2),
+                            KeyCode::KeyD => Some(3),
+                            KeyCode::ShiftLeft | KeyCode::ShiftRight => Some(4),
+                            _ => None,
+                        };
+                        if let Some(i) = k {
+                            self.move_keys[i] = down;
+                            return;
+                        }
+                    }
+                    let slot = match code {
+                        KeyCode::ArrowUp => Some(0),
+                        KeyCode::ArrowDown => Some(1),
+                        KeyCode::ArrowLeft => Some(2),
+                        KeyCode::ArrowRight => Some(3),
+                        KeyCode::PageUp => Some(4),
+                        KeyCode::PageDown => Some(5),
+                        _ => None,
+                    };
+                    if let Some(i) = slot {
+                        self.head_keys[i] = down;
+                        return;
+                    }
+                    if let (true, KeyCode::Home) = (down, code) {
+                        cam.head = Vec3::ZERO;
+                        cam.cab_yaw = 0.0;
+                        cam.cab_pitch = -0.25;
+                        return;
+                    }
+                    match code {
+                        KeyCode::F2 if down => {
+                            cam.mode = Mode::Orbit;
+                            self.move_keys = [false; 5];
+                        }
+                        KeyCode::F3 if down => {
+                            cam.mode = Mode::Cab;
+                            self.move_keys = [false; 5];
+                        }
+                        KeyCode::F4 if down => {
+                            if cam.mode == Mode::Walk {
+                                // sit back down if the seat is within reach
+                                let seat = CAB_EYE + cam.head;
+                                if (cam.walk_pos.truncate() - seat.truncate()).length() < 1.2 {
+                                    cam.cab_yaw = cam.walk_yaw;
+                                    cam.cab_pitch = cam.walk_pitch;
+                                    cam.mode = Mode::Cab;
+                                    self.move_keys = [false; 5];
+                                }
+                            } else {
+                                // stand up from the driver's seat
+                                let seat = CAB_EYE + cam.head;
+                                cam.walk_pos = Vec3::new(seat.x - 0.35, seat.y, FLOOR_Z);
+                                cam.walk_yaw = cam.cab_yaw;
+                                cam.walk_pitch = cam.cab_pitch;
+                                cam.mode = Mode::Walk;
+                            }
+                        }
+                        KeyCode::F6 if down => {
+                            if let Some(s) = &self.sim {
+                                s.reset_autostop();
+                            }
+                        }
+                        KeyCode::F5 if down => {
+                            if let Some(s) = &self.sim {
+                                log::info!("quick start");
+                                s.quick_start();
+                            }
+                        }
+                        _ => {
+                            if let (Some(name), Some(s), true) = (gmod_key_name(code), &self.sim, cam.mode != Mode::Walk) {
+                                if !event.repeat {
+                                    s.key(name, down);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            WindowEvent::RedrawRequested => {
+                self.redraw();
+                if let Some(g) = &self.gfx {
+                    g.window.request_redraw();
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
+/// winit key -> the suffix of GMod's `KEY_*` constant.
+fn gmod_key_name(code: KeyCode) -> Option<&'static str> {
+    use KeyCode::*;
+    Some(match code {
+        Digit0 => "0", Digit1 => "1", Digit2 => "2", Digit3 => "3", Digit4 => "4",
+        Digit5 => "5", Digit6 => "6", Digit7 => "7", Digit8 => "8", Digit9 => "9",
+        KeyA => "A", KeyB => "B", KeyC => "C", KeyD => "D", KeyE => "E", KeyF => "F", KeyG => "G",
+        KeyH => "H", KeyI => "I", KeyJ => "J", KeyK => "K", KeyL => "L", KeyM => "M", KeyN => "N",
+        KeyO => "O", KeyP => "P", KeyQ => "Q", KeyR => "R", KeyS => "S", KeyT => "T", KeyU => "U",
+        KeyV => "V", KeyW => "W", KeyX => "X", KeyY => "Y", KeyZ => "Z",
+        Numpad0 => "PAD_0", Numpad1 => "PAD_1", Numpad2 => "PAD_2", Numpad3 => "PAD_3", Numpad4 => "PAD_4",
+        Numpad5 => "PAD_5", Numpad6 => "PAD_6", Numpad7 => "PAD_7", Numpad8 => "PAD_8", Numpad9 => "PAD_9",
+        NumpadDivide => "PAD_DIVIDE", NumpadMultiply => "PAD_MULTIPLY", NumpadSubtract => "PAD_MINUS",
+        NumpadAdd => "PAD_PLUS", NumpadEnter => "PAD_ENTER", NumpadDecimal => "PAD_DECIMAL",
+        BracketLeft => "LBRACKET", BracketRight => "RBRACKET", Semicolon => "SEMICOLON", Quote => "APOSTROPHE",
+        Backquote => "BACKQUOTE", Comma => "COMMA", Period => "PERIOD", Slash => "SLASH", Backslash => "BACKSLASH",
+        Minus => "MINUS", Equal => "EQUAL", Enter => "ENTER", Space => "SPACE", Backspace => "BACKSPACE", Tab => "TAB",
+        CapsLock => "CAPSLOCK", Insert => "INSERT", Delete => "DELETE", Home => "HOME", End => "END",
+        PageUp => "PAGEUP", PageDown => "PAGEDOWN",
+        ShiftLeft => "LSHIFT", ShiftRight => "RSHIFT", AltLeft => "LALT", AltRight => "RALT",
+        ControlLeft => "LCONTROL", ControlRight => "RCONTROL",
+        ArrowUp => "UP", ArrowLeft => "LEFT", ArrowDown => "DOWN", ArrowRight => "RIGHT",
+        _ => return None,
+    })
+}
+
+pub fn run(
+    load: Box<dyn FnOnce(&Renderer) -> Result<Scene>>,
+    panels: Panels,
+    sim: Option<Sim>,
+    make_sim: Box<dyn Fn() -> Result<Sim>>,
+    audio: Option<crate::audio::Audio>,
+    start_cab: bool,
+    settings_path: std::path::PathBuf,
+    show_menu: bool,
+) -> Result<()> {
+    let el = EventLoop::new()?;
+    let mut app = App {
+        vfs_scene: Some(load),
+        gfx: None,
+        scene: None,
+        signals: None,
+        camera: None,
+        dragging: false,
+        last_cursor: None,
+        start_cab,
+        panels,
+        hovered: None,
+        sim,
+        names: Default::default(),
+        last_tick: std::time::Instant::now(),
+        cursor: (0.0, 0.0),
+        press_at: (0.0, 0.0),
+        frames: 0,
+        held: None,
+        ground: None,
+        move_keys: [false; 5],
+        tip: None,
+        head_keys: [false; 6],
+        menu: Menu::new(settings_path, if show_menu { Screen::Main } else { Screen::Playing }),
+        make_sim,
+        audio,
+    };
+    el.run_app(&mut app)?;
+    Ok(())
+}
+
+/// The game icon (embedded `icon.png`) for the title bar and taskbar.
+fn window_icon() -> Option<winit::window::Icon> {
+    let mut reader = png::Decoder::new(std::io::Cursor::new(&include_bytes!("../icon.png")[..])).read_info().ok()?;
+    let mut buf = vec![0; reader.output_buffer_size()?];
+    let info = reader.next_frame(&mut buf).ok()?;
+    buf.truncate(info.buffer_size());
+    winit::window::Icon::from_rgba(buf, info.width, info.height).ok()
+}
+
+/// Speed, ARS limit and next signal in the corner while driving.
+fn draw_hud(ui: &mut Ui, s: &Sim) {
+    let (kmh, pos) = s.motion();
+    let (sw, sh) = ui.screen;
+    let (x, y) = (24.0, sh - 150.0);
+    ui.rect(x - 12.0, y - 10.0, 330.0, 158.0, [0.0, 0.03, 0.08, 0.55]);
+    ui.text(x, y, 56.0, &format!("{:.0}", kmh.abs()), [1.0, 1.0, 1.0, 1.0]);
+    ui.text(x + 100.0, y + 28.0, 24.0, "км/ч", [0.7, 0.8, 1.0, 1.0]);
+    let sig = match (s.next_signal(), s.ars_limit()) {
+        (Some((d, name, _)), Some(l)) => format!("{name} через {d:.0} м · АРС {l:.0}"),
+        (Some((d, name, 0)), _) => format!("{name} через {d:.0} м · КРАСНЫЙ"),
+        (Some((d, name, _)), None) => format!("{name} через {d:.0} м"),
+        _ => "сигналов впереди нет".to_string(),
+    };
+    ui.text(x, y + 74.0, 20.0, &sig, [0.9, 0.93, 1.0, 1.0]);
+    ui.text(x, y + 98.0, 20.0, &format!("путь {pos:.0} м"), [0.6, 0.7, 0.85, 1.0]);
+    if let Some((st, pl, d, side, left)) = s.platform_ahead() {
+        let side = if side == crate::station::Side::Left { "слева" } else { "справа" };
+        let line = if d > 0.0 {
+            format!("Ст. {st} п.{pl} через {d:.0} м · двери {side}")
+        } else {
+            format!("Ст. {st} п.{pl} · до конца {left:.0} м · двери {side}")
+        };
+        ui.rect(x - 12.0, y - 40.0, 330.0, 28.0, [0.0, 0.03, 0.08, 0.55]);
+        ui.text(x, y - 36.0, 20.0, &line, [0.75, 1.0, 0.8, 1.0]);
+    }
+    let (dl, dr) = s.doors_open();
+    if dl || dr {
+        let open = match (dl, dr) {
+            (true, true) => "обе стороны",
+            (true, false) => "слева",
+            _ => "справа",
+        };
+        let wrong = match s.platform_ahead() {
+            Some((_, _, d, side, _)) if d <= 0.0 => {
+                let left = side == crate::station::Side::Left;
+                (dl && !left) || (dr && left)
+            }
+            _ => true,
+        };
+        let msg = if kmh.abs() > 3.0 {
+            Some("ДВЕРИ ОТКРЫТЫ В ДВИЖЕНИИ".to_string())
+        } else if wrong {
+            Some(format!("ДВЕРИ {open}: НЕ У ПЛАТФОРМЫ"))
+        } else {
+            None
+        };
+        ui.text(x, y + 122.0, 18.0, &format!("двери открыты: {open}"), [1.0, 0.9, 0.5, 1.0]);
+        if let Some(m) = msg {
+            let w = ui.text_width(&m, 30.0);
+            ui.rect((sw - w) / 2.0 - 20.0, 110.0, w + 40.0, 52.0, [0.75, 0.35, 0.0, 0.85]);
+            ui.text((sw - w) / 2.0, 118.0, 30.0, &m, [1.0, 1.0, 1.0, 1.0]);
+        }
+    }
+    if let Some((short, _)) = s.stop_report() {
+        let msg = if short > 8.0 {
+            format!("Остановка: не дотянули {:.1} м до конца платформы", short)
+        } else if short < -1.0 {
+            format!("Остановка: проехали на {:.1} м", -short)
+        } else {
+            format!("Остановка: точно ({:.1} м до конца)", short)
+        };
+        let w = ui.text_width(&msg, 28.0);
+        ui.rect((sw - w) / 2.0 - 20.0, sh - 110.0, w + 40.0, 48.0, [0.0, 0.25, 0.1, 0.85]);
+        ui.text((sw - w) / 2.0, sh - 104.0, 28.0, &msg, [1.0, 1.0, 1.0, 1.0]);
+    }
+    if s.ars_tripped() {
+        let msg = "АВТОСТОП АРС — F6 сброс";
+        let w = ui.text_width(msg, 34.0);
+        ui.rect((sw - w) / 2.0 - 20.0, 40.0, w + 40.0, 60.0, [0.7, 0.05, 0.05, 0.85]);
+        ui.text((sw - w) / 2.0, 48.0, 34.0, msg, [1.0, 1.0, 1.0, 1.0]);
+    }
+}

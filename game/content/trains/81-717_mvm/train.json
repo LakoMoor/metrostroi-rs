@@ -1,0 +1,9 @@
+{
+  "id": "81-717_mvm",
+  "name": "81-717 (Moscow)",
+  "entity": "gmod_subway_81-717_mvm",
+  "body_model": "models/metrostroi_train/81-717/81-717_mvm",
+  "cab_eye": [10.25, -0.12, 0.28],
+  "mass_t": 40,
+  "workshop_packs": ["1095094174", "1095098251"]
+}

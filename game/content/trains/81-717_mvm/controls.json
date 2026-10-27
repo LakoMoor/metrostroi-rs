@@ -1,0 +1,5580 @@
+{
+ "client_props": {
+  "salon": {
+   "model": "models/metrostroi_train/81-717/interior_mvm.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "body_additional": {
+   "model": "models/metrostroi_train/81-717/717_body_additional.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "schemes": {
+   "model": "models/metrostroi_train/81-717/labels/schemes.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0,
+   "callback": "function",
+   "PassSchemesDone": "false"
+  },
+  "destination": {
+   "model": "models/metrostroi_train/81-717/labels/destination.mdl",
+   "pos": {
+    "vector": [
+     -0.5,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0,
+   "callback": "function",
+   "Reloaded": "false"
+  },
+  "destination1": {
+   "model": "models/metrostroi_train/81-717/labels/destination.mdl",
+   "pos": {
+    "vector": [
+     -0.3,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0,
+   "callback": "function",
+   "Reloaded": "false"
+  },
+  "brake_valve_334": {
+   "model": "models/metrostroi_train/81-717/brake_valves/334.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 1.0
+  },
+  "brake_valve_013": {
+   "model": "models/metrostroi_train/81-717/brake_valves/013.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 1.0
+  },
+  "lamps1": {
+   "model": "models/metrostroi_train/81-717/lamps_type1.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 1.5
+  },
+  "lamps2": {
+   "model": "models/metrostroi_train/81-717/lamps_type2.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 1.5
+  },
+  "seats_old": {
+   "model": "models/metrostroi_train/81-717/couch_old.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 1.5
+  },
+  "seats_old_cap": {
+   "model": "models/metrostroi_train/81-717/couch_cap_l.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "seats_new": {
+   "model": "models/metrostroi_train/81-717/couch_new.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 1.5
+  },
+  "seats_new_cap": {
+   "model": "models/metrostroi_train/81-717/couch_new_cap.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "handrails_old": {
+   "model": "models/metrostroi_train/81-717/handlers_old.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 1.5
+  },
+  "handrails_new": {
+   "model": "models/metrostroi_train/81-717/handlers_new.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 1.5
+  },
+  "mask22_mvm": {
+   "model": "models/metrostroi_train/81-717/mask_22.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "mask222_mvm": {
+   "model": "models/metrostroi_train/81-717/mask_222.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "mask222_lvz": {
+   "model": "models/metrostroi_train/81-717/mask_spb_222.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "mask141_mvm": {
+   "model": "models/metrostroi_train/81-717/mask_141.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "Headlights222_1": {
+   "model": "models/metrostroi_train/81-717/lamps/headlights_222_group1.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "Headlights222_2": {
+   "model": "models/metrostroi_train/81-717/lamps/headlights_222_group2.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "Headlights141_1": {
+   "model": "models/metrostroi_train/81-717/lamps/headlights_141_group1.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "Headlights141_2": {
+   "model": "models/metrostroi_train/81-717/lamps/headlights_141_group2.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "Headlights22_1": {
+   "model": "models/metrostroi_train/81-717/lamps/headlights_22_group2.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "Headlights22_2": {
+   "model": "models/metrostroi_train/81-717/lamps/headlights_22_group1.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "RedLights": {
+   "model": "models/metrostroi_train/81-717/lamps/redlights.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "color": "Color",
+   "nohide": "true"
+  },
+  "otsek_cap_l": {
+   "model": "models/metrostroi_train/81-717/otsek_cap_l.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "otsek_cap_r": {
+   "model": "models/metrostroi_train/81-717/otsek_cap_r.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   }
+  },
+  "door_otsek1": {
+   "model": "models/metrostroi_train/81-717/door_otsek1.mdl",
+   "pos": {
+    "vector": [
+     375.35,
+     -15.324,
+     5.167
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hideseat": 1.7
+  },
+  "door_otsek2": {
+   "model": "models/metrostroi_train/81-717/door_otsek2.mdl",
+   "pos": {
+    "vector": [
+     375.35,
+     -59.65,
+     5.167
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hideseat": 1.7
+  },
+  "cap_l": {
+   "model": "models/metrostroi_train/81-717/couch_cap_r.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "door1": {
+   "model": "models/metrostroi_train/81-717/door_torec.mdl",
+   "pos": {
+    "vector": [
+     -472.5,
+     15.75,
+     -2.7
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door2": {
+   "model": "models/metrostroi_train/81-717/cab_door.mdl",
+   "pos": {
+    "vector": [
+     377.322,
+     28.267,
+     -1.599
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door3": {
+   "model": "models/metrostroi_train/81-717/door_cabine.mdl",
+   "pos": {
+    "vector": [
+     443.493,
+     65.111,
+     0.277
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "cabine_mvm": {
+   "model": "models/metrostroi_train/81-717/cabine_mvm.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "cabine_lvz": {
+   "model": "models/metrostroi_train/81-717/cabine_lvz.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "Controller": {
+   "model": "models/metrostroi_train/81-717/kv_black.mdl",
+   "pos": {
+    "vector": [
+     435.928,
+     16.1,
+     -15.039
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     -32.0
+    ]
+   },
+   "hideseat": 0.2,
+   "modelcallback": "function",
+   "reload": "true"
+  },
+  "body_gray": {
+   "model": "models/metrostroi_train/81-717/pult/body_classic.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "color": "Color",
+   "hide": 2.5
+  },
+  "pult_mvm_classic": {
+   "model": "models/metrostroi_train/81-717/pult/pult_mvm_classic.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "color": "Color",
+   "hideseat": 0.8
+  },
+  "ars_mvm": {
+   "model": "models/metrostroi_train/81-717/pult/ars_round.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8,
+   "modelcallback": "function"
+  },
+  "ars_mvm_round": {
+   "model": "models/metrostroi_train/81-717/pult/ars_round.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "ars_mvm_round_yellow": {
+   "model": "models/metrostroi_train/81-717/pult/ars_round_yellow.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "ars_mvm_square": {
+   "model": "models/metrostroi_train/81-717/pult/ars_square.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "ars_mvm_old": {
+   "model": "models/metrostroi_train/81-717/pult/ars_old.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "ars_mvm_old_yellow": {
+   "model": "models/metrostroi_train/81-717/pult/ars_old_yellow.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.8
+  },
+  "speed": {
+   "model": "models/metrostroi_train/81-710/ezh3_voltages.mdl",
+   "pos": {
+    "vector": [
+     448.287628,
+     -0.010203,
+     1.644087
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "bscale": {
+    "vector": [
+     1.2,
+     1.2,
+     1.65
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "reverser": {
+   "model": "models/metrostroi_train/reversor/reversor_classic.mdl",
+   "pos": {
+    "vector": [
+     438.0,
+     -29.9,
+     -14.9
+    ]
+   },
+   "ang": {
+    "angle": [
+     -112.0,
+     180.0,
+     90.0
+    ]
+   },
+   "hideseat": 0.2,
+   "modelcallback": "function"
+  },
+  "krureverser": {
+   "model": "models/metrostroi_train/reversor/reversor_classic.mdl",
+   "pos": {
+    "vector": [
+     443.8,
+     -24.5,
+     -3.2
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     60.0
+    ]
+   },
+   "hideseat": 0.2,
+   "modelcallback": "function"
+  },
+  "UAVALever": {
+   "model": "models/metrostroi_train/81-703/cabin_uava.mdl",
+   "pos": {
+    "vector": [
+     422.7,
+     -59.4,
+     -31.6
+    ]
+   },
+   "ang": {
+    "angle": [
+     3.0,
+     -180.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "stopkran": {
+   "model": "models/metrostroi_train/81-717/stop_mvm.mdl",
+   "pos": {
+    "vector": [
+     408.45,
+     62.15,
+     11.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "parking_brake": {
+   "model": "models/metrostroi_train/81-707/cran3.mdl",
+   "pos": {
+    "vector": [
+     453.6,
+     -0.25,
+     -39.8
+    ]
+   },
+   "ang": {
+    "angle": [
+     120.0,
+     0.0,
+     180.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "brake_disconnect": {
+   "model": "models/metrostroi_train/81-707/cran1.mdl",
+   "pos": {
+    "vector": [
+     427.3,
+     -28.9,
+     -32.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     -60.0,
+     90.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "EPK_disconnect": {
+   "model": "models/metrostroi_train/81-707/cran1.mdl",
+   "pos": {
+    "vector": [
+     432.4,
+     -44.25,
+     -24.7
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "EPV_disconnect": {
+   "model": "models/metrostroi_train/81-707/cran1.mdl",
+   "pos": {
+    "vector": [
+     431.15,
+     -43.5,
+     -24.7
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "train_disconnect": {
+   "model": "models/metrostroi_train/81-707/cran3.mdl",
+   "pos": {
+    "vector": [
+     430.1,
+     -24.0,
+     -24.1
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     -60.0,
+     90.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "valve_disconnect": {
+   "model": "models/metrostroi_train/81-707/cran3.mdl",
+   "pos": {
+    "vector": [
+     428.15,
+     -22.95,
+     -37.43
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     242.0,
+     90.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "FrontBrake": {
+   "model": "models/metrostroi_train/bogey/disconnect_valve_red.mdl",
+   "pos": {
+    "vector": [
+     460.0,
+     -31.0,
+     -62.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     -15.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "FrontTrain": {
+   "model": "models/metrostroi_train/bogey/disconnect_valve_blue.mdl",
+   "pos": {
+    "vector": [
+     460.0,
+     31.0,
+     -62.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     15.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "RearTrain": {
+   "model": "models/metrostroi_train/bogey/disconnect_valve_blue.mdl",
+   "pos": {
+    "vector": [
+     -472.0,
+     -34.0,
+     -62.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     -15.0,
+     90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "RearBrake": {
+   "model": "models/metrostroi_train/bogey/disconnect_valve_red.mdl",
+   "pos": {
+    "vector": [
+     -472.0,
+     34.0,
+     -62.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     15.0,
+     90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "gv": {
+   "model": "models/metrostroi/81-717/gv.mdl",
+   "pos": {
+    "vector": [
+     141.0,
+     56.0,
+     -76.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     -90.0,
+     90.0,
+     -90.0
+    ]
+   },
+   "color": "Color",
+   "hide": 0.5
+  },
+  "gv_wrench": {
+   "model": "models/metrostroi_train/reversor/reversor_classic.mdl",
+   "pos": {
+    "vector": [
+     141.0,
+     56.0,
+     -76.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     -90.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 0.5
+  },
+  "route": {
+   "model": "models/metrostroi_train/common/routes/ezh/route_holder.mdl",
+   "pos": {
+    "vector": [
+     -8.0,
+     0.0,
+     -5.65
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "route1": {
+   "model": "models/metrostroi_train/common/routes/ezh/route_number1.mdl",
+   "pos": {
+    "vector": [
+     -8.0,
+     0.0,
+     -5.65
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "skin": 6.0,
+   "hide": 2.0,
+   "callback": "function",
+   "Reloaded": "false"
+  },
+  "route2": {
+   "model": "models/metrostroi_train/common/routes/ezh/route_number2.mdl",
+   "pos": {
+    "vector": [
+     -8.0,
+     0.0,
+     -5.65
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     1.0,
+     0.0
+    ]
+   },
+   "skin": 1.0,
+   "hide": 2.0,
+   "callback": "function",
+   "Reloaded": "false"
+  },
+  "brake013": {
+   "model": "models/metrostroi_train/81-717/cran13.mdl",
+   "pos": {
+    "vector": [
+     431.5,
+     -20.3,
+     -10.2
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "brake334": {
+   "model": "models/metrostroi_train/81-703/cabin_cran_334.mdl",
+   "pos": {
+    "vector": [
+     432.27,
+     -22.83,
+     -8.2
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -230.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "PB": {
+   "model": "models/metrostroi_train/81-720/720_pb.mdl",
+   "pos": {
+    "vector": [
+     450.0,
+     18.0,
+     -37.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     8.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "train_line": {
+   "model": "models/metrostroi_train/Equipment/arrow_nm.mdl",
+   "pos": {
+    "vector": [
+     450.66507,
+     -15.255391,
+     2.1573109999999995
+    ]
+   },
+   "ang": {
+    "angle": [
+     -62.299999,
+     -33.400002,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "brake_line": {
+   "model": "models/metrostroi_train/Equipment/arrow_tm.mdl",
+   "pos": {
+    "vector": [
+     450.684143,
+     -15.267894,
+     2.1453909999999996
+    ]
+   },
+   "ang": {
+    "angle": [
+     -62.299999,
+     -33.400002,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "brake_cylinder": {
+   "model": "models/metrostroi_train/Equipment/arrow_nm.mdl",
+   "pos": {
+    "vector": [
+     450.535736,
+     -22.815704,
+     2.2368509999999997
+    ]
+   },
+   "ang": {
+    "angle": [
+     -62.299999,
+     -33.400002,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "ampermeter": {
+   "model": "models/metrostroi/81-717/volt_arrow.mdl",
+   "pos": {
+    "vector": [
+     452.269592,
+     -30.54043,
+     16.922098
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.5,
+     0.0,
+     40.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "voltmeter": {
+   "model": "models/metrostroi/81-717/volt_arrow.mdl",
+   "pos": {
+    "vector": [
+     452.246277,
+     -30.519978,
+     12.287716
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.5,
+     0.0,
+     40.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "volt1": {
+   "model": "models/metrostroi_train/81-710/ezh3_voltages.mdl",
+   "pos": {
+    "vector": [
+     449.50174,
+     15.141174,
+     0.812889
+    ]
+   },
+   "ang": {
+    "angle": [
+     -58.299999,
+     0.0,
+     27.968136
+    ]
+   },
+   "bscale": {
+    "vector": [
+     1.0,
+     1.0,
+     1.47
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "bortlamps1": {
+   "model": "models/metrostroi_train/81-717/bort_lamps_body.mdl",
+   "pos": {
+    "vector": [
+     -52.0,
+     67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "bortlamp1_w": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_b.mdl",
+   "pos": {
+    "vector": [
+     -52.0,
+     67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp1_g": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_g.mdl",
+   "pos": {
+    "vector": [
+     -52.0,
+     67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp1_y": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_y.mdl",
+   "pos": {
+    "vector": [
+     -52.0,
+     67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamps2": {
+   "model": "models/metrostroi_train/81-717/bort_lamps_body.mdl",
+   "pos": {
+    "vector": [
+     39.0,
+     -67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "bortlamp2_w": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_b.mdl",
+   "pos": {
+    "vector": [
+     39.0,
+     -67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp2_g": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_g.mdl",
+   "pos": {
+    "vector": [
+     39.0,
+     -67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp2_y": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_y.mdl",
+   "pos": {
+    "vector": [
+     39.0,
+     -67.0,
+     45.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamps3": {
+   "model": "models/metrostroi_train/81-502/bort_lamps_body.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "bortlamp3_w": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_b.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp3_g": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_g.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp3_y": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_y.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamps4": {
+   "model": "models/metrostroi_train/81-502/bort_lamps_body.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     -67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     180.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "bortlamp4_w": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_b.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     -67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp4_g": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_g.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     -67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "bortlamp4_y": {
+   "model": "models/metrostroi_train/equipment/bort_lamps_y.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     -67.0,
+     53.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "nohide": "true"
+  },
+  "door0x1": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos1.mdl",
+   "pos": {
+    "vector": [
+     338.445,
+     65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door1x1": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos2.mdl",
+   "pos": {
+    "vector": [
+     108.324,
+     65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door2x1": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos3.mdl",
+   "pos": {
+    "vector": [
+     -121.682,
+     65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door3x1": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos4.mdl",
+   "pos": {
+    "vector": [
+     -351.531,
+     65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door0x0": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos4.mdl",
+   "pos": {
+    "vector": [
+     338.445,
+     -65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door1x0": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos3.mdl",
+   "pos": {
+    "vector": [
+     108.324,
+     -65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door2x0": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos2.mdl",
+   "pos": {
+    "vector": [
+     -121.682,
+     -65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "door3x0": {
+   "model": "models/metrostroi_train/81-717/81-717_doors_pos1.mdl",
+   "pos": {
+    "vector": [
+     -351.531,
+     -65.164,
+     0.807
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     0.0
+    ]
+   },
+   "hide": 2.0
+  },
+  "Lamp_RTM1": {
+   "model": "models/metrostroi_train/81-717/rtmlamp.mdl",
+   "pos": {
+    "vector": [
+     414.367554,
+     -32.449749,
+     6.717192
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "Lamp_RTM2": {
+   "model": "models/metrostroi_train/81-717/rtmlamp.mdl",
+   "pos": {
+    "vector": [
+     447.35,
+     -32.82,
+     -0.9
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -5.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.2
+  },
+  "Lamps_cab1": {
+   "model": "models/metrostroi_train/81-717/lamps/lamp_cabine1.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.9
+  },
+  "Lamps_cab2": {
+   "model": "models/metrostroi_train/81-717/lamps/lamp_cabine2.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.9
+  },
+  "Lamps2_cab1": {
+   "model": "models/metrostroi_train/81-717/lamps/lamp_cabine1.mdl",
+   "pos": {
+    "vector": [
+     0.5,
+     0.0,
+     -0.7
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.9
+  },
+  "Lamps2_cab2": {
+   "model": "models/metrostroi_train/81-717/lamps/lamp_cabine2.mdl",
+   "pos": {
+    "vector": [
+     0.0,
+     0.0,
+     -0.8
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "hideseat": 0.9
+  },
+  "TEST": {
+   "model": "models/metrostroi_train/81/334cran.mdl",
+   "pos": {
+    "vector": [
+     450.273468,
+     -32.306019,
+     13.236823
+    ]
+   },
+   "ang": {
+    "angle": [
+     -18.0,
+     25.541767,
+     -90.600349
+    ]
+   },
+   "scale": 0.1
+  }
+ },
+ "button_panels": {
+  "LastStation": {
+   "pos": {
+    "vector": [
+     457.7,
+     -27.4,
+     1.75
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 876.0,
+   "height": 205.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "LastStation-",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 438.0,
+     "h": 205.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "LastStation+",
+     "x": 438.0,
+     "y": 0.0,
+     "w": 438.0,
+     "h": 205.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block5_6": {
+   "pos": {
+    "vector": [
+     449.0,
+     12.3,
+     -2.6500000000000004
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     44.0
+    ]
+   },
+   "width": 480.0,
+   "height": 225.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "R_UNchToggle",
+     "x": 44.0,
+     "y": 40.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_ZSToggle",
+     "x": 44.0,
+     "y": 40.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_GToggle",
+     "x": 44.0,
+     "y": 40.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_RadioToggle",
+     "x": 44.0,
+     "y": 40.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!R_ProgramToggle",
+     "x": 155.0,
+     "y": 40.0,
+     "radius": 0.0
+    },
+    {
+     "ID": "R_Program1Set",
+     "x": 155.0,
+     "y": 40.0,
+     "w": 20.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_Program2Set",
+     "x": 155.0,
+     "y": 40.0,
+     "w": 20.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:KVTSet",
+     "x": 247.0,
+     "y": 33.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:KVTSet",
+     "x": 263.0,
+     "y": 36.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:KVTRSet",
+     "x": 293.0,
+     "y": 36.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "2:KVTSet",
+     "x": 293.0,
+     "y": 36.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "2:KVTRSet",
+     "x": 263.0,
+     "y": 36.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!L1Light",
+     "x": 333.0,
+     "y": 42.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VZ1Set",
+     "x": 372.5,
+     "y": 36.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "V13Toggle",
+     "x": 438.0,
+     "y": 42.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AutodriveToggle",
+     "x": 420.0,
+     "y": 92.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VUD1Toggle",
+     "x": 60.0,
+     "y": 103.0,
+     "radius": 40.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KDLSet",
+     "x": 60.0,
+     "y": 170.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KDLKToggle",
+     "x": 40.0,
+     "y": 180.0,
+     "w": 40.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KDLRSet",
+     "x": 155.0,
+     "y": 170.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KDLRKToggle",
+     "x": 135.0,
+     "y": 180.0,
+     "w": 40.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "DoorSelectToggle",
+     "x": 107.5,
+     "y": 183.5,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KRZDSet",
+     "x": 155.0,
+     "y": 85.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_VPRToggle",
+     "x": 107.0,
+     "y": 85.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VozvratRPSet",
+     "x": 107.0,
+     "y": 132.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!GreenRPLight",
+     "x": 155.0,
+     "y": 132.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!AVULight",
+     "x": 333.0,
+     "y": 98.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LKVPLight",
+     "x": 377.0,
+     "y": 98.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!SPLight",
+     "x": 412.0,
+     "y": 42.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "OtklAVUToggle",
+     "x": 241.0,
+     "y": 85.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "OtklBVSet",
+     "x": 293.0,
+     "y": 90.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KAHPl",
+     "x": 37.0,
+     "y": 68.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "OtklBVKToggle",
+     "x": 273.0,
+     "y": 100.0,
+     "w": 40.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "V11Toggle",
+     "x": 357.0,
+     "y": 70.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "V12Toggle",
+     "x": 400.0,
+     "y": 70.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "ConverterProtectionSet",
+     "x": 333.0,
+     "y": 133.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KSNSet",
+     "x": 377.0,
+     "y": 133.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "RingSet",
+     "x": 420.0,
+     "y": 133.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "ARSToggle",
+     "x": 234.0,
+     "y": 134.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "ALSToggle",
+     "x": 263.0,
+     "y": 134.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "ARSRToggle",
+     "x": 293.0,
+     "y": 134.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "OVTToggle",
+     "x": 240.0,
+     "y": 181.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "ALSFreqToggle",
+     "x": 278.0,
+     "y": 181.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "L_1Toggle",
+     "x": 316.0,
+     "y": 181.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "L_2Toggle",
+     "x": 353.0,
+     "y": 181.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "L_3Toggle",
+     "x": 391.0,
+     "y": 181.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VPToggle",
+     "x": 429.0,
+     "y": 181.0,
+     "radius": 20.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block7": {
+   "pos": {
+    "vector": [
+     446.22,
+     -17.6,
+     -0.13000000000000078
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 178.0,
+   "height": 222.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "L_4Toggle",
+     "x": 42.0,
+     "y": 180.5,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VUSToggle",
+     "x": 74.5,
+     "y": 180.5,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VADToggle",
+     "x": 107.0,
+     "y": 180.5,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VAHToggle",
+     "x": 140.0,
+     "y": 180.5,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KRPSet",
+     "x": 43.0,
+     "y": 30.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KAHSet",
+     "x": 43.0,
+     "y": 88.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KAHPl",
+     "x": 37.0,
+     "y": 68.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KAHKToggle",
+     "x": 23.0,
+     "y": 98.0,
+     "w": 40.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!PNT",
+     "x": 45.0,
+     "y": 130.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KDPSet",
+     "x": 90.0,
+     "y": 130.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "KDPKToggle",
+     "x": 70.0,
+     "y": 140.0,
+     "w": 40.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!PNW",
+     "x": 135.0,
+     "y": 130.0,
+     "radius": 20.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block1": {
+   "pos": {
+    "vector": [
+     450.4,
+     28.2,
+     6.6499999999999995
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 290.0,
+   "height": 110.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "VMKToggle",
+     "x": 39.0,
+     "y": 30.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "BPSNonToggle",
+     "x": 80.0,
+     "y": 30.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "RezMKSet",
+     "x": 80.0,
+     "y": 80.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "ARS13Set",
+     "x": 130.0,
+     "y": 80.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!BatteryVoltage",
+     "x": 220.0,
+     "y": 55.0,
+     "radius": 60.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block3": {
+   "pos": {
+    "vector": [
+     450.4,
+     -10.0,
+     6.6499999999999995
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 290.0,
+   "height": 110.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "!BLTLPressure",
+     "x": 62.0,
+     "y": 55.0,
+     "radius": 55.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!BCPressure",
+     "x": 182.0,
+     "y": 55.0,
+     "radius": 55.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block4": {
+   "pos": {
+    "vector": [
+     445.25,
+     23.0,
+     -1.1500000000000004
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 135.0,
+   "height": 75.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "R_ASNPMenuSet",
+     "x": 69.0,
+     "y": 56.0,
+     "radius": 8.0,
+     "tooltip": "\u00d0\u0090\u00d0\u00a1\u00d0\u009d\u00d0\u009f: \u00d0\u009c\u00d0\u00b5\u00d0\u00bd\u00d1\u008e"
+    },
+    {
+     "ID": "R_ASNPUpSet",
+     "x": 123.0,
+     "y": 24.5,
+     "radius": 8.0,
+     "tooltip": "\u00d0\u0090\u00d0\u00a1\u00d0\u009d\u00d0\u009f: \u00d0\u0092\u00d0\u00b2\u00d0\u00b5\u00d1\u0080\u00d1\u0085"
+    },
+    {
+     "ID": "R_ASNPDownSet",
+     "x": 123.0,
+     "y": 24.5,
+     "radius": 8.0,
+     "tooltip": "\u00d0\u0090\u00d0\u00a1\u00d0\u009d\u00d0\u009f: \u00d0\u0092\u00d0\u00bd\u00d0\u00b8\u00d0\u00b7"
+    },
+    {
+     "ID": "R_ASNPOnToggle",
+     "x": 15.0,
+     "y": 22.0,
+     "radius": 8.0,
+     "tooltip": "\u00d0\u0090\u00d0\u00a1\u00d0\u009d\u00d0\u009f: \u00d0\u0092\u00d0\u00ba\u00d0\u00bb\u00d1\u008e\u00d1\u0087\u00d0\u00b5\u00d0\u00bd\u00d0\u00b8\u00d0\u00b5"
+    }
+   ]
+  },
+  "ASNPScreen": {
+   "pos": {
+    "vector": [
+     445.0,
+     21.2,
+     -1.9000000000000004
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     59.0
+    ]
+   },
+   "width": 512.0,
+   "height": 128.0,
+   "scale": 0.025,
+   "hideseat": 0.2,
+   "hide": "true",
+   "buttons": []
+  },
+  "Block2_2": {
+   "pos": {
+    "vector": [
+     450.4,
+     10.0,
+     6.6499999999999995
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 315.0,
+   "height": 110.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "!Speedometer1",
+     "x": 109.0,
+     "y": 18.5,
+     "w": 13.0,
+     "h": 22.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!Speedometer2",
+     "x": 121.0,
+     "y": 18.5,
+     "w": 13.0,
+     "h": 22.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARSOch",
+     "x": 45.0,
+     "y": 51.1,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS0",
+     "x": 45.0,
+     "y": 51.1,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS40",
+     "x": 45.0,
+     "y": 51.1,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS60",
+     "x": 45.0,
+     "y": 51.1,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS70",
+     "x": 45.0,
+     "y": 51.1,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS80",
+     "x": 45.0,
+     "y": 51.1,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLSD1",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLSD2",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLVD",
+     "x": 45.0,
+     "y": 57.2,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLHRK",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLST",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLRD",
+     "x": 192.4,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampRP",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLSN",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLKVD",
+     "x": 45.0,
+     "y": 57.2,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLKVC",
+     "x": 45.0,
+     "y": 57.15,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLKT",
+     "x": 45.0,
+     "y": 57.9,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampDV",
+     "x": 222.0,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLEKK",
+     "x": 45.0,
+     "y": 57.15,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLN",
+     "x": 45.0,
+     "y": 57.3,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLRS",
+     "x": 45.0,
+     "y": 57.2,
+     "w": 18.0,
+     "h": 10.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block2_3": {
+   "pos": {
+    "vector": [
+     450.4,
+     10.0,
+     6.6499999999999995
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 315.0,
+   "height": 110.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "!Speedometer",
+     "x": 1110.0,
+     "y": 200.0,
+     "w": 800.0,
+     "h": 440.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LSD",
+     "x": 42.5,
+     "y": 16.0,
+     "w": 35.0,
+     "h": 15.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LOch",
+     "x": 42.5,
+     "y": 16.0,
+     "w": 35.0,
+     "h": 15.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LN",
+     "x": 42.5,
+     "y": 16.0,
+     "w": 35.0,
+     "h": 15.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!60",
+     "x": 42.5,
+     "y": 16.0,
+     "w": 35.0,
+     "h": 15.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!70",
+     "x": 42.5,
+     "y": 16.0,
+     "w": 35.0,
+     "h": 15.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LEKK",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LPU",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LKVD",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LKT",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LRP",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LKVC",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LVD",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LST",
+     "x": 258.0,
+     "y": 20.0,
+     "radius": 12.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Block2_1": {
+   "pos": {
+    "vector": [
+     450.4,
+     10.0,
+     6.6499999999999995
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 300.0,
+   "height": 110.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "!Speedometer1",
+     "x": 59.5,
+     "y": 35.5,
+     "w": 12.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!Speedometer2",
+     "x": 70.5,
+     "y": 35.5,
+     "w": 12.0,
+     "h": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARSOch",
+     "x": 101.7,
+     "y": 52.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!ARS0",
+     "x": 101.85,
+     "y": 52.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!ARS40",
+     "x": 101.75,
+     "y": 52.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!ARS60",
+     "x": 101.4,
+     "y": 52.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!ARS70",
+     "x": 101.5,
+     "y": 52.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!ARS80",
+     "x": 101.3,
+     "y": 52.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLSD1",
+     "x": 65.4,
+     "y": 91.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLSD2",
+     "x": 82.8,
+     "y": 91.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLHRK",
+     "x": 102.3,
+     "y": 91.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampRP",
+     "x": 137.4,
+     "y": 91.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLSN",
+     "x": 189.3,
+     "y": 91.0,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLN",
+     "x": 215.5,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLKVD",
+     "x": 214.8,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLKT",
+     "x": 215.5,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLKVC",
+     "x": 267.2,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLRS",
+     "x": 266.3,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLVD",
+     "x": 265.2,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    },
+    {
+     "ID": "!LampLST",
+     "x": 267.2,
+     "y": 31.8,
+     "tooltip": "",
+     "radius": 3.0
+    }
+   ]
+  },
+  "BZOS_C": {
+   "pos": {
+    "vector": [
+     440.2,
+     -62.15,
+     -1.1
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     90.0
+    ]
+   },
+   "width": 16.0,
+   "height": 60.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "SAB1Toggle",
+     "x": 8.2,
+     "y": 8.0,
+     "radius": 8.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!VH1",
+     "x": 8.2,
+     "y": 27.0,
+     "radius": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!VH2",
+     "x": 8.2,
+     "y": 44.0,
+     "radius": 4.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "KiyvARS": {
+   "pos": {
+    "vector": [
+     456.97,
+     10.0,
+     12.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     58.0
+    ]
+   },
+   "width": 300.0,
+   "height": 110.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "!Speedometer1",
+     "x": 135.0,
+     "y": 28.0,
+     "w": 17.0,
+     "h": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!Speedometer2",
+     "x": 157.0,
+     "y": 28.0,
+     "w": 17.0,
+     "h": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARSOch",
+     "x": 95.8,
+     "y": 31.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS0",
+     "x": 84.3,
+     "y": 31.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS40",
+     "x": 84.3,
+     "y": 31.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS60",
+     "x": 84.3,
+     "y": 31.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS70",
+     "x": 84.3,
+     "y": 31.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!ARS80",
+     "x": 84.3,
+     "y": 31.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLSD1",
+     "x": 192.5,
+     "y": 32.7,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLSD2",
+     "x": 202.6,
+     "y": 32.7,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLVD",
+     "x": 192.5,
+     "y": 42.8,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLHRK",
+     "x": 192.5,
+     "y": 42.8,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLST",
+     "x": 192.5,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLRD",
+     "x": 192.4,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampRP",
+     "x": 212.0,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLSN",
+     "x": 222.1,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLKVD",
+     "x": 222.0,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLKT",
+     "x": 222.0,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampDV",
+     "x": 222.0,
+     "y": 42.9,
+     "w": 10.0,
+     "h": 4.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLN",
+     "x": 217.0,
+     "y": 34.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!LampLRS",
+     "x": 271.5,
+     "y": 34.6,
+     "w": 10.0,
+     "h": 10.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "AV_C": {
+   "pos": {
+    "vector": [
+     396.0,
+     -17.5,
+     44.6
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 680.0,
+   "height": 590.0,
+   "scale": 0.0625,
+   "hide": 0.8,
+   "buttons": [
+    {
+     "ID": "A53Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A56Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A54Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A17Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A44Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A39Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A70Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A14Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A74Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A26Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AR63Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AS1Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A13Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A21Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A31Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A32Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A16Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A12Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A24Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A49Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A27Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A72Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A50Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A15Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 8.0
+    },
+    {
+     "ID": "AV3Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV2Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 9.0
+    },
+    {
+     "ID": "AV4Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 10.0
+    },
+    {
+     "ID": "AV5Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 11.0
+    },
+    {
+     "ID": "AV6Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 12.0
+    },
+    {
+     "ID": "AV1Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 13.0
+    },
+    {
+     "ID": "A29Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A46Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A47Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 17.0
+    },
+    {
+     "ID": "A71Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A7Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A9Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A84Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A8Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A52Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A19Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A48Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A10Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A22Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A30Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A1Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A2Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A3Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A4Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A5Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A6Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A18Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A73Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A20Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A25Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A11Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A37Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A45Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A38Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A51Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A65Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A66Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 16.0
+    },
+    {
+     "ID": "A42Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A43Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A41Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A40Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A75Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A76Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A60Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A58Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 14.0
+    },
+    {
+     "ID": "A57Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A59Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": "",
+     "lab": 15.0
+    },
+    {
+     "ID": "A28Toggle",
+     "x": 30.0,
+     "y": 60.0,
+     "radius": 25.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Battery_C": {
+   "pos": {
+    "vector": [
+     410.0,
+     -57.0,
+     21.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 255.0,
+   "height": 280.0,
+   "scale": 0.0625,
+   "hide": 0.8,
+   "buttons": [
+    {
+     "ID": "1:RC1Pl",
+     "x": 45.0,
+     "y": 108.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:UOSToggle",
+     "x": 40.0,
+     "y": 40.0,
+     "radius": 40.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:VBToggle",
+     "x": 215.0,
+     "y": 40.0,
+     "radius": 40.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:RC1Toggle",
+     "x": 40.0,
+     "y": 240.0,
+     "radius": 40.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "VBD_C": {
+   "pos": {
+    "vector": [
+     410.0,
+     -56.15,
+     36.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 50.0,
+   "height": 125.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "1:VBDToggle",
+     "x": 25.0,
+     "y": 25.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "1:UPPS_OnToggle",
+     "x": 25.0,
+     "y": 100.0,
+     "radius": 25.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "AV_R": {
+   "pos": {
+    "vector": [
+     409.5,
+     -52.3,
+     37.1
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 398.0,
+   "height": 358.0,
+   "scale": 0.0625,
+   "hide": 0.8,
+   "buttons": [
+    {
+     "ID": "A11Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A17Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A44Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A26Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AR63Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AS1Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A21Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A49Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A27Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A10Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A53Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A54Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A84Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A76Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A48Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV1Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A29Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A46Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A47Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A43Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A42Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A74Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A73Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A71Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A41Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A45Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A75Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A8Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A52Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A72Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A31Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A32Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A13Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A1Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A20Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A25Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A30Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A56Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A65Toggle",
+     "x": 29.7,
+     "y": 155.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "AV_S": {
+   "pos": {
+    "vector": [
+     392.0,
+     -33.0,
+     -20.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     270.0,
+     90.0
+    ]
+   },
+   "width": 300.0,
+   "height": 165.0,
+   "scale": 0.0625,
+   "hide": 0.8,
+   "buttons": [
+    {
+     "ID": "A2Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A3Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A4Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A5Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A6Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A70Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A14Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A39Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A28Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A38Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A22Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A8Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AISToggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A12Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A16Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A37Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A51Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A24Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A19Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A66Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A18Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A40Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A80Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A50Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A52Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV2Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV3Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV4Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV5Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "AV6Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A15Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A57Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A81Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A7Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A9Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A68Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "A72Toggle",
+     "x": 25.0,
+     "y": 60.0,
+     "w": 25.0,
+     "h": 45.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Battery_R": {
+   "pos": {
+    "vector": [
+     410.0,
+     -54.25,
+     8.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 440.0,
+   "height": 157.0,
+   "scale": 0.0625,
+   "hide": 0.8,
+   "buttons": [
+    {
+     "ID": "2:RC1Toggle",
+     "x": 64.0,
+     "y": 40.0,
+     "radius": 40.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "2:VBToggle",
+     "x": 220.0,
+     "y": 40.0,
+     "radius": 40.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "2:UOSToggle",
+     "x": 376.0,
+     "y": 40.0,
+     "radius": 40.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "VBD_R": {
+   "pos": {
+    "vector": [
+     402.0,
+     -18.05,
+     15.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     90.0
+    ]
+   },
+   "width": 50.0,
+   "height": 125.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "2:VBDToggle",
+     "x": 25.0,
+     "y": 25.0,
+     "radius": 25.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "2:UPPS_OnToggle",
+     "x": 25.0,
+     "y": 100.0,
+     "radius": 25.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "CabVent_C": {
+   "pos": {
+    "vector": [
+     455.2,
+     47.0,
+     -11.9
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     0.0
+    ]
+   },
+   "width": 70.0,
+   "height": 62.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "PVK-",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 35.0,
+     "h": 62.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!PVK",
+     "x": 35.0,
+     "y": 31.0
+    },
+    {
+     "ID": "PVK+",
+     "x": 35.0,
+     "y": 0.0,
+     "w": 35.0,
+     "h": 62.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "HelperPanel_C": {
+   "pos": {
+    "vector": [
+     447.0,
+     62.6,
+     17.75
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "width": 76.0,
+   "height": 305.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "VUD2Toggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 76.0,
+     "h": 86.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "VDLSet",
+     "x": 0.0,
+     "y": 86.0,
+     "w": 76.0,
+     "h": 86.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_Program1HSet",
+     "x": 38.0,
+     "y": 230.0,
+     "radius": 20.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "R_Program2HSet",
+     "x": 38.0,
+     "y": 285.0,
+     "radius": 20.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "UAVAPanel": {
+   "pos": {
+    "vector": [
+     423.0,
+     -57.0,
+     -25.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     90.0
+    ]
+   },
+   "width": 180.0,
+   "height": 200.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "UAVAToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 60.0,
+     "h": 200.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "UAVAContactSet",
+     "x": 60.0,
+     "y": 0.0,
+     "w": 120.0,
+     "h": 200.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Stopkran": {
+   "pos": {
+    "vector": [
+     401.0,
+     62.0,
+     17.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "width": 200.0,
+   "height": 1300.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "EmergencyBrakeValveToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 1300.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "IGLA_C": {
+   "pos": {
+    "vector": [
+     456.15,
+     -25.45,
+     27.1
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -110.0,
+     90.0
+    ]
+   },
+   "width": 512.0,
+   "height": 107.0,
+   "scale": 0.0171,
+   "hideseat": 0.2,
+   "hide": "true",
+   "buttons": []
+  },
+  "IGLAButtons_C": {
+   "pos": {
+    "vector": [
+     456.23,
+     -24.87,
+     27.85
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -110.0,
+     90.0
+    ]
+   },
+   "width": 165.0,
+   "height": 70.0,
+   "scale": 0.0625,
+   "hideseat": 0.2,
+   "buttons": [
+    {
+     "ID": "IGLA1Set",
+     "x": 23.0,
+     "y": 54.0,
+     "w": 14.0,
+     "h": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "IGLA2Set",
+     "x": 23.0,
+     "y": 54.0,
+     "w": 14.0,
+     "h": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "IGLA23",
+     "x": 23.0,
+     "y": 54.0,
+     "w": 14.0,
+     "h": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "IGLA3Set",
+     "x": 23.0,
+     "y": 54.0,
+     "w": 14.0,
+     "h": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "IGLA4Set",
+     "x": 23.0,
+     "y": 54.0,
+     "w": 14.0,
+     "h": 12.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!IGLAFire",
+     "x": 142.9,
+     "y": 56.0,
+     "radius": 3.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!IGLAErr",
+     "x": 142.9,
+     "y": 63.0,
+     "radius": 3.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "DriverValveBLDisconnect": {
+   "pos": {
+    "vector": [
+     426.1,
+     -27.3,
+     -20.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     -150.0,
+     90.0
+    ]
+   },
+   "width": 200.0,
+   "height": 100.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "DriverValveBLDisconnectToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 100.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "DriverValveTLDisconnect": {
+   "pos": {
+    "vector": [
+     429.3,
+     -23.0,
+     -15.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     -150.0,
+     90.0
+    ]
+   },
+   "width": 200.0,
+   "height": 90.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "DriverValveTLDisconnectToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 90.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "EPKDisconnect": {
+   "pos": {
+    "vector": [
+     435.0,
+     -40.0,
+     -23.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -135.0,
+     45.0
+    ]
+   },
+   "width": 200.0,
+   "height": 120.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "EPKToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 120.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "EPVDisconnect": {
+   "pos": {
+    "vector": [
+     435.0,
+     -40.0,
+     -23.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -135.0,
+     45.0
+    ]
+   },
+   "width": 200.0,
+   "height": 120.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "EPKToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 120.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "ParkingBrake": {
+   "pos": {
+    "vector": [
+     453.777527,
+     5.0,
+     -30.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     60.0
+    ]
+   },
+   "width": 200.0,
+   "height": 120.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "ParkingBrakeToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 120.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "DriverValveDisconnect": {
+   "pos": {
+    "vector": [
+     425.0,
+     -23.0,
+     -27.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     90.0,
+     -150.0,
+     90.0
+    ]
+   },
+   "width": 200.0,
+   "height": 90.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "DriverValveDisconnectToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 200.0,
+     "h": 90.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "FrontPneumatic": {
+   "pos": {
+    "vector": [
+     461.0,
+     -45.0,
+     -53.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 900.0,
+   "height": 100.0,
+   "scale": 0.1,
+   "hideseat": 0.2,
+   "hide": "true",
+   "screenHide": "true",
+   "buttons": [
+    {
+     "ID": "FrontBrakeLineIsolationToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 400.0,
+     "h": 100.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "FrontTrainLineIsolationToggle",
+     "x": 500.0,
+     "y": 0.0,
+     "w": 400.0,
+     "h": 100.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "RearPneumatic": {
+   "pos": {
+    "vector": [
+     -474.0,
+     45.0,
+     -53.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     270.0,
+     90.0
+    ]
+   },
+   "width": 900.0,
+   "height": 100.0,
+   "scale": 0.1,
+   "hideseat": 0.2,
+   "hide": "true",
+   "screenHide": "true",
+   "buttons": [
+    {
+     "ID": "RearTrainLineIsolationToggle",
+     "x": 500.0,
+     "y": 0.0,
+     "w": 400.0,
+     "h": 100.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "RearBrakeLineIsolationToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 400.0,
+     "h": 100.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "GV": {
+   "pos": {
+    "vector": [
+     157.5,
+     70.0,
+     -58.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     210.0,
+     90.0
+    ]
+   },
+   "width": 260.0,
+   "height": 260.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "GVToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 260.0,
+     "h": 260.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "AirDistributor": {
+   "pos": {
+    "vector": [
+     -185.0,
+     -68.0,
+     -50.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "width": 170.0,
+   "height": 80.0,
+   "scale": 0.1,
+   "hideseat": 0.1,
+   "hide": "true",
+   "screenHide": "true",
+   "buttons": [
+    {
+     "ID": "AirDistributorDisconnectToggle",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 170.0,
+     "h": 80.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "Route": {
+   "pos": {
+    "vector": [
+     457.0,
+     43.4,
+     -3.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     99.0,
+     90.0
+    ]
+   },
+   "width": 153.0,
+   "height": 130.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "RouteNumber1+",
+     "x": 76.5,
+     "y": 0.0,
+     "w": 76.5,
+     "h": 65.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "RouteNumber2+",
+     "x": 76.5,
+     "y": 0.0,
+     "w": 76.5,
+     "h": 65.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "RouteNumber1-",
+     "x": 76.5,
+     "y": 65.0,
+     "w": 76.5,
+     "h": 65.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "RouteNumber2-",
+     "x": 76.5,
+     "y": 65.0,
+     "w": 76.5,
+     "h": 65.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "CabinDoor": {
+   "pos": {
+    "vector": [
+     411.0,
+     64.0,
+     50.0
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     0.0,
+     90.0
+    ]
+   },
+   "width": 665.0,
+   "height": 2000.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "CabinDoor",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 665.0,
+     "h": 2000.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "OtsekDoor1": {
+   "pos": {
+    "vector": [
+     394.5,
+     28.0,
+     12.6
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     90.0
+    ]
+   },
+   "width": 310.0,
+   "height": 130.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "OtsekDoor1",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 310.0,
+     "h": 130.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "OtsekDoor2": {
+   "pos": {
+    "vector": [
+     394.5,
+     28.0,
+     -15.5
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     180.0,
+     90.0
+    ]
+   },
+   "width": 310.0,
+   "height": 130.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "OtsekDoor2",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 310.0,
+     "h": 130.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "PassengerDoor": {
+   "pos": {
+    "vector": [
+     377.8,
+     29.0,
+     50.6
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 642.0,
+   "height": 2000.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "PassengerDoor",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 642.0,
+     "h": 2000.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "PassengerDoor1": {
+   "pos": {
+    "vector": [
+     377.8,
+     61.0,
+     50.6
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -90.0,
+     90.0
+    ]
+   },
+   "width": 642.0,
+   "height": 2000.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "PassengerDoor",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 642.0,
+     "h": 2000.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "RearDoor": {
+   "pos": {
+    "vector": [
+     -473.0,
+     -16.0,
+     46.4
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     90.0,
+     90.0
+    ]
+   },
+   "width": 642.0,
+   "height": 1900.0,
+   "scale": 0.1,
+   "buttons": [
+    {
+     "ID": "RearDoor",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 642.0,
+     "h": 1900.0,
+     "tooltip": ""
+    }
+   ]
+  },
+  "LeftMirror": {
+   "pos": {
+    "vector": [
+     469.9,
+     72.75,
+     37.4
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -60.0,
+     90.0
+    ]
+   },
+   "width": 128.0,
+   "height": 256.0,
+   "scale": 0.06,
+   "buttons": []
+  },
+  "RightMirror": {
+   "pos": {
+    "vector": [
+     473.4,
+     -66.75,
+     37.4
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -120.0,
+     90.0
+    ]
+   },
+   "width": 128.0,
+   "height": 256.0,
+   "scale": 0.06,
+   "buttons": []
+  },
+  "HVMeters": {
+   "pos": {
+    "vector": [
+     453.3,
+     -28.7,
+     20.1
+    ]
+   },
+   "ang": {
+    "angle": [
+     0.0,
+     -130.0,
+     90.0
+    ]
+   },
+   "width": 68.0,
+   "height": 138.0,
+   "scale": 0.0625,
+   "buttons": [
+    {
+     "ID": "!EnginesCurrent",
+     "x": 0.0,
+     "y": 0.0,
+     "w": 68.0,
+     "h": 64.0,
+     "tooltip": ""
+    },
+    {
+     "ID": "!HighVoltage",
+     "x": 0.0,
+     "y": 74.0,
+     "w": 68.0,
+     "h": 64.0,
+     "tooltip": ""
+    }
+   ]
+  }
+ },
+ "derived": [
+  {
+   "kind": "ButtonMap",
+   "name": "BZOS_R",
+   "expr": "table.Copy(ENT.ButtonMap[\"BZOS_C\"])"
+  },
+  {
+   "kind": "ButtonMap",
+   "name": "CabVent_R",
+   "expr": "table.Copy(ENT.ButtonMap[\"CabVent_C\"])"
+  },
+  {
+   "kind": "ButtonMap",
+   "name": "HelperPanel_R",
+   "expr": "table.Copy(ENT.ButtonMap[\"HelperPanel_C\"])"
+  },
+  {
+   "kind": "ButtonMap",
+   "name": "IGLA_R",
+   "expr": "table.Copy(ENT.ButtonMap[\"IGLA_C\"])"
+  },
+  {
+   "kind": "ButtonMap",
+   "name": "IGLAButtons_R",
+   "expr": "table.Copy(ENT.ButtonMap[\"IGLAButtons_C\"])"
+  }
+ ]
+}
