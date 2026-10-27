@@ -18,8 +18,13 @@ use formats::vfs::Vfs;
 use glam::Mat4;
 use std::path::{Path, PathBuf};
 
-pub fn mount_workshop(cfg: &config::Config) -> Result<Vfs> {
+pub fn mount_workshop(cfg: &config::Config, pack: Option<&Path>) -> Result<Vfs> {
     let mut vfs = Vfs::default();
+    if let Some(p) = pack {
+        vfs.mount_mpak(p)?;
+        log::info!("asset package {}: {} files", p.display(), vfs.len());
+        return Ok(vfs);
+    }
     for id in &cfg.packs {
         let dir = Path::new(&cfg.workshop).join(id);
         let gma = std::fs::read_dir(&dir)
@@ -97,7 +102,11 @@ fn main() -> Result<()> {
     log::info!("game folder: {:?}", game);
     let controls = arg_value(&args, "--controls").unwrap_or_else(|| cfg.resolve(game.as_deref(), &cfg.controls).to_string_lossy().into_owned());
 
-    let vfs = mount_workshop(&cfg)?;
+    // our own package wins unless `--workshop` asks for the original archives (needed to build it)
+    let pack_out: Option<PathBuf> = arg_value(&args, "--pack-assets").map(PathBuf::from);
+    let pack_file = Some(cfg.resolve(game.as_deref(), &cfg.assets)).filter(|p| p.exists() && pack_out.is_none() && !args.iter().any(|a| a == "--workshop"));
+    let vfs = mount_workshop(&cfg, pack_file.as_deref())?;
+    vfs.record_reads(pack_out.is_some());
     log::info!("mounted {} files", vfs.len());
 
     let map_dir = if cfg.map.is_empty() { None } else { Some(cfg.resolve(game.as_deref(), &cfg.map)) };
@@ -170,7 +179,9 @@ fn main() -> Result<()> {
             None => panels::Panels::load(&controls_path)?,
         };
         log::info!("{} buttons on panels", panels.button_count());
-        return app::run(
+        let sound_files = sim.sound_files();
+        let vfs_keep = vfs.clone();
+        let result = app::run(
             Box::new(move |r| match single {
                 Some(m) => {
                     let mut s = renderer::Scene::default();
@@ -213,6 +224,13 @@ fn main() -> Result<()> {
             game.clone().unwrap_or_default().join("config").join("settings.json"),
             !args.iter().any(|a| a == "--nomenu"),
         );
+        if let Some(out) = &pack_out {
+            // everything read this session, plus every sound the cab's Lua can ask for
+            let extra: Vec<String> = sound_files.iter().flat_map(|f| [format!("sound/{f}"), f.clone()]).collect();
+            let (n, bytes) = vfs_keep.lock().unwrap().pack_used(out, &extra)?;
+            log::info!("packed {n} files ({:.1} MB) into {}", bytes as f64 / 1e6, out.display());
+        }
+        return result;
     }
 
     pollster::block_on(async {

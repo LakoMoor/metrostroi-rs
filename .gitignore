@@ -1,5 +1,6 @@
 sim/target/
 *.exe
 game/content/maps/*/map.bsp
+*.mpak
 game/screenshots/
 game/logs/

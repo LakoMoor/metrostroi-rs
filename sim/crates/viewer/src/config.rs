@@ -15,6 +15,8 @@ pub struct Config {
     pub map: String,
     /// Trains standing on the main line (metres along it): they hold the signals behind them at red.
     pub obstacles: Vec<f32>,
+    /// Own asset package (`.mpak`, relative to the game folder). When it exists it replaces the Workshop/Steam mounts.
+    pub assets: String,
 }
 
 impl Default for Config {
@@ -29,6 +31,7 @@ impl Default for Config {
             controls: "content/trains/81-717_mvm/controls.json".into(),
             map: "content/maps/crossline_c4".into(),
             obstacles: Vec::new(),
+            assets: "content/assets.mpak".into(),
         }
     }
 }

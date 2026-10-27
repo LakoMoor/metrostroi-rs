@@ -137,6 +137,8 @@ struct App {
     frames: u64,
     /// Brightness of the car body and cab from the light around it (smoothed).
     car_light: f32,
+    /// Smoothed frames per second for the HUD.
+    fps: f32,
     /// Last failure message and when it was shown (F7/F8/F9).
     fail_note: Option<(String, std::time::Instant)>,
     held: Option<String>,
@@ -300,6 +302,9 @@ impl App {
     fn redraw(&mut self) {
         let now = std::time::Instant::now();
         let dt = now.duration_since(self.last_tick).as_secs_f32().min(0.1);
+        if dt > 0.0 {
+            self.fps += (1.0 / dt - self.fps) * 0.05;
+        }
         self.last_tick = now;
         let playing = self.menu.screen == Screen::Playing;
         // the tag belongs to the button under the cursor *now* (the camera may have moved since the mouse did)
@@ -416,6 +421,8 @@ impl App {
             if self.menu.settings.hud {
                 if let Some(s) = &self.sim {
                     draw_hud(&mut g.ui, s);
+                    let (sw, _) = g.ui.screen;
+                    g.ui.text(sw - 90.0, 12.0, 18.0, &format!("{:.0} fps", self.fps), [0.6, 0.7, 0.85, 0.9]);
                     if let Some((msg, at)) = &self.fail_note {
                         if at.elapsed().as_secs_f32() < 6.0 {
                             let (sw, _) = g.ui.screen;
@@ -645,6 +652,12 @@ impl ApplicationHandler for App {
             }
             WindowEvent::RedrawRequested => {
                 self.redraw();
+                // `MS_EXIT_AFTER=<s>`: quit by itself (used to build asset packages unattended)
+                static T0: std::sync::OnceLock<std::time::Instant> = std::sync::OnceLock::new();
+                let t0 = *T0.get_or_init(std::time::Instant::now);
+                if std::env::var("MS_EXIT_AFTER").ok().and_then(|v| v.parse::<f32>().ok()).is_some_and(|s| t0.elapsed().as_secs_f32() > s) {
+                    el.exit();
+                }
                 if let Some(g) = &self.gfx {
                     g.window.request_redraw();
                 }
@@ -709,6 +722,7 @@ pub fn run(
         press_at: (0.0, 0.0),
         frames: 0,
         car_light: 1.0,
+        fps: 60.0,
         fail_note: None,
         held: None,
         ground: None,

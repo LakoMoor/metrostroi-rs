@@ -2,7 +2,9 @@
 
 use crate::gma::Gma;
 use anyhow::Result;
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Mutex;
 use std::path::Path;
 
 #[derive(Default)]
@@ -16,6 +18,11 @@ pub struct Vfs {
     vpk_index: HashMap<String, usize>,
     /// VPK files that have preload bytes and archive data: joined once at mount time.
     vpk_joined: HashMap<String, Vec<u8>>,
+    /// Game asset packages (`.mpak`); consulted after addon archives.
+    mpaks: Vec<crate::mpak::Mpak>,
+    /// When set, every file read from an archive or package is noted in `used` (what `pack_used` writes out).
+    recording: AtomicBool,
+    used: Mutex<BTreeSet<String>>,
 }
 
 fn norm(path: &str) -> String {
@@ -59,7 +66,36 @@ impl Vfs {
         }
     }
 
+    /// Mount an `.mpak` asset package.
+    pub fn mount_mpak(&mut self, path: &Path) -> Result<()> {
+        self.mpaks.push(crate::mpak::Mpak::open(path)?);
+        Ok(())
+    }
+
+    /// Start (or stop) remembering which archive files get read.
+    pub fn record_reads(&self, on: bool) {
+        self.recording.store(on, Ordering::Relaxed);
+    }
+
+    /// Write the files read so far, plus `extra` paths, into a package. Returns (files, bytes).
+    pub fn pack_used(&self, out: &Path, extra: &[String]) -> Result<(usize, usize)> {
+        let mut want: BTreeSet<String> = self.used.lock().unwrap().clone();
+        want.extend(extra.iter().map(|p| norm(p)));
+        let files: Vec<(String, Vec<u8>)> = want.into_iter().filter_map(|p| Some((p.clone(), self.fetch(&p)?.to_vec()))).collect();
+        let bytes = files.iter().map(|f| f.1.len()).sum();
+        crate::mpak::write(out, &files)?;
+        Ok((files.len(), bytes))
+    }
+
     pub fn read(&self, path: &str) -> Option<&[u8]> {
+        let d = self.fetch(path)?;
+        if self.recording.load(Ordering::Relaxed) && !self.loose.contains_key(&norm(path)) {
+            self.used.lock().unwrap().insert(norm(path));
+        }
+        Some(d)
+    }
+
+    fn fetch(&self, path: &str) -> Option<&[u8]> {
         if let Some(d) = self.loose.get(&norm(path)) {
             return Some(d);
         }
@@ -67,6 +103,11 @@ impl Vfs {
         if let Some(&(m, i)) = self.index.get(&key) {
             let g = &self.mounts[m];
             return Some(g.read(&g.entries[i]));
+        }
+        for m in &self.mpaks {
+            if let Some(d) = m.read(&key) {
+                return Some(d);
+            }
         }
         if let Some(j) = self.vpk_joined.get(&key) {
             return Some(j);
@@ -80,18 +121,18 @@ impl Vfs {
     }
 
     pub fn exists(&self, path: &str) -> bool {
-        self.loose.contains_key(&norm(path)) || self.index.contains_key(&norm(path)) || self.vpk_index.contains_key(&norm(path))
+        self.loose.contains_key(&norm(path)) || self.index.contains_key(&norm(path)) || self.mpaks.iter().any(|m| m.entries.contains_key(&norm(path))) || self.vpk_index.contains_key(&norm(path))
     }
 
     pub fn paths(&self) -> impl Iterator<Item = &str> {
-        self.index.keys().chain(self.loose.keys()).map(|s| s.as_str())
+        self.index.keys().chain(self.loose.keys()).chain(self.mpaks.iter().flat_map(|m| m.entries.keys())).map(|s| s.as_str())
     }
 
     pub fn len(&self) -> usize {
-        self.index.len() + self.loose.len()
+        self.index.len() + self.loose.len() + self.mpaks.iter().map(|m| m.entries.len()).sum::<usize>()
     }
 
     pub fn is_empty(&self) -> bool {
-        self.index.is_empty()
+        self.len() == 0
     }
 }

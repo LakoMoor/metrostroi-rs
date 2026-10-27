@@ -1,5 +1,6 @@
 pub mod gma;
 pub mod mdl;
+pub mod mpak;
 pub mod skeleton;
 pub mod vfs;
 pub mod vpk;

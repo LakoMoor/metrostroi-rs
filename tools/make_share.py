@@ -33,6 +33,8 @@ for child in OUT.iterdir():
 copy_tree(ROOT / "sim", OUT / "sim", skip=("target",))
 copy_tree(ROOT / "game", OUT / "game", skip=("screenshots", "logs"))
 copy_tree(ROOT / "src" / "scripts" / "lua", OUT / "game" / "lua")
+for f in OUT.rglob("*.mpak"):  # asset packages are built locally from Workshop content, never published
+    f.unlink()
 if (ROOT / "site").exists():
     copy_tree(ROOT / "site", OUT / "docs")
 (OUT / "tools").mkdir()
@@ -56,7 +58,7 @@ for f in ("README.md", "AGENTS.md", "CLAUDE.md", "SETUP.md"):
     if src.exists():
         shutil.copy2(src, OUT / f)
 
-GITIGNORE = "\n".join(["sim/target/", "*.exe", "game/content/maps/*/map.bsp", "game/screenshots/", "game/logs/", ""])
+GITIGNORE = "\n".join(["sim/target/", "*.exe", "game/content/maps/*/map.bsp", "*.mpak", "game/screenshots/", "game/logs/", ""])
 (OUT / ".gitignore").write_text(GITIGNORE, encoding="utf-8")
 size = sum(p.stat().st_size for p in OUT.rglob("*") if p.is_file())
 print(f"{OUT}: {size / 1e6:.0f} MB")

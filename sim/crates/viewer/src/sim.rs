@@ -462,6 +462,12 @@ impl Sim {
             .collect()
     }
 
+    /// Every sound file the cab's Lua can play (for building an asset package).
+    pub fn sound_files(&self) -> Vec<String> {
+        let code = "local r = {} for _, n in pairs(C.SoundNames or {}) do if type(n) == 'string' then r[#r+1] = n elseif type(n) == 'table' then for _, v in ipairs(n) do if type(v) == 'string' then r[#r+1] = v end end end end return r";
+        self.rt.lua.load(code).eval::<mlua::Table>().map(|t| t.sequence_values::<String>().flatten().collect()).unwrap_or_default()
+    }
+
     /// The cab's button panels straight from the running Lua.
     pub fn panels(&self, tips_file: Option<&Path>) -> Option<crate::panels::Panels> {
         let f: mlua::Function = self.rt.lua.globals().get("__panels").ok()?;
