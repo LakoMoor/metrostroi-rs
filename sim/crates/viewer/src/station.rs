@@ -69,6 +69,15 @@ pub fn names(lua_file: &std::path::Path) -> HashMap<u32, String> {
     let mut cur: Option<u32> = None;
     for line in text.lines() {
         let l = line.trim();
+        // announcer tables: `915,"Речная",`
+        if let Some((n, rest)) = l.split_once(',') {
+            if let (Ok(id), Some(name)) = (n.trim().parse::<u32>(), rest.trim().strip_prefix('"').and_then(|r| r.split('"').next())) {
+                let mut c = name.chars();
+                let cap: String = c.next().map(|f| f.to_uppercase().collect::<String>() + c.as_str()).unwrap_or_default();
+                out.entry(id).or_insert(cap);
+                continue;
+            }
+        }
         if let Some(rest) = l.strip_prefix('[') {
             if let Some((n, tail)) = rest.split_once(']') {
                 if tail.trim_start().starts_with('=') {
@@ -107,6 +116,7 @@ mod tests {
         let n = names(f);
         assert_eq!(n.get(&110).map(String::as_str), Some("Международная"));
         assert!(n.len() > 5, "{n:?}");
+        assert_eq!(n.get(&915).map(String::as_str), Some("Речная"));
     }
 
     #[test]
