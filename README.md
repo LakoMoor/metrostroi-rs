@@ -10,7 +10,8 @@
 
 | | |
 |---|---|
-| ![Сигналы](docs/img/signals.jpg) | ![Салон](docs/img/salon.jpg) |
+| ![Туннель](docs/img/tunnel.jpg) | ![Сигналы](docs/img/signals.jpg) |
+| ![Салон](docs/img/salon.jpg) | ![Снаружи](docs/img/orbit.jpg) |
 
 ## Что нужно для запуска
 Windows, Rust (MSVC), видеокарта с Vulkan/DX12 и **ваши подписки на контент Metrostroi в Steam Workshop** (Garry's Mod,
