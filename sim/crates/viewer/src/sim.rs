@@ -167,6 +167,7 @@ const HELPERS: &str = r#"
         end)
     end
     function __qs_active() return __qs ~= nil and coroutine.status(__qs) ~= "dead" end
+    RAIL_OHMS = 0.03
     function __tick(dt)
         __time = __time + dt
         if __qs_active() then
@@ -174,8 +175,12 @@ const HELPERS: &str = r#"
             if not ok then print("quickstart: " .. tostring(err)) __qs = nil end
         end
         -- third-rail voltage comes from Rust (Sim::rail_voltage)
-        T.FrontBogey.Voltage = __rail
-        T.RearBogey.Voltage = __rail
+        -- the line sags under load: feeder resistance times the traction current (eased like the real contact patch)
+        local amps = math.abs((T.Electric and T.Electric.Itotal) or 0)
+        __sag = (__sag or 0) + (amps * RAIL_OHMS - (__sag or 0)) * math.min(1, dt * 3)
+        local volts = math.max(0, __rail - (__rail > 0 and __sag or 0))
+        T.FrontBogey.Voltage = volts
+        T.RearBogey.Voltage = volts
         local ok, err = pcall(T.Think, T)
         if not ok then return tostring(err) end
         C.RingVolume = C.RingVolume or 1
