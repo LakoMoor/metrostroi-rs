@@ -1072,6 +1072,32 @@ mod tests {
         assert!(ok, "trailer bogey speed not fed by the dynamics");
     }
 
+    /// A drive over the first section of a Moscow line (with its dip): the train leaves the platform and reaches speed.
+    #[test]
+    fn train_drives_a_generated_moscow_line() {
+        let f = Path::new("E:/metrostroi2pz/game/content/maps/moscow/305810/track.lua");
+        if !Path::new(LUA_ROOT).exists() || !f.exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        sim.set_track(crate::track::Track::load(f).unwrap());
+        sim.set_position(5.0);
+        run(&sim, 2.0);
+        sim.quick_start();
+        while sim.quick_start_active() {
+            sim.tick(1.0 / 60.0);
+        }
+        sim.key("3", true);
+        let mut max = 0.0f64;
+        for _ in 0..40 {
+            run(&sim, 1.0);
+            max = max.max(sim.motion().0);
+        }
+        let (kmh, pos) = sim.motion();
+        println!("Moscow: {kmh:.0} km/h (max {max:.0}) after {pos:.0} m");
+        assert!(max > 30.0 && pos > 200.0, "max {max}, pos {pos}");
+    }
+
     #[test]
     fn announcer_messages_reach_the_audio_queue() {
         if !Path::new(LUA_ROOT).exists() {
