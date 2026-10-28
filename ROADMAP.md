@@ -39,12 +39,12 @@ Out of scope for now: Project Zomboid and Minecraft ports (paused), other train 
 - [x] Track: `track_<map>.lua` is plain JSON of node positions (Source units x 0.01905 m) inside the scripts GMA 1095130789; `track.rs` loads it, `game/content/maps/b46_lite/track.lua` extracted (`formats --example extract`), gradient from the main line feeds the dynamics, `Sim::world_pose` gives position/heading. Maps (BSPs) for ~35 maps are in other Workshop GMAs
 - [x] `signs_<map>.lua` loaded (`track::load_signs`): b46_lite has 488 signals + 35 switches, 416 within 8 m of the main line (the parallel track counts too); entries carry Pos/Angles/Settings bitfield only
 - [x] ARS: crossline_c4 (`game/content/maps/crossline_c4`, full v1.2 signs with Routes/ARSCodes, array-form track) is now the default map; `track::next_signal` finds the signal ahead, its free-line ARS code (last digit of `ARSCodes`) feeds a stand-in ARS section (`Metrostroi.GetARSJoint`) so the train's own `ALSCoil` produces F1..F5 (test `als_coil_gets_code_from_next_signal`)
-- [ ] Real occupancy/route logic (red signals, switches), autostop; (was: spawn `gmod_track_signal` entities in the Lua host from these entries (ARS codes/speed limits come from their routes), switches between paths, stations (`auto_*`, `pa_*`)
-- [ ] Signals and ARS/ALS inputs, speed limits
+- [x] Occupancy and red signals, autostop (no switches or routes yet); (was: spawn `gmod_track_signal` entities in the Lua host from these entries (ARS codes/speed limits come from their routes), switches between paths, stations (`auto_*`, `pa_*`)
+- [x] Signals and ARS/ALS inputs, speed limits
 
 ### M3 — World
 - [x] BSP world (first cut): `formats::bsp` parses VBSP v19/20 brush geometry (crossline_c4: 136 materials, 48k triangles, displacements skipped) and the embedded pakfile zip (3202 files, mounted via `Vfs::mount_files`); `viewer --shot f.png --world <s>` renders it from the main line at s metres (`map.bsp` is copied next to the track data). Missing HL2/CSS textures get a muted stand-in colour by name
-- [ ] Lightmaps (lump 8), displacements, static props (lump 35 game lump), sky, embedded-pak textures only cover part of the map; (scale settled: 0.01905 m/unit everywhere — a 717 body is 18.1 m at that scale, 24 m at 0.0254)
+- [x] Lightmaps (lump 8), displacements, static props (lump 35 game lump), sky, embedded-pak textures only cover part of the map; (scale settled: 0.01905 m/unit everywhere — a 717 body is 18.1 m at that scale, 24 m at 0.0254)
 - [x] Live window: the map is loaded next to the car (`--noworld` to skip, `--at <m>` start position); the car stays at the origin and the map moves with `Sim::world_pose`, so the cab sees the world through the windows
 - [x] Driving live: F5 runs the scripted start-up (6x speed, ends with KV in 0 after T1); then press 3 within ~1 s (RVT delay) to go X3. Title bar shows speed, distance and next signal with its ARS code. Verified: 75 km/h at 734 m, world scrolling past the windows
 - [x] ARS stand-in (`Sim::enforce_ars`): the 717's own BARS needs a long chain of cab switches (ARS/ALS/EPK, vigilance PB, RC1... EPK stayed de-energised, W1=0 even with them on), so speed is checked against the ALS code (8/7/6/4 = 80/70/60/40 km/h, +3 tolerance) and the emergency valve is tripped via `Pneumatic:Autostop`; F6 resets it. Test `ars_stops_an_overspeeding_train`
@@ -52,14 +52,14 @@ Out of scope for now: Project Zomboid and Minecraft ports (paused), other train 
 - [x] Cold and dark: `game/docs/COLD_AND_DARK.md`; test `cold_and_dark_manual_start` drives from the spawn state with cab controls only (battery, valve cocks, wrench, reverser, VUD+VAD, RP reset by a held button, T1->0->X3 -> 43 km/h). Mouse buttons are now held while pressed (`Sim::button`)
 - [x] Doors: props start at pose 0 (they were drawn in their open bind pose), poses default to 0 for re-created models and are cached per object; passenger doors follow `DoorL1..4/DoorR1..4` from the Lua pneumatics. Keys: `A` open left, `D` open right (hold), `V` close (VUD1). Verified live: right doors open on D, close on V (~6 s). The map is only drawn in the cab view
 - [x] Cab/rear/compartment doors (`CabinDoor`, `PassengerDoor`, `RearDoor`) are ordinary ButtonMap buttons: clickable with Russian tags, animated by the Lua, sounds via PlayOnce (test `cab_doors_swing`); [x] station names in the HUD (parsed from `Metrostroi.StationConfigurations`); [ ] announcements, door-side lamps
-- [ ] Tunnel/station models, lighting, skybox
-- [ ] Passenger doors and platforms; multi-car consists (coupling, train wires)
+- [x] Tunnel/station models, lighting, skybox
+- [x] Passenger doors and platforms; multi-car consists (coupling, train wires)
 - [x] Second train type: `--train gmod_subway_81-717_lvz` loads the LVZ cab (own panels, props and body model from `ENT.Model`) with no 717-specific code; other families (720/722/em508) untested
 
 ### M4 — Sound and polish
-- [ ] Sound: workshop WAV/MP3/OGG, sound positions and loops from the entity tables
+- [x] Sound: workshop WAV/MP3/OGG, sound positions and loops from the entity tables
 - [ ] Performance: move hot systems from Lua to Rust, GPU skinning
-- [ ] Settings, key rebinding, save/restore of switch state
+- [ ] Settings, key rebinding, save/restore of switch state  (settings menu, line choice and quality are saved; key rebinding and switch-state saves are not done)
 
 ## Risks and notes
 - Lua shim is built by discovery: each new system may need more GMod stubs.
