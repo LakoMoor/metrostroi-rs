@@ -16,12 +16,12 @@ use winit::keyboard::{KeyCode, PhysicalKey};
 use winit::window::{Window, WindowId};
 
 /// Driver's eye in car space, metres (Source axes: X forward, Y left, Z up).
-/// Height of the car body origin over the rail head, metres.
-/// Car origin above the track node, metres. The 81-717 models put the wheel treads 2.22 m below the origin;
-/// 1.6 looks right against the map's rails. Override with `MS_CAR_HEIGHT` to compare.
+/// Car origin above the track node, metres. Track nodes sit 2.21 m over the tunnel floor in the Metrostroi maps
+/// (measured in the BSP) and the 81-717 wheel treads are 2.22 m below the car origin, so the origin is the node
+/// itself. Override with `MS_CAR_HEIGHT` to compare.
 pub fn car_above_rail() -> f32 {
     static H: std::sync::OnceLock<f32> = std::sync::OnceLock::new();
-    *H.get_or_init(|| std::env::var("MS_CAR_HEIGHT").ok().and_then(|v| v.parse().ok()).unwrap_or(1.6))
+    *H.get_or_init(|| std::env::var("MS_CAR_HEIGHT").ok().and_then(|v| v.parse().ok()).unwrap_or(0.0))
 }
 /// Standing eye height above the feet, metres.
 const EYE_HEIGHT: f32 = 1.7;
