@@ -13,6 +13,7 @@ pub enum Screen {
     Settings,
     Help,
     Lines,
+    Trip,
 }
 
 /// A selectable line (`lines.json` of a generated map set): folder under `content/maps/moscow` and the menu text.
@@ -20,6 +21,13 @@ pub enum Screen {
 pub struct LineInfo {
     pub id: String,
     pub label: String,
+}
+
+/// Lines of the trip statistics screen, refreshed by the app while a menu is open.
+static TRIP: std::sync::Mutex<Vec<String>> = std::sync::Mutex::new(Vec::new());
+
+pub fn set_trip(l: Vec<String>) {
+    *TRIP.lock().unwrap() = l;
 }
 
 static LINES: std::sync::Mutex<Vec<LineInfo>> = std::sync::Mutex::new(Vec::new());
@@ -159,6 +167,7 @@ impl Menu {
                 Item::Button("Быстрый запуск поезда", Action::QuickStart),
                 Item::Button("Сбросить автостоп АРС", Action::ResetAutostop),
                 Item::Button("Поезд в начало", Action::ResetTrain),
+                Item::Goto("Статистика рейса", Screen::Trip),
                 Item::Goto("Настройки", Screen::Settings),
                 Item::Goto("Управление", Screen::Help),
                 Item::Button("В главное меню", Action::ToMain),
@@ -173,7 +182,7 @@ impl Menu {
                 Item::Toggle("Показывать приборы на экране", Field::Hud),
                 Item::Back,
             ],
-            Screen::Help => vec![Item::Back],
+            Screen::Help | Screen::Trip => vec![Item::Back],
             Screen::Lines => (0..self.lines.len()).map(Item::Line).chain(std::iter::once(Item::Back)).collect(),
             Screen::Playing => vec![],
         }
@@ -185,6 +194,7 @@ impl Menu {
             Screen::Pause => "Пауза",
             Screen::Settings => "Настройки",
             Screen::Help => "Управление",
+            Screen::Trip => "Статистика рейса",
             Screen::Lines => "Выбор линии",
             Screen::Playing => "",
         }
@@ -217,7 +227,7 @@ impl Menu {
     }
 
     fn go(&mut self, s: Screen) {
-        if matches!(s, Screen::Settings | Screen::Help | Screen::Lines) {
+        if matches!(s, Screen::Settings | Screen::Help | Screen::Lines | Screen::Trip) {
             self.back_to = self.screen;
         }
         self.screen = s;
@@ -274,7 +284,7 @@ impl Menu {
                 self.screen = Screen::Playing;
                 Action::Resume
             }
-            Screen::Settings | Screen::Help | Screen::Lines => {
+            Screen::Settings | Screen::Help | Screen::Lines | Screen::Trip => {
                 self.back();
                 Action::None
             }
@@ -336,7 +346,13 @@ impl Menu {
         }
         let items = self.items();
         let (iw, ih, gap) = (560.0f32, 52.0f32, 12.0f32);
-        let top = if self.screen == Screen::Help { sh * 0.12 + 96.0 + KEYS_HELP.len() as f32 * 34.0 } else { sh * 0.30 };
+        let top = if self.screen == Screen::Help {
+            sh * 0.12 + 96.0 + KEYS_HELP.len() as f32 * 34.0
+        } else if self.screen == Screen::Trip {
+            sh * 0.12 + 96.0 + 10.0 * 34.0
+        } else {
+            sh * 0.30
+        };
         self.rects.clear();
         // long lists (the line menu) show a window of rows that follows the selection
         let rows = (((sh - top - 70.0) / (ih + gap)).floor() as usize).max(3);
@@ -375,6 +391,11 @@ impl Menu {
                 let y = sh * 0.12 + 96.0 + i as f32 * 34.0;
                 ui.text(sw / 2.0 - 400.0, y, 24.0, k, [1.0, 0.9, 0.5, 1.0]);
                 ui.text(sw / 2.0 - 130.0, y, 24.0, d, [0.9, 0.93, 1.0, 1.0]);
+            }
+        }
+        if self.screen == Screen::Trip {
+            for (i, l) in TRIP.lock().unwrap().iter().enumerate() {
+                ui.text(sw / 2.0 - 400.0, sh * 0.12 + 96.0 + i as f32 * 34.0, 24.0, l, if i == 0 { [1.0, 0.9, 0.5, 1.0] } else { [0.9, 0.93, 1.0, 1.0] });
             }
         }
         let hint = "↑↓ выбор · Enter · ←→ значение · Esc назад";

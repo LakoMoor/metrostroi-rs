@@ -9,5 +9,6 @@
   main menu), with stations, block signals and a stand-in vertical profile.
 - Walking through the car and outside controls (end cocks, main switch, ...) within arm's reach.
 - Graphics quality: standard / high (4x MSAA) / ultra (HDR, bloom, ACES, SSAO, render-scale slider).
+- Trip statistics screen with a driving score (stop accuracy, autostops, door violations).
 - Own asset package (`assets.mpak`, built locally with `--pack-assets`), friendly start-up errors, Steam Workshop
   auto-detection.

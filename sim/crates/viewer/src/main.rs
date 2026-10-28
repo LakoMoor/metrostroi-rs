@@ -13,6 +13,7 @@ mod signals;
 mod station;
 mod sim;
 mod track;
+mod trip;
 mod ui;
 
 use anyhow::{Context, Result};

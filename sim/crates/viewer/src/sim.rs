@@ -326,6 +326,9 @@ pub struct Sim {
     /// Last stop on a platform: metres short of the platform end and seconds left to show it.
     stop_report: std::cell::Cell<Option<(f32, f32)>>,
     ars_tripped: std::cell::Cell<bool>,
+    /// The driver's trip record (stops, rule violations).
+    pub trip: RefCell<crate::trip::Trip>,
+    trip_clock: std::cell::Cell<f32>,
 }
 
 /// Distance between the centres of coupled 81-717 cars, metres.
@@ -480,7 +483,7 @@ impl Sim {
         rt.lua.globals().set("T", train)?;
         rt.lua.globals().set("__rail", 750.0)?;
         rt.exec(HELPERS, "@sim_helpers")?;
-        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), cars: std::cell::Cell::new(1), auto_fail: std::cell::Cell::new(false), fail_clock: std::cell::Cell::new(0.0), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false) })
+        Ok(Sim { rt, dynamics: RefCell::new(Dynamics::default()), track: RefCell::new(None), signs: RefCell::new(Vec::new()), obstacles: RefCell::new(Vec::new()), platforms: RefCell::new(Vec::new()), station_names: RefCell::new(HashMap::new()), lead: RefCell::new(Vec::new()), cars: std::cell::Cell::new(1), auto_fail: std::cell::Cell::new(false), fail_clock: std::cell::Cell::new(0.0), red_ahead: std::cell::Cell::new(None), moving: std::cell::Cell::new(false), stop_report: std::cell::Cell::new(None), ars_tripped: std::cell::Cell::new(false), trip: RefCell::new(Default::default()), trip_clock: std::cell::Cell::new(0.0) })
     }
 
     /// The body model of the train (`ENT.Model`, no extension), e.g. `models/metrostroi_train/81-717/81-717_mvm`.
@@ -733,15 +736,42 @@ impl Sim {
             if let Some((_, _, d, _, left)) = self.platform_ahead() {
                 if d <= 0.0 {
                     self.stop_report.set(Some((left, 10.0)));
+                    let name = self.station_name(self.platform_ahead().map(|p| p.0).unwrap_or(0)).unwrap_or_else(|| "станция".into());
+                    self.trip.borrow_mut().stopped(name, left);
                 }
             }
         }
+    }
+
+    /// Samples the facts the trip record needs five times a second.
+    fn track_trip(&self, dt: f32) {
+        let t = self.trip_clock.get() + dt;
+        if t < 0.2 {
+            self.trip_clock.set(t);
+            return;
+        }
+        self.trip_clock.set(0.0);
+        let (dl, dr) = self.doors_open();
+        let wrong = match self.platform_ahead() {
+            Some((_, _, d, side, _)) if d <= 0.0 => {
+                let left = side == crate::station::Side::Left;
+                (dl && !left) || (dr && left)
+            }
+            _ => true,
+        };
+        let kmh = self.dynamics.borrow().v.abs() as f32 * 3.6;
+        self.trip.borrow_mut().observe(t, kmh, dl || dr, wrong, self.ars_tripped.get());
+    }
+
+    pub fn trip_lines(&self) -> Vec<String> {
+        self.trip.borrow().lines()
     }
 
     fn tick_once(&self, dt: f32) {
         self.enforce_ars();
         self.physics(dt as f64);
         self.track_stops(dt);
+        self.track_trip(dt);
         let f: mlua::Function = self.rt.lua.globals().get("__tick").unwrap();
         if let Ok(Some(err)) = f.call::<Option<String>>(dt as f64) {
             log::warn!("train think: {err}");

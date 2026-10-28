@@ -367,6 +367,11 @@ impl App {
         }
         self.last_tick = now;
         let playing = self.menu.screen == Screen::Playing;
+        if self.menu.screen == Screen::Trip {
+            if let Some(s) = &self.sim {
+                crate::menu::set_trip(s.trip_lines());
+            }
+        }
         // the tag belongs to the button under the cursor *now* (the camera may have moved since the mouse did)
         self.tip = if playing {
             self.cursor_hit().map(|h| (if h.tooltip.is_empty() { h.id.clone() } else { h.tooltip.clone() }, h.pos))

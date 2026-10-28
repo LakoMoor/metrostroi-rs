@@ -161,3 +161,5 @@ Goal: the same game on Android phones/tablets (arm64-v8a first), reusing the Rus
 - Replaced on purpose (no VPhysics): friction/`compensateF`/side force -> a small rolling+air resistance; mass and `BRAKE_SCALE` (0.85) are calibrated: ~1.0 m/s^2 traction, ~1.1 m/s^2 rheostatic T2, ~1.2 m/s^2 pneumatic emergency brake, coasting ~0.1 m/s^2, top speed ~104 km/h (motor curve, as in the Lua).
 - Consists: all cars' bogeys feed one 1-D model, mass scales with the car count. Not modelled: coupler slack/forces, curve resistance, wheel slip.
 - `performance_envelope` test pins these numbers.
+
+- Trip record (`trip.rs`, pause menu -> Статистика рейса): stop accuracy per station, ARS autostops, doors opened while moving / on the wrong side, a 0-100 score.
