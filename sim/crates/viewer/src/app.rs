@@ -233,7 +233,9 @@ impl App {
         let inv = cam.view_proj(w / h, self.menu.settings.fov).inverse();
         let (near, far) = (inv.project_point3(ndc.extend(0.0)), inv.project_point3(ndc.extend(1.0)));
         let hidden = self.sim.as_ref().map(|s| s.hidden_buttons()).unwrap_or_default();
-        self.panels.pick(near, (far - near).normalize(), &hidden)
+        // on foot you have to be within arm's length (plus a step) of the button; from the seat everything in the cab is reachable
+        let reach = if cam.mode == Mode::Walk { 2.2 } else { f32::MAX };
+        self.panels.pick(near, (far - near).normalize(), reach, &hidden)
     }
 
     /// Show the button under the cursor in the window title.

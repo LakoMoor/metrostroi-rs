@@ -169,7 +169,8 @@ impl Panels {
     }
 
     /// Nearest button under the ray (one-sided, like Metrostroi's panel hit test).
-    pub fn pick(&self, origin: Vec3, dir: Vec3, hidden: &std::collections::HashSet<String>) -> Option<Hit> {
+    /// `reach` limits the distance along the ray (metres).
+    pub fn pick(&self, origin: Vec3, dir: Vec3, reach: f32, hidden: &std::collections::HashSet<String>) -> Option<Hit> {
         let mut best: Option<(f32, &Button, Vec3)> = None;
         for p in &self.panels {
             let n = p.axes.z_axis.truncate();
@@ -179,7 +180,7 @@ impl Panels {
                 continue;
             }
             let t = (p.origin - origin).dot(n) / denom;
-            if t <= 0.0 || best.is_some_and(|(bt, _, _)| bt <= t) {
+            if t <= 0.0 || t > reach || best.is_some_and(|(bt, _, _)| bt <= t) {
                 continue;
             }
             let rel = origin + dir * t - p.origin;
@@ -293,7 +294,7 @@ mod tests {
                 let n = p.axes.z_axis.truncate();
                 let eye = target + n * 0.5;
                 tried += 1;
-                if ps.pick(eye, -n, &Default::default()).is_some() {
+                if ps.pick(eye, -n, f32::MAX, &Default::default()).is_some() {
                     ok += 1;
                 }
             }
