@@ -394,6 +394,7 @@ impl App {
             let t_state = std::time::Instant::now();
             crate::car::apply_state(&g.renderer, scene, &self.names, &s.state(), self.car_light);
             prof(1, t_state, self.fps);
+            crate::car::spin_wheels(scene, &self.names, s.motion().1);
             // the train stays at the origin; the map moves around it
             if let (Some((pos, dir)), Some(w)) = (s.world_pose(), scene.objects.iter_mut().find(|o| o.name == "world")) {
                 let x = dir.normalize_or_zero();
