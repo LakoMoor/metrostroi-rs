@@ -26,6 +26,8 @@ struct GpuVertex {
 struct Globals {
     view_proj: [[f32; 4]; 4],
     light: [f32; 4],
+    /// x = tone-mapping strength (0 = off), y = saturation boost
+    fx: [f32; 4],
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -139,6 +141,8 @@ pub struct Renderer {
     pipes: [[wgpu::RenderPipeline; 3]; 2],
     /// Current MSAA sample count (1 or 4); `depth_view` and `msaa_view` follow it.
     pub samples: std::cell::Cell<u32>,
+    /// Post-tone-mapping amount for the ultra quality tier (0..1).
+    pub tonemap: std::cell::Cell<f32>,
     pub target_format: wgpu::TextureFormat,
     /// Debug: show raw texture colours without lighting.
     pub unlit: std::cell::Cell<bool>,
@@ -312,6 +316,7 @@ impl Renderer {
             sampler,
             pipes,
             samples: std::cell::Cell::new(1),
+            tonemap: std::cell::Cell::new(0.0),
             target_format,
             unlit: std::cell::Cell::new(false),
             skin: Default::default(),
@@ -680,7 +685,7 @@ impl Renderer {
     /// Like `render`; with `msaa` the scene is drawn multisampled and resolved into `color`.
     pub fn render_ms(&self, scene: &Scene, view_proj: Mat4, msaa: Option<&wgpu::TextureView>, color: &wgpu::TextureView, depth: &wgpu::TextureView) {
         let pipes = &self.pipes[(msaa.is_some() && self.samples.get() > 1) as usize];
-        let g = Globals { view_proj: view_proj.to_cols_array_2d(), light: [0.4, -0.3, 0.85, if self.unlit.get() { 1.0 } else { 0.0 }] };
+        let g = Globals { view_proj: view_proj.to_cols_array_2d(), light: [0.4, -0.3, 0.85, if self.unlit.get() { 1.0 } else { 0.0 }], fx: [self.tonemap.get(), 0.0, 0.0, 0.0] };
         self.queue.write_buffer(&self.globals, 0, bytemuck::bytes_of(&g));
         self.upload_objects(scene);
         let obj_bind = self.object_bind.borrow();

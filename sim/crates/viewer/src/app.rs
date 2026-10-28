@@ -436,6 +436,7 @@ impl App {
             _ => return,
         };
         prof(5, t_acq, self.fps);
+        g.renderer.tonemap.set(if self.menu.settings.quality >= 2 { 0.6 } else { 0.0 });
         let want = if self.menu.settings.quality >= 1 { 4 } else { 1 };
         if g.renderer.samples.get() != want {
             g.renderer.samples.set(want);
