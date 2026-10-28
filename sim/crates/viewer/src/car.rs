@@ -12,6 +12,18 @@ pub fn load(r: &Renderer, vfs: &Vfs, body_model: &str, props: &[PropDef]) -> Res
     let body = r.load_model(&mut scene, vfs, body_model)?;
     r.add_object(&mut scene, "body", body, Mat4::IDENTITY, true);
 
+    // bogeys are separate entities in Metrostroi (gmod_train_bogey); positions are the 81-717's CreateBogey calls
+    for (name, x, yaw) in [("bogey_front", 312.0f32, 180.0f32), ("bogey_rear", -317.0, 0.0)] {
+        let at = Mat4::from_translation(Vec3::new(x, 0.0, -84.0) * SCALE) * source_angles(0.0, yaw, 0.0);
+        if let Ok(id) = r.load_model(&mut scene, vfs, "models/metrostroi_train/bogey/metro_bogey_717") {
+            r.add_object(&mut scene, name, id, at, true);
+        }
+        if let Ok(id) = r.load_model(&mut scene, vfs, "models/metrostroi_train/bogey/metro_wheels_collector") {
+            let w = at * Mat4::from_translation(Vec3::new(0.0, 0.0, -10.0) * SCALE) * source_angles(0.0, 90.0, 0.0);
+            r.add_object(&mut scene, &format!("{name}_wheels"), id, w, true);
+        }
+    }
+
     let mut skipped = 0;
     for p in props {
         let id = match r.load_model(&mut scene, vfs, &p.model) {
@@ -39,6 +51,10 @@ pub fn index(scene: &Scene) -> HashMap<String, usize> {
 pub fn apply_state(r: &Renderer, scene: &mut Scene, names: &HashMap<String, usize>, state: &HashMap<String, (Option<f32>, f32)>, light: f32) {
     for (name, &i) in names {
         if name == "world" {
+            continue;
+        }
+        if name.starts_with("bogey") {
+            scene.objects[i].tint = [light, light, light, 1.0];
             continue;
         }
         if name == "body" || name == "model" {
