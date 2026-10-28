@@ -1,0 +1,32 @@
+[
+ {
+  "name": "Деловой центр",
+  "name_en": "Delovoy Tsentr",
+  "s": 0.0,
+  "side": "right"
+ },
+ {
+  "name": "Шелепиха",
+  "name_en": "Shelepikha",
+  "s": 2001.1,
+  "side": "right"
+ },
+ {
+  "name": "Звенигородская",
+  "name_en": "Zvenigorodskaya",
+  "s": 3398.8,
+  "side": "right"
+ },
+ {
+  "name": "Народное Ополчение",
+  "name_en": "Narodnoye Opolcheniye",
+  "s": 5405.6,
+  "side": "right"
+ },
+ {
+  "name": "Бульвар Генерала Карбышева",
+  "name_en": "Bulvar Generala Karbysheva",
+  "s": 6767.2,
+  "side": "right"
+ }
+]
