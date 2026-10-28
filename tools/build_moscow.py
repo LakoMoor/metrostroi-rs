@@ -68,6 +68,19 @@ def resample(pts, step):
     return out
 
 
+DIP = 8.0
+MAX_GRADE = 0.035
+
+
+def profile(s, stops):
+    """Height (m) relative to the platforms at path distance s."""
+    for a, b in zip(stops, stops[1:]):
+        if a <= s <= b and b - a > 1.0:
+            depth = min(DIP, MAX_GRADE * (b - a) / math.pi)
+            return -depth * math.sin(math.pi * (s - a) / (b - a)) ** 2
+    return 0.0
+
+
 def project(path, cum, p):
     """Nearest point of the polyline to p: (s along, lateral distance, signed side: +1 left of travel, -1 right)."""
     best = (1e18, 0.0, 1)
@@ -146,7 +159,11 @@ def main():
             continue
         folder = OUT / rid
         folder.mkdir(exist_ok=True)
-        nodes = [f"[{x / UNIT:.1f} {y / UNIT:.1f} {-1000:.1f}]" for x, y in path]
+        # OSM has no depths. Moscow's lines run in "saddle" profiles (stations on shallow summits, the tunnel
+        # falling away between them), so the stand-in is a smooth dip of up to DIP metres between stations,
+        # flat at the platforms and never steeper than MAX_GRADE.
+        stops_s = [x["s"] for x in st]
+        nodes = [f"[{x / UNIT:.1f} {y / UNIT:.1f} {(-1000.0 + profile(c, stops_s) / UNIT):.1f}]" for (x, y), c in zip(path, cum)]
         (folder / "track.lua").write_text(json.dumps([nodes], ensure_ascii=False, indent=0), encoding="utf-8")
         (folder / "stations.json").write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
         full = tags.get("name", rid)

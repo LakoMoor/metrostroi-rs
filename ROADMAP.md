@@ -153,3 +153,5 @@ Goal: the same game on Android phones/tablets (arm64-v8a first), reusing the Rus
 - Car origin sits exactly at the track node (`MS_CAR_HEIGHT` default 0.0): BSP floor is 2.21 m under nodes, wheel treads 2.22 m under the origin. Measured with `formats/examples/railz.rs`.
 
 - Consist dynamics: every coupled car's bogeys feed the 1-D model (mass scales with the car count) and get the speed back, so trailer interlocks see the real speed.
+
+- Moscow vertical profile: OSM has no depths, so `build_moscow.py` adds a stand-in "saddle" profile (stations flat, the tunnel dips up to 8 m between them, grade <= 35 per mille). It is an approximation, not surveyed data; replace `profile()` when real depths are available.
