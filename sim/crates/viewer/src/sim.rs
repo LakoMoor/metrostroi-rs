@@ -961,6 +961,65 @@ mod tests {
         assert!(brake > 0.6 && brake < 1.6, "service braking {brake}");
     }
 
+    /// Station to station on a generated Moscow line, driven by a simple automatic driver: the stop is recorded.
+    #[test]
+    fn a_driver_can_stop_at_the_next_station() {
+        let dir = Path::new("E:/metrostroi2pz/game/content/maps/moscow/305810");
+        if !Path::new(LUA_ROOT).exists() || !dir.join("stations.json").exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        let t = crate::track::Track::load(&dir.join("track.lua")).unwrap();
+        let (plats, names) = crate::station::from_json(&dir.join("stations.json")).unwrap();
+        sim.set_platforms(plats.clone());
+        sim.set_station_names(names);
+        sim.set_signs(Vec::new());
+        sim.set_track(t);
+        sim.set_position(plats[0].to - 10.0);
+        run(&sim, 2.0);
+        sim.quick_start();
+        while sim.quick_start_active() {
+            sim.tick(1.0 / 60.0);
+        }
+        let target = plats[1].to - 4.0; // stop four metres short of the end of the second platform
+        sim.key("3", true);
+        let mut state = "power";
+        for step in 0..(60 * 400) {
+            sim.tick(1.0 / 60.0);
+            if step % 6 != 0 {
+                continue;
+            }
+            let (kmh, pos) = sim.motion();
+            let left = target as f64 - pos;
+            let v = kmh / 3.6;
+            match state {
+                "power" if kmh > 55.0 => {
+                    sim.key("3", false);
+                    sim.key("4", true);
+                    sim.key("4", false);
+                    state = "coast";
+                }
+                "coast" if left < v * v / (2.0 * 1.1) + 8.0 => {
+                    sim.key("7", true);
+                    state = "brake";
+                }
+                "brake" if kmh < 12.0 => {
+                    sim.rt.lua.load("T.Pneumatic:TriggerInput('BrakeSet', 5)").exec().unwrap();
+                    state = "hold";
+                }
+                _ => {}
+            }
+            if state == "hold" && kmh < 0.1 {
+                break;
+            }
+        }
+        let trip = sim.trip.borrow();
+        println!("{:?} -> {:?} after {:.0} m", state, trip.stops, sim.motion().1);
+        assert_eq!(trip.stops.len(), 1, "no stop recorded: {:?}", trip.stops);
+        assert!(trip.stops[0].short > -3.0 && trip.stops[0].short < 12.0, "stopped {} m short of the end", trip.stops[0].short);
+        assert_eq!(trip.autostops, 0);
+    }
+
     /// With a track and signs loaded, the ALS coil receives the next signal's ARS code.
     #[test]
     fn als_coil_gets_code_from_next_signal() {
