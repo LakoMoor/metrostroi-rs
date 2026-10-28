@@ -168,6 +168,22 @@ const HELPERS: &str = r#"
     end
     function __qs_active() return __qs ~= nil and coroutine.status(__qs) ~= "dead" end
     RAIL_OHMS = 0.03
+    -- the real consist: more trains linked front-to-rear so Metrostroi's own train-wire code (WagonList, leader) runs
+    __cars = { T }
+    function __couple(n)
+        for i = #__cars, 2, -1 do __cars[i] = nil end
+        for i = 2, n do __cars[i] = Metrostroi.SpawnTrain("gmod_subway_81-714_mvm") end
+        for i, t in ipairs(__cars) do
+            t.FrontTrain = __cars[i - 1]
+            t.RearTrain = __cars[i + 1]
+            t.TrainCoupledIndex = 1
+            t.WagonList = nil
+        end
+        for i, t in ipairs(__cars) do
+            t:UpdateWagonList()
+            t.TrainWireLeader = i == 1
+        end
+    end
     function __tick(dt)
         __time = __time + dt
         if __qs_active() then
@@ -181,6 +197,15 @@ const HELPERS: &str = r#"
         local volts = math.max(0, __rail - (__rail > 0 and __sag or 0))
         T.FrontBogey.Voltage = volts
         T.RearBogey.Voltage = volts
+        for i = 2, #__cars do
+            local c = __cars[i]
+            c.FrontBogey.Voltage = volts
+            c.RearBogey.Voltage = volts
+            net.Muted = true -- only the driven car is heard and animated
+            local okc, errc = pcall(c.Think, c)
+            net.Muted = false
+            if not okc then return "car " .. i .. ": " .. tostring(errc) end
+        end
         local ok, err = pcall(T.Think, T)
         if not ok then return tostring(err) end
         C.RingVolume = C.RingVolume or 1
@@ -333,7 +358,13 @@ impl Sim {
 
     /// Cars coupled behind the driven one (the consist has `cars` in total).
     pub fn set_cars(&self, n: usize) {
-        self.cars.set(n.clamp(1, 8));
+        let n = n.clamp(1, 8);
+        self.cars.set(n);
+        if let Ok(f) = self.rt.lua.globals().get::<mlua::Function>("__couple") {
+            if let Err(e) = f.call::<()>(n) {
+                log::warn!("coupling: {e}");
+            }
+        }
     }
 
     pub fn tail_poses(&self) -> Vec<glam::Mat4> {
@@ -1002,6 +1033,27 @@ mod tests {
         sim.set_position(0.0);
         let t = sim.tail_poses();
         assert!((t[2].w_axis.truncate() - t[1].w_axis.truncate()).length() > 15.0);
+    }
+
+    /// Real coupling: the trailer's train wires follow the head car's cab (Metrostroi's own WagonList code).
+    #[test]
+    fn trailer_follows_the_head_car_train_wires() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        sim.set_cars(2);
+        run(&sim, 2.0);
+        sim.quick_start();
+        while sim.quick_start_active() {
+            sim.tick(1.0 / 60.0);
+        }
+        sim.key("3", true);
+        run(&sim, 3.0);
+        let r: String = sim.rt.lua.load("return string.format('wagons=%d head W1=%s W6=%s trailer W1=%s W6=%s', #T.WagonList, tostring(T:ReadTrainWire(1)), tostring(T:ReadTrainWire(6)), tostring(__cars[2]:ReadTrainWire(1)), tostring(__cars[2]:ReadTrainWire(6)))").eval().unwrap();
+        println!("{r}");
+        let same: bool = sim.rt.lua.load("return __cars[2]:ReadTrainWire(1) == T:ReadTrainWire(1) and __cars[2]:ReadTrainWire(6) == T:ReadTrainWire(6)").eval().unwrap();
+        assert!(same && r.starts_with("wagons=2"), "{r}");
     }
 
     #[test]

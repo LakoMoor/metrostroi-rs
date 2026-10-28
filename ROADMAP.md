@@ -113,7 +113,7 @@ car shell. `share/metrostroi-rs` (built by `tools/make_share.py`) holds everythi
 `AGENTS.md`/`CLAUDE.md`/`SETUP.md`. `site/` is a static GitHub Pages site (no Workshop assets, only screenshots).
 
 - Moving lead train: `--lead <m>[,<m>...]` spawns one or more 717s running ahead at 12 m/s (43 km/h); it is an occupied block for the signals, so lights behind it go red/yellow and the ARS stand-in reacts. Reset (menu) restarts it. Next: several AI trains, switches/path connectivity.
-- Consist: `--cars <n>` (1..8) draws n-1 more cars coupled behind the driven one, 19.2 m apart, following the main line (visual only for now: same body model, no walking through, no train-wire coupling to the cab).
+- Consist: `--cars <n>` (1..8) draws n-1 more cars coupled behind the driven one, 19.2 m apart, following the main line (trailers are real `gmod_subway_81-714_mvm` entities linked front-to-rear, so Metrostroi's own WagonList / train-wire code runs and the trailers follow the cab; still the 717 body model is drawn, no walking through).
 - Failures: F7 random failure, F8 reset, F9 ageing on/off (FailSim). Rail voltage sags by traction current x 0.03 ohm. `MS_CAR_HEIGHT` overrides the car height above the track node (default 1.6 m).
 
 - World materials/light: base-game HL2/CSS/GMod textures are read from the Garry's Mod install's VPKs (`formats::vpk`, mounted after the addons); map texture packs 3340000198 + 3018420076 are mounted; unknown addon textures get a neutral grey. BSP lightmaps (lump 8, face luxels packed into a 2048-wide atlas, second UV set `uv2`) light the map (object tint alpha 3 selects it in the shader; `--nolightmap` disables). Still open: displacements, static props, skybox, other addons' textures (`mus/`, `se_concrete/`).

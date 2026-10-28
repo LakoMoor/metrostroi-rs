@@ -80,7 +80,7 @@ do
     local function send()
         local m = out
         out = nil
-        local fn = m and receivers[m.__name]
+        local fn = m and not rawget(net, "Muted") and receivers[m.__name]
         if fn then
             inbox = m
             local ok, err = pcall(fn, #m, nil)
