@@ -258,7 +258,7 @@ fn main() -> Result<()> {
                         let stub = [formats::mdl::Mesh { material: "dev/dev_measuregeneric01".into(), vertices: vec![formats::mdl::Vertex::default(); 3], indices: vec![0, 1, 2] }];
                         let id = r.load_meshes(&mut scene, &vfs, "world", &stub, renderer::SCALE);
                         r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
-                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead).with_chunks(r, &mut scene, &vfs, &chunks));
+                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead, cars.saturating_sub(1)).with_chunks(r, &mut scene, &vfs, &chunks));
                     } else if with_world {
                         let data = std::fs::read(&map_bsp)?;
                         let (mut meshes, lightmap) = formats::bsp::load_lit(&data)?;
@@ -277,7 +277,7 @@ fn main() -> Result<()> {
                             scene.objects.last_mut().unwrap().tint[3] = 3.0;
                         }
                         let statics = if no_props { Vec::new() } else { formats::bsp::static_props(&data).unwrap_or_default() };
-                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead).with_statics(r, &mut scene, &vfs, &statics));
+                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead, cars.saturating_sub(1)).with_statics(r, &mut scene, &vfs, &statics));
                     }
                     Ok(scene)
                 }

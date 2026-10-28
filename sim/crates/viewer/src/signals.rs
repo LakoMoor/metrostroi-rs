@@ -189,7 +189,7 @@ fn lit_colour(ars: Option<u8>) -> char {
 }
 
 impl Signals {
-    pub fn spawn(r: &Renderer, scene: &mut Scene, vfs: &Vfs, lua_root: &Path, signs: Vec<Sign>, train_poses: Vec<Mat4>, n_lead: usize) -> Signals {
+    pub fn spawn(r: &Renderer, scene: &mut Scene, vfs: &Vfs, lua_root: &Path, signs: Vec<Sign>, train_poses: Vec<Mat4>, n_lead: usize, n_tail: usize) -> Signals {
         let (kits, base) = match load_kits(lua_root) {
             Ok(k) => k,
             Err(e) => {
@@ -271,11 +271,14 @@ impl Signals {
         log::info!("{} traffic lights placed ({} models)", lights.len(), loaded.len());
         let mut trains = Vec::new();
         if !train_poses.is_empty() {
-            if let Ok(id) = r.load_model(scene, vfs, "models/metrostroi_train/81-717/81-717_mvm") {
-                for pose in train_poses {
-                    trains.push((scene.objects.len(), pose));
-                    r.add_object(scene, "standing train", id, Mat4::IDENTITY, false);
-                }
+            // the coupled trailers (the last `n_tail` poses) are 81-714s: the same body without the cab
+            let head = r.load_model(scene, vfs, "models/metrostroi_train/81-717/81-717_mvm");
+            let trailer = r.load_model(scene, vfs, "models/metrostroi_train/81-717/81-717_mvm_int").ok().or(head.as_ref().ok().copied());
+            let first_tail = train_poses.len().saturating_sub(n_tail);
+            for (i, pose) in train_poses.into_iter().enumerate() {
+                let Some(id) = (if i >= first_tail { trailer } else { head.as_ref().ok().copied() }) else { continue };
+                trains.push((scene.objects.len(), pose));
+                r.add_object(scene, "standing train", id, Mat4::IDENTITY, false);
             }
         }
         let lead = n_lead.min(trains.len());
