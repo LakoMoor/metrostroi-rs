@@ -1,0 +1,86 @@
+[
+ {
+  "name": "Аэропорт Внуково",
+  "name_en": "",
+  "s": 0.0,
+  "side": "right"
+ },
+ {
+  "name": "Пыхтино",
+  "name_en": "",
+  "s": 2305.9,
+  "side": "right"
+ },
+ {
+  "name": "Рассказовка",
+  "name_en": "",
+  "s": 5053.6,
+  "side": "right"
+ },
+ {
+  "name": "Новопеределкино",
+  "name_en": "",
+  "s": 6568.7,
+  "side": "right"
+ },
+ {
+  "name": "Боровское шоссе",
+  "name_en": "",
+  "s": 7895.3,
+  "side": "right"
+ },
+ {
+  "name": "Солнцево",
+  "name_en": "",
+  "s": 9457.6,
+  "side": "right"
+ },
+ {
+  "name": "Говорово",
+  "name_en": "",
+  "s": 11591.9,
+  "side": "right"
+ },
+ {
+  "name": "Озёрная",
+  "name_en": "",
+  "s": 14121.1,
+  "side": "right"
+ },
+ {
+  "name": "Мичуринский проспект",
+  "name_en": "",
+  "s": 17140.2,
+  "side": "right"
+ },
+ {
+  "name": "Раменки",
+  "name_en": "",
+  "s": 18492.2,
+  "side": "right"
+ },
+ {
+  "name": "Ломоносовский проспект",
+  "name_en": "",
+  "s": 20028.6,
+  "side": "right"
+ },
+ {
+  "name": "Минская",
+  "name_en": "",
+  "s": 23120.4,
+  "side": "right"
+ },
+ {
+  "name": "Парк Победы",
+  "name_en": "Park Pobedy",
+  "s": 25711.4,
+  "side": "right"
+ },
+ {
+  "name": "Деловой центр",
+  "name_en": "Delovoy Tsentr",
+  "s": 28268.5,
+  "side": "right"
+ }
+]
