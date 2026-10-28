@@ -117,6 +117,8 @@ struct Gfx {
     depth: wgpu::TextureView,
     /// Multisampled colour target (high/ultra quality).
     msaa: Option<wgpu::TextureView>,
+    /// HDR scene + bloom chain (ultra tier only).
+    post: Option<crate::post::Post>,
     ui: Ui,
 }
 
@@ -216,7 +218,7 @@ impl App {
         self.ground = crate::ground::take();
         self.scene = Some(scene);
         let ui = Ui::new(&renderer.device, &renderer.queue, config.format);
-        self.gfx = Some(Gfx { window, surface, config, renderer, depth, msaa, ui });
+        self.gfx = Some(Gfx { window, surface, config, renderer, depth, msaa, post: None, ui });
         Ok(())
     }
 
@@ -436,17 +438,26 @@ impl App {
             _ => return,
         };
         prof(5, t_acq, self.fps);
-        g.renderer.tonemap.set(if self.menu.settings.quality >= 2 { 0.6 } else { 0.0 });
+        let hdr = self.menu.settings.quality >= 2;
+        // the HDR path tone-maps in the composite pass
+        g.renderer.tonemap.set(0.0);
         let want = if self.menu.settings.quality >= 1 { 4 } else { 1 };
-        if g.renderer.samples.get() != want {
+        if g.renderer.samples.get() != want || g.renderer.hdr.get() != hdr {
             g.renderer.samples.set(want);
+            g.renderer.hdr.set(hdr);
+            g.post = hdr.then(|| crate::post::Post::new(&g.renderer.device, g.config.format, g.config.width, g.config.height));
             g.depth = g.renderer.depth_view(g.config.width, g.config.height);
             g.msaa = g.renderer.msaa_view(g.config.width, g.config.height);
         }
         let t_render = std::time::Instant::now();
         let view = frame.texture.create_view(&Default::default());
         let aspect = g.config.width as f32 / g.config.height as f32;
-        g.renderer.render_ms(scene, cam.view_proj(aspect, self.menu.settings.fov), g.msaa.as_ref(), &view, &g.depth);
+        if let Some(post) = &g.post {
+            g.renderer.render_ms(scene, cam.view_proj(aspect, self.menu.settings.fov), g.msaa.as_ref(), &post.scene, &g.depth);
+            post.run(&g.renderer.device, &g.renderer.queue, &view);
+        } else {
+            g.renderer.render_ms(scene, cam.view_proj(aspect, self.menu.settings.fov), g.msaa.as_ref(), &view, &g.depth);
+        }
         g.ui.screen = (g.config.width as f32, g.config.height as f32);
         if self.menu.screen == Screen::Playing {
             let (sw, sh) = g.ui.screen;
@@ -509,6 +520,9 @@ impl ApplicationHandler for App {
                     g.surface.configure(&g.renderer.device, &g.config);
                     g.depth = g.renderer.depth_view(g.config.width, g.config.height);
                     g.msaa = g.renderer.msaa_view(g.config.width, g.config.height);
+                    if g.post.is_some() {
+                        g.post = Some(crate::post::Post::new(&g.renderer.device, g.config.format, g.config.width, g.config.height));
+                    }
                 }
             }
             WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {

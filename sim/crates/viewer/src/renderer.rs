@@ -138,7 +138,9 @@ pub struct Renderer {
     object_bind: std::cell::RefCell<wgpu::BindGroup>,
     sampler: wgpu::Sampler,
     /// Pipelines per sample count: index 0 = 1x, index 1 = 4x MSAA.
-    pipes: [[wgpu::RenderPipeline; 3]; 2],
+    pipes: [[wgpu::RenderPipeline; 3]; 3],
+    /// Draw into the HDR format instead of the swap-chain format (ultra tier).
+    pub hdr: std::cell::Cell<bool>,
     /// Current MSAA sample count (1 or 4); `depth_view` and `msaa_view` follow it.
     pub samples: std::cell::Cell<u32>,
     /// Post-tone-mapping amount for the ultra quality tier (0..1).
@@ -256,7 +258,7 @@ impl Renderer {
             bind_group_layouts: &[Some(&globals_layout), Some(&material_layout), Some(&object_layout)],
             immediate_size: 0,
         });
-        let make = |label: &str, fs: &str, blend: Option<wgpu::BlendState>, depth_write: bool, samples: u32| {
+        let make = |label: &str, fs: &str, blend: Option<wgpu::BlendState>, depth_write: bool, samples: u32, target_format: wgpu::TextureFormat| {
             device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
                 label: Some(label),
                 layout: Some(&layout),
@@ -293,14 +295,14 @@ impl Renderer {
                 cache: None,
             })
         };
-        let set = |n: u32| {
+        let set = |n: u32, f: wgpu::TextureFormat| {
             [
-                make("opaque", "fs_opaque", None, true, n),
-                make("alphatest", "fs_alphatest", None, true, n),
-                make("blend", "fs_blend", Some(wgpu::BlendState::ALPHA_BLENDING), false, n),
+                make("opaque", "fs_opaque", None, true, n, f),
+                make("alphatest", "fs_alphatest", None, true, n, f),
+                make("blend", "fs_blend", Some(wgpu::BlendState::ALPHA_BLENDING), false, n, f),
             ]
         };
-        let pipes = [set(1), set(4)];
+        let pipes = [set(1, target_format), set(4, target_format), set(4, crate::post::HDR_FORMAT)];
         let (obuf, obind) = Self::make_object_buffer(&device, &object_layout, 1);
         Renderer {
             device,
@@ -315,6 +317,7 @@ impl Renderer {
             object_bind: std::cell::RefCell::new(obind),
             sampler,
             pipes,
+            hdr: std::cell::Cell::new(false),
             samples: std::cell::Cell::new(1),
             tonemap: std::cell::Cell::new(0.0),
             target_format,
@@ -654,7 +657,7 @@ impl Renderer {
                     mip_level_count: 1,
                     sample_count: n,
                     dimension: wgpu::TextureDimension::D2,
-                    format: self.target_format,
+                    format: if self.hdr.get() { crate::post::HDR_FORMAT } else { self.target_format },
                     usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
                     view_formats: &[],
                 })
@@ -684,7 +687,7 @@ impl Renderer {
 
     /// Like `render`; with `msaa` the scene is drawn multisampled and resolved into `color`.
     pub fn render_ms(&self, scene: &Scene, view_proj: Mat4, msaa: Option<&wgpu::TextureView>, color: &wgpu::TextureView, depth: &wgpu::TextureView) {
-        let pipes = &self.pipes[(msaa.is_some() && self.samples.get() > 1) as usize];
+        let pipes = &self.pipes[if self.hdr.get() { 2 } else { (msaa.is_some() && self.samples.get() > 1) as usize }];
         let g = Globals { view_proj: view_proj.to_cols_array_2d(), light: [0.4, -0.3, 0.85, if self.unlit.get() { 1.0 } else { 0.0 }], fx: [self.tonemap.get(), 0.0, 0.0, 0.0] };
         self.queue.write_buffer(&self.globals, 0, bytemuck::bytes_of(&g));
         self.upload_objects(scene);

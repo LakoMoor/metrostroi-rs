@@ -6,6 +6,7 @@ mod dynamics;
 mod ground;
 mod menu;
 mod panels;
+mod post;
 mod procgen;
 mod renderer;
 mod signals;
