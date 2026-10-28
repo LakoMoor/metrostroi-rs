@@ -8,7 +8,7 @@
 /// Effective mass the bogey forces of ONE car act on, kg-equivalent (a consist scales it with its car count).
 const MASS: f64 = 40_000.0;
 /// Brake forces in the Lua are tuned for Source's friction model; scale to real-world deceleration.
-const BRAKE_SCALE: f64 = 0.33;
+const BRAKE_SCALE: f64 = 0.85;
 /// Rolling plus air resistance: a = R0 + R2 * v_kmh^2 (m/s^2).
 const RES_0: f64 = 0.005;
 const RES_2: f64 = 1.0e-5;

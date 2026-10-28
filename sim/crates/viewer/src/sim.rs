@@ -167,10 +167,11 @@ const HELPERS: &str = r#"
             end
             for _, k in ipairs({ "PAD_ENTER", "PAD_PLUS", "PAD_1" }) do __key(k, true) wait(0.02) __key(k, false) end
             wait(10)
-            __key("5", true) wait(3)
-            __key("4", true) T:ButtonEvent("VozvratRPSet", true) wait(0.5) T:ButtonEvent("VozvratRPSet", false)
-            __key("5", true) wait(2)
-            __key("4", true)
+            -- every key goes up again, or the cab would ignore the player's next press of it
+            __key("5", true) wait(3) __key("5", false)
+            __key("4", true) T:ButtonEvent("VozvratRPSet", true) wait(0.5) T:ButtonEvent("VozvratRPSet", false) __key("4", false)
+            __key("5", true) wait(2) __key("5", false)
+            __key("4", true) wait(0.1) __key("4", false)
         end)
     end
     function __qs_active() return __qs ~= nil and coroutine.status(__qs) ~= "dead" end
@@ -843,6 +844,91 @@ mod tests {
         println!("40 s after T2: {kmh2:.1} km/h");
         assert!(sim.world_pose().is_none());
         assert!(kmh2 < kmh * 0.5, "T2 did not slow the train: {kmh} -> {kmh2}");
+    }
+
+    /// The performance envelope of one 81-717 on level track: acceleration, top speed, coasting and braking.
+    #[test]
+    fn performance_envelope() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        run(&sim, 2.0);
+        sim.quick_start();
+        while sim.quick_start_active() {
+            sim.tick(1.0 / 60.0);
+        }
+        sim.key("3", true);
+        let mut speeds = vec![];
+        for _ in 0..24 {
+            run(&sim, 5.0);
+            speeds.push(sim.motion().0);
+        }
+        let accel0 = speeds[0] / 3.6 / 5.0;
+        let top = speeds.iter().cloned().fold(0.0, f64::max);
+        println!("speed every 5 s: {speeds:.0?}");
+        println!("mean acceleration over the first 5 s: {accel0:.2} m/s^2, top speed {top:.0} km/h");
+        // coasting
+        let kvp = |sim: &Sim, tag: &str| {
+            let v: String = sim.rt.lua.load("return tostring(T.KV.ControllerPosition)").eval().unwrap();
+            println!("KV {tag}: {v}");
+        };
+        kvp(&sim, "before release");
+        sim.key("3", false);
+        kvp(&sim, "after 3 up");
+        sim.key("4", true);
+        kvp(&sim, "after 4 down");
+        run(&sim, 1.0);
+        sim.key("4", false);
+        let kv: String = sim.rt.lua.load("return tostring(T.KV.ControllerPosition) .. ' en=' .. tostring(T.KV.Enabled) .. ' rev=' .. tostring(T.KV.ReverserPosition)").eval().unwrap();
+        println!("KV after key 4 release: {kv}");
+        let kb: String = sim.rt.lua.load("local t = {} for k, v in pairs(T.KeyBuffer or {}) do t[#t + 1] = tostring(k) .. '=' .. tostring(v) end return table.concat(t, ',') .. ' | KEY_4=' .. tostring(KEY_4) .. ' map=' .. tostring(T.KeyMap[KEY_4]) .. ' mods=' .. tostring(T.KeyMods and T.KeyMods[KEY_4] and next(T.KeyMods[KEY_4]))").eval().unwrap();
+        println!("KeyBuffer: {kb}");
+        let e: String = sim.rt.lua.load("local ok, err = pcall(T.OnKeyEvent, T, KEY_4, true, nil) return tostring(ok) .. ' ' .. tostring(err) .. ' KV=' .. T.KV.ControllerPosition").eval().unwrap();
+        println!("OnKeyEvent: {e}");
+        sim.rt.lua.load("T:ButtonEvent('KVSet0', true)").exec().unwrap();
+        run(&sim, 1.0);
+        let kv: String = sim.rt.lua.load("return tostring(T.KV.ControllerPosition)").eval().unwrap();
+        println!("KV after ButtonEvent: {kv}");
+        let v0 = sim.motion().0;
+        let dbg: String = sim.rt.lua.load("return string.format('KV=%s MP=%.2f MF=%.0f I=%.0f', tostring(T.KV.ControllerPosition) .. '/' .. tostring(T.KV.RealControllerPosition), T.FrontBogey.MotorPower or -9, T.FrontBogey.MotorForce or -9, (T.Electric and T.Electric.Itotal) or -9)").eval().unwrap();
+        println!("after key 4: {dbg}");
+        for _ in 0..4 {
+            run(&sim, 5.0);
+            let d: String = sim.rt.lua.load("return string.format('MP=%.2f MF=%.0f I=%.0f v=%.1f', T.FrontBogey.MotorPower or -9, T.FrontBogey.MotorForce or -9, (T.Electric and T.Electric.Itotal) or -9, T.FrontBogey.Speed or -1)").eval().unwrap();
+            println!("  coast: {d}");
+        }
+        let coast = (v0 - sim.motion().0) / 3.6 / 20.0;
+        println!("coasting from {v0:.0} km/h: {coast:.3} m/s^2");
+        // service brake
+        let v1 = sim.motion().0;
+        sim.key("7", true);
+        run(&sim, 3.0);
+        let d: String = sim.rt.lua.load("return string.format('BC=%.2f TL=%.2f BL=%.2f mp=%.2f mf=%.0f I=%.0f', T.Pneumatic.BrakeCylinderPressure, T.Pneumatic.TrainLinePressure, T.Pneumatic.BrakeLinePressure, T.FrontBogey.MotorPower or -9, T.FrontBogey.MotorForce or -9, T.Electric.Itotal or -9)").eval().unwrap();
+        println!("  T2: {d}");
+        let (v2, p2) = (sim.motion().0, sim.motion().1);
+        run(&sim, 5.0);
+        let brake = (v2 - sim.motion().0) / 3.6 / 5.0;
+        println!("T2 from {v1:.0} km/h: {brake:.2} m/s^2 (pos {p2:.0})");
+        // emergency brake from what is left of the speed (the valve stays in its service position otherwise)
+        sim.key("3", true);
+        run(&sim, 15.0);
+        sim.rt.lua.load("T:ButtonEvent('EmergencyBrake', true)").exec().unwrap();
+        run(&sim, 2.0);
+        let (ve, pe) = (sim.motion().0, sim.motion().1);
+        for _ in 0..4 {
+            run(&sim, 1.0);
+            let d: String = sim.rt.lua.load("return string.format('BC=%.2f TL=%.2f BL=%.2f v=%.1f BrakeForce=%.0f', T.Pneumatic.BrakeCylinderPressure, T.Pneumatic.TrainLinePressure, T.Pneumatic.BrakeLinePressure, T.FrontBogey.Speed, T.FrontBogey.PneumaticBrakeForce or -1)").eval().unwrap();
+            println!("  EB: {d}");
+        }
+        let eb = (ve - sim.motion().0) / 3.6 / 4.0;
+        println!("emergency brake from {ve:.0} km/h: {eb:.2} m/s^2 (pos {pe:.0})");
+        assert!(eb > 0.9 && eb < 1.6, "emergency braking {eb}");
+        assert!(accel0 > 0.7 && accel0 < 1.5, "acceleration {accel0}");
+        // the original compensates Source's friction (`compensateF`), so the limit comes from the motor curve, not drag
+        assert!(top > 80.0 && top < 110.0, "top speed {top}");
+        assert!(coast > 0.0 && coast < 0.15, "coasting deceleration {coast}");
+        assert!(brake > 0.6 && brake < 1.6, "service braking {brake}");
     }
 
     /// With a track and signs loaded, the ALS coil receives the next signal's ARS code.
