@@ -164,6 +164,14 @@ impl Panels {
         None
     }
 
+    /// Ids of every latching switch (`...Toggle`) on any panel.
+    pub fn toggle_ids(&self) -> Vec<String> {
+        let mut v: Vec<String> = self.panels.iter().flat_map(|p| p.buttons.iter()).filter(|b| b.id.ends_with("Toggle")).map(|b| b.id.clone()).collect();
+        v.sort();
+        v.dedup();
+        v
+    }
+
     pub fn button_count(&self) -> usize {
         self.panels.iter().map(|p| p.buttons.len()).sum()
     }

@@ -275,6 +275,28 @@ const HELPERS: &str = r#"
         local s = T[name] or T.Systems[name]
         if s and s.Value ~= nil then return tostring(s.Value) end
     end
+    -- cab state for save/load: the latched value of every toggle switch, plus the controller and reverser
+    function __save_cab(ids)
+        local out = {}
+        for _, id in ipairs(ids) do
+            local name = id:gsub("Toggle$", "")
+            local s = T[name]
+            if type(s) == "table" and type(s.Value) == "number" then out[name] = s.Value end
+        end
+        out.__kv = T.KV.ControllerPosition
+        out.__rev = T.KV.ReverserPosition
+        return out
+    end
+    function __load_cab(t)
+        for name, v in pairs(t) do
+            if name:sub(1, 2) ~= "__" then
+                local s = T[name]
+                if type(s) == "table" and s.TriggerInput and s.Value ~= v then s:TriggerInput("Set", v) end
+            end
+        end
+        if t.__rev then T.KV:TriggerInput("ReverserSet", t.__rev) end
+        if t.__kv then T.KV:TriggerInput("ControllerSet", t.__kv) end
+    end
     function __press(id)
         T:ButtonEvent(id, true)
         T:ButtonEvent(id, false)
@@ -807,6 +829,26 @@ impl Sim {
         f.call::<Option<String>>((id.to_string(), down)).ok().flatten()
     }
 
+    /// The latched state of the cab's toggle switches (ids from the button panels), as JSON.
+    pub fn save_cab(&self, ids: &[String]) -> serde_json::Value {
+        let Ok(f) = self.rt.lua.globals().get::<mlua::Function>("__save_cab") else { return serde_json::Value::Null };
+        let Ok(t) = f.call::<mlua::Table>(ids.to_vec()) else { return serde_json::Value::Null };
+        let map: serde_json::Map<String, serde_json::Value> =
+            t.pairs::<String, f64>().flatten().map(|(k, v)| (k, serde_json::json!(v))).collect();
+        serde_json::Value::Object(map)
+    }
+
+    pub fn load_cab(&self, state: &serde_json::Value) {
+        let (Some(map), Ok(f)) = (state.as_object(), self.rt.lua.globals().get::<mlua::Function>("__load_cab")) else { return };
+        let Ok(t) = self.rt.lua.create_table() else { return };
+        for (k, v) in map {
+            if let Some(n) = v.as_f64() {
+                let _ = t.set(k.as_str(), n);
+            }
+        }
+        let _ = f.call::<()>(t);
+    }
+
     pub fn press(&self, id: &str) -> Option<String> {
         let f: mlua::Function = self.rt.lua.globals().get("__press").ok()?;
         f.call::<Option<String>>(id.to_string()).ok().flatten()
@@ -1301,6 +1343,29 @@ mod tests {
         run(&sim, 1.0);
         let (_, once) = sim.sounds();
         println!("once sounds: {}", once.len());
+    }
+
+    /// Saving the cab and loading it again brings the switches back.
+    #[test]
+    fn cab_state_round_trips() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        run(&sim, 3.0);
+        let ids: Vec<String> = ["VBToggle", "VAHToggle", "VADToggle", "A1Toggle"].map(String::from).to_vec();
+        let val = |n: &str| -> f64 { sim.rt.lua.load(format!("return T.{n}.Value")).eval().unwrap() };
+        sim.press("VBToggle"); // VB is off after a fresh spawn: switch it on, then save
+        run(&sim, 0.5);
+        let saved = sim.save_cab(&ids);
+        let (vb, vad) = (val("VB"), val("VAD"));
+        sim.press("VBToggle");
+        sim.press("VADToggle");
+        run(&sim, 0.5);
+        assert!(val("VB") != vb || val("VAD") != vad, "presses changed nothing");
+        sim.load_cab(&saved);
+        run(&sim, 0.5);
+        assert_eq!((val("VB"), val("VAD")), (vb, vad), "state not restored: {saved}");
     }
 
     #[test]

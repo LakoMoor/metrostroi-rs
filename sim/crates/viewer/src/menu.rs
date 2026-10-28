@@ -83,6 +83,8 @@ pub enum Action {
     Start { quick: bool },
     Resume,
     QuickStart,
+    SaveCab,
+    LoadCab,
     ResetAutostop,
     ResetTrain,
     ToMain,
@@ -165,6 +167,8 @@ impl Menu {
             Screen::Pause => vec![
                 Item::Button("Продолжить", Action::Resume),
                 Item::Button("Быстрый запуск поезда", Action::QuickStart),
+                Item::Button("Сохранить кабину", Action::SaveCab),
+                Item::Button("Загрузить кабину", Action::LoadCab),
                 Item::Button("Сбросить автостоп АРС", Action::ResetAutostop),
                 Item::Button("Поезд в начало", Action::ResetTrain),
                 Item::Goto("Статистика рейса", Screen::Trip),
@@ -247,7 +251,7 @@ impl Menu {
         let Some(item) = self.items().get(i).copied() else { return Action::None };
         match item {
             Item::Button(_, a) => {
-                if matches!(a, Action::Start { .. } | Action::Resume | Action::QuickStart | Action::ResetAutostop | Action::ResetTrain) {
+                if matches!(a, Action::Start { .. } | Action::Resume | Action::QuickStart | Action::SaveCab | Action::LoadCab | Action::ResetAutostop | Action::ResetTrain) {
                     self.screen = Screen::Playing;
                 }
                 if a == Action::ToMain {

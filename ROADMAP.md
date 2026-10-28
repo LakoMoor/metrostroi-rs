@@ -59,7 +59,7 @@ Out of scope for now: Project Zomboid and Minecraft ports (paused), other train 
 ### M4 — Sound and polish
 - [x] Sound: workshop WAV/MP3/OGG, sound positions and loops from the entity tables
 - [ ] Performance: move hot systems from Lua to Rust, GPU skinning
-- [ ] Settings, key rebinding, save/restore of switch state  (settings menu, line choice and quality are saved; key rebinding and switch-state saves are not done)
+- [ ] Settings, key rebinding, save/restore of switch state  (settings menu, line choice and quality are saved; key rebinding via game.json `keys` and cab save/load are done)
 
 ## Risks and notes
 - Lua shim is built by discovery: each new system may need more GMod stubs.

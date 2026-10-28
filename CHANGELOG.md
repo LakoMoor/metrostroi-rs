@@ -11,5 +11,6 @@
 - Graphics quality: standard / high (4x MSAA) / ultra (HDR, bloom, ACES, SSAO, render-scale slider).
 - Trip statistics screen with a driving score (stop accuracy, autostops, door violations).
 - Key remapping through `keys` in game.json; curve resistance; overruns past the platform end are scored.
+- Pause menu: save and load the cab (toggle switches, controller, reverser) to `game/config/cab.json`.
 - Own asset package (`assets.mpak`, built locally with `--pack-assets`), friendly start-up errors, Steam Workshop
   auto-detection.

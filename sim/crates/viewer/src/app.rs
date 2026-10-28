@@ -337,6 +337,25 @@ impl App {
                     s.quick_start();
                 }
             }
+            Action::SaveCab => {
+                if let Some(s) = &self.sim {
+                    let file = self.menu.settings_path().with_file_name("cab.json");
+                    let state = s.save_cab(&self.panels.toggle_ids());
+                    match std::fs::write(&file, serde_json::to_string_pretty(&state).unwrap_or_default()) {
+                        Ok(()) => log::info!("cab saved to {}", file.display()),
+                        Err(e) => log::warn!("cab save: {e}"),
+                    }
+                }
+            }
+            Action::LoadCab => {
+                if let Some(s) = &self.sim {
+                    let file = self.menu.settings_path().with_file_name("cab.json");
+                    match std::fs::read_to_string(&file).ok().and_then(|t| serde_json::from_str(&t).ok()) {
+                        Some(state) => s.load_cab(&state),
+                        None => log::warn!("no saved cab at {}", file.display()),
+                    }
+                }
+            }
             Action::ResetAutostop => {
                 if let Some(s) = &self.sim {
                     s.reset_autostop();
