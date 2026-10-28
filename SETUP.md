@@ -21,3 +21,5 @@
 
 Optional: Python 3 for `tools/*.py` (`make_font.py` needs Pillow; `make_tooltips.py` regenerates the Russian tooltips from
 `game/lua/metrostroi_data/languages`).
+
+**Key remapping:** `game/config/game.json` -> `"keys": {"F": "R"}` makes a physical key send another Metrostroi key to the cab (names as in the original: `A`..`Z`, `0`..`9`, `PAD_1`, `LSHIFT`, ...). Menu and camera keys (F-keys, Esc) are fixed.

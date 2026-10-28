@@ -735,7 +735,7 @@ impl ApplicationHandler for App {
                         _ => {
                             if let (Some(name), Some(s), true) = (gmod_key_name(code), &self.sim, cam.mode != Mode::Walk) {
                                 if !event.repeat {
-                                    s.key(name, down);
+                                    s.key(&name, down);
                                 }
                             }
                         }
@@ -762,7 +762,20 @@ impl ApplicationHandler for App {
 }
 
 /// winit key -> the suffix of GMod's `KEY_*` constant.
-fn gmod_key_name(code: KeyCode) -> Option<&'static str> {
+static KEY_MAP: std::sync::OnceLock<std::collections::HashMap<String, String>> = std::sync::OnceLock::new();
+
+/// Install the `keys` table of `game.json`.
+pub fn set_key_map(m: std::collections::HashMap<String, String>) {
+    let _ = KEY_MAP.set(m);
+}
+
+/// The Metrostroi key name for a physical key, after the user's remapping.
+fn gmod_key_name(code: KeyCode) -> Option<String> {
+    let name = physical_key_name(code)?;
+    Some(KEY_MAP.get().and_then(|m| m.get(name)).cloned().unwrap_or_else(|| name.to_string()))
+}
+
+fn physical_key_name(code: KeyCode) -> Option<&'static str> {
     use KeyCode::*;
     Some(match code {
         Digit0 => "0", Digit1 => "1", Digit2 => "2", Digit3 => "3", Digit4 => "4",

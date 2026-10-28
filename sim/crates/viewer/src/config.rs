@@ -17,6 +17,8 @@ pub struct Config {
     pub obstacles: Vec<f32>,
     /// Own asset package (`.mpak`, relative to the game folder). When it exists it replaces the Workshop/Steam mounts.
     pub assets: String,
+    /// Key remapping for the cab: physical Metrostroi key name -> the one the cab should see (`{"F": "R"}`).
+    pub keys: std::collections::HashMap<String, String>,
 }
 
 impl Default for Config {
@@ -32,6 +34,7 @@ impl Default for Config {
             map: "content/maps/crossline_c4".into(),
             obstacles: Vec::new(),
             assets: "content/assets.mpak".into(),
+            keys: Default::default(),
         }
     }
 }
@@ -116,5 +119,19 @@ impl Config {
             Some(g) if Path::new(rel).is_relative() => g.join(rel),
             _ => PathBuf::from(rel),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn keys_table_is_read_from_game_json() {
+        let c: Config = serde_json::from_str(r#"{"keys": {"F": "R", "4": "5"}}"#).unwrap();
+        assert_eq!(c.keys.get("F").map(String::as_str), Some("R"));
+        assert_eq!(c.keys.len(), 2);
+        // everything else keeps its default
+        assert_eq!(c.train, "gmod_subway_81-717_mvm");
     }
 }

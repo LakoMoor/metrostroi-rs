@@ -184,6 +184,7 @@ fn run() -> Result<()> {
             }
         }
     }
+    app::set_key_map(cfg.keys.clone());
     log::info!("game folder: {:?}", game);
     let controls = arg_value(&args, "--controls").unwrap_or_else(|| cfg.resolve(game.as_deref(), &cfg.controls).to_string_lossy().into_owned());
 
