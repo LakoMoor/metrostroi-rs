@@ -32,6 +32,7 @@ fn texture(device: &wgpu::Device, w: u32, h: u32, usage: wgpu::TextureUsages) ->
 }
 
 impl Post {
+    /// `w`, `h` is the render resolution; the composite pass stretches it over whatever it is run into.
     pub fn new(device: &wgpu::Device, out_format: wgpu::TextureFormat, w: u32, h: u32) -> Post {
         let module = device.create_shader_module(wgpu::ShaderModuleDescriptor { label: Some("post"), source: wgpu::ShaderSource::Wgsl(include_str!("post.wgsl").into()) });
         let tex = |binding| wgpu::BindGroupLayoutEntry {

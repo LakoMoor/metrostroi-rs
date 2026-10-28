@@ -56,7 +56,11 @@ fn aces(c: vec3<f32>) -> vec3<f32> {
 
 @fragment
 fn fs_composite(v: V) -> @location(0) vec4<f32> {
-    let c = textureSample(src, smp, v.uv).rgb;
+    var c = textureSample(src, smp, v.uv).rgb;
+    // light sharpen (also hides the softness of a reduced render scale)
+    let t = 1.0 / vec2<f32>(textureDimensions(src));
+    let avg = (textureSample(src, smp, v.uv + vec2<f32>(t.x, 0.0)).rgb + textureSample(src, smp, v.uv - vec2<f32>(t.x, 0.0)).rgb + textureSample(src, smp, v.uv + vec2<f32>(0.0, t.y)).rgb + textureSample(src, smp, v.uv - vec2<f32>(0.0, t.y)).rgb) * 0.25;
+    c = max(c + (c - avg) * 0.3, vec3<f32>(0.0));
     let b = textureSample(bloom, smp, v.uv).rgb;
     var col = c + b * 0.9;
     col = mix(col, aces(col), 0.7);

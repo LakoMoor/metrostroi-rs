@@ -109,7 +109,22 @@ fn floor_at(p: Vec3, z: f32, doors: (bool, bool), ground: &Option<crate::ground:
     Some(world.transform_point3(Vec3::new(m.x, m.y, h)).z)
 }
 
+impl Gfx {
+    /// Depth, multisample and post targets at the render resolution (the window size, scaled down in the HDR path).
+    fn rebuild_targets(&mut self, scale: f32) {
+        let hdr = self.renderer.hdr.get();
+        let s = if hdr { scale } else { 1.0 };
+        let (w, h) = (((self.config.width as f32 * s) as u32).max(1), ((self.config.height as f32 * s) as u32).max(1));
+        self.depth = self.renderer.depth_view(w, h);
+        self.msaa = self.renderer.msaa_view(w, h);
+        self.post = hdr.then(|| crate::post::Post::new(&self.renderer.device, self.config.format, w, h));
+        self.scale = scale;
+    }
+}
+
 struct Gfx {
+    /// Render scale the targets were built for.
+    scale: f32,
     window: Arc<Window>,
     surface: wgpu::Surface<'static>,
     config: wgpu::SurfaceConfiguration,
@@ -218,7 +233,7 @@ impl App {
         self.ground = crate::ground::take();
         self.scene = Some(scene);
         let ui = Ui::new(&renderer.device, &renderer.queue, config.format);
-        self.gfx = Some(Gfx { window, surface, config, renderer, depth, msaa, post: None, ui });
+        self.gfx = Some(Gfx { window, surface, config, renderer, depth, msaa, post: None, scale: 1.0, ui });
         Ok(())
     }
 
@@ -444,12 +459,11 @@ impl App {
         // the HDR path tone-maps in the composite pass
         g.renderer.tonemap.set(0.0);
         let want = if self.menu.settings.quality >= 1 { 4 } else { 1 };
-        if g.renderer.samples.get() != want || g.renderer.hdr.get() != hdr {
+        let scale = self.menu.settings.scale.clamp(0.5, 1.0);
+        if g.renderer.samples.get() != want || g.renderer.hdr.get() != hdr || (hdr && g.scale != scale) {
             g.renderer.samples.set(want);
             g.renderer.hdr.set(hdr);
-            g.post = hdr.then(|| crate::post::Post::new(&g.renderer.device, g.config.format, g.config.width, g.config.height));
-            g.depth = g.renderer.depth_view(g.config.width, g.config.height);
-            g.msaa = g.renderer.msaa_view(g.config.width, g.config.height);
+            g.rebuild_targets(scale);
         }
         let t_render = std::time::Instant::now();
         let view = frame.texture.create_view(&Default::default());
@@ -520,11 +534,8 @@ impl ApplicationHandler for App {
                     g.config.width = s.width.max(1);
                     g.config.height = s.height.max(1);
                     g.surface.configure(&g.renderer.device, &g.config);
-                    g.depth = g.renderer.depth_view(g.config.width, g.config.height);
-                    g.msaa = g.renderer.msaa_view(g.config.width, g.config.height);
-                    if g.post.is_some() {
-                        g.post = Some(crate::post::Post::new(&g.renderer.device, g.config.format, g.config.width, g.config.height));
-                    }
+                    let scale = g.scale;
+                    g.rebuild_targets(scale);
                 }
             }
             WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {

@@ -46,11 +46,13 @@ pub struct Settings {
     pub map: String,
     /// 0 = standard, 1 = high (4x MSAA), 2 = ultra (4x MSAA + the heavier effects as they land).
     pub quality: u8,
+    /// Ultra only: fraction of the window resolution the scene is drawn at (upscaled with a light sharpen).
+    pub scale: f32,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, map: String::new(), quality: 1 }
+        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, map: String::new(), quality: 1, scale: 1.0 }
     }
 }
 
@@ -98,6 +100,7 @@ enum Field {
     Volume,
     Hud,
     Quality,
+    Scale,
 }
 
 pub struct Menu {
@@ -166,6 +169,7 @@ impl Menu {
                 Item::Slider("Чувствительность мыши", Field::Mouse),
                 Item::Slider("Громкость (на будущее)", Field::Volume),
                 Item::Slider("Графика", Field::Quality),
+                Item::Slider("Масштаб рендера (ультра)", Field::Scale),
                 Item::Toggle("Показывать приборы на экране", Field::Hud),
                 Item::Back,
             ],
@@ -192,6 +196,7 @@ impl Menu {
             Field::Mouse => (format!("{:.1}×", self.settings.mouse), (self.settings.mouse - 0.3) / 1.7),
             Field::Volume => (format!("{:.0}%", self.settings.volume * 100.0), self.settings.volume),
             Field::Quality => ((["обычная", "высокая", "ультра"][self.settings.quality.min(2) as usize]).to_string(), self.settings.quality as f32 / 2.0),
+            Field::Scale => (format!("{:.0}%", self.settings.scale * 100.0), (self.settings.scale - 0.5) / 0.5),
             Field::Hud => (if self.settings.hud { "вкл".into() } else { "выкл".into() }, 0.0),
         }
     }
@@ -202,10 +207,12 @@ impl Menu {
             Field::Mouse => self.settings.mouse = ((self.settings.mouse + dir * 0.1) * 10.0).round() / 10.0,
             Field::Volume => self.settings.volume = ((self.settings.volume + dir * 0.1) * 10.0).round() / 10.0,
             Field::Quality => self.settings.quality = (self.settings.quality as i32 + if dir < 0.0 { -1 } else { 1 }).clamp(0, 2) as u8,
+            Field::Scale => self.settings.scale = ((self.settings.scale + dir * 0.1) * 10.0).round() / 10.0,
             Field::Hud => self.settings.hud = !self.settings.hud,
         }
         self.settings.mouse = self.settings.mouse.clamp(0.3, 2.0);
         self.settings.volume = self.settings.volume.clamp(0.0, 1.0);
+        self.settings.scale = self.settings.scale.clamp(0.5, 1.0);
         self.dirty = true;
     }
 
