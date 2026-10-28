@@ -13,6 +13,12 @@
 | ![Туннель](docs/img/tunnel.jpg) | ![Сигналы](docs/img/signals.jpg) |
 | ![Салон](docs/img/salon.jpg) | ![Снаружи](docs/img/orbit.jpg) |
 
+## Скачать
+Готовая сборка для Windows x64 — на странице [Releases](https://github.com/LakoMoor/metrostroi-rs/releases) (архив
+`Metrostroi-rs-<версия>-win64.zip`: exe + папка `game`, без контента Workshop). Распакуйте, подпишитесь на контент
+Metrostroi в Steam (таблица ниже), запустите `Play.bat`. Путь к Workshop находится автоматически; если игра не
+запускается, она покажет окно с причиной.
+
 ## Что нужно для запуска
 Windows, Rust (MSVC), видеокарта с Vulkan/DX12 и **ваши подписки на контент Metrostroi в Steam Workshop** (Garry's Mod,
 appid 4000). Программа читает модели, текстуры и звуки прямо из установки Steam; в репозитории их нет.
@@ -54,6 +60,12 @@ target/release/metrostroi-rs.exe --cab --at 300
 
 Идеи архитектуры взяты из [openOMSI](https://github.com/openOMSI-org/openOMSI) (AGPL-3.0), код не копировался.
 Проект неофициальный и не связан с авторами Metrostroi и Garry's Mod.
+
+## Возможности версии 0.1
+Кабина 81-717 (353 кнопки), физика по законам оригинала, составы из нескольких вагонов, система отказов, объявления,
+звуки всех переключателей, прогулки по вагону и внешние краны, **все 34 маршрута метро Москвы из OpenStreetMap**
+(меню «Выбрать линию»), настройки графики: обычная / высокая (MSAA) / ультра (HDR, bloom, SSAO, масштаб рендера).
+История изменений — [CHANGELOG.md](CHANGELOG.md), лицензия — [LICENSE](LICENSE).
 
 ## Состояние
 См. [ROADMAP.md](ROADMAP.md) и [PLAN.md](PLAN.md). Сделано: форматы, рендер, Lua-хост, кабина 1:1, динамика, трасса,

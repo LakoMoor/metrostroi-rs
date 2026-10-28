@@ -89,7 +89,51 @@ fn arg_value(args: &[String], key: &str) -> Option<String> {
     args.iter().position(|a| a == key).and_then(|i| args.get(i + 1)).cloned()
 }
 
-fn main() -> Result<()> {
+/// Show a message box on Windows (the exe has a console only when started from one, so a double-click would otherwise
+/// close silently); elsewhere it just prints.
+fn error_box(title: &str, text: &str) {
+    eprintln!("{title}: {text}");
+    #[cfg(windows)]
+    {
+        #[link(name = "user32")]
+        extern "system" {
+            fn MessageBoxW(hwnd: *mut std::ffi::c_void, text: *const u16, caption: *const u16, kind: u32) -> i32;
+        }
+        let wide = |s: &str| s.encode_utf16().chain(std::iter::once(0)).collect::<Vec<u16>>();
+        let (t, c) = (wide(text), wide(title));
+        unsafe {
+            MessageBoxW(std::ptr::null_mut(), t.as_ptr(), c.as_ptr(), 0x10);
+        }
+    }
+}
+
+fn main() {
+    if std::env::args().any(|a| a == "--version") {
+        println!("Metrostroi-rs {}", env!("CARGO_PKG_VERSION"));
+        return;
+    }
+    std::panic::set_hook(Box::new(|info| {
+        let text = format!("{info}");
+        let _ = std::fs::write("metrostroi-rs-crash.txt", &text);
+        error_box("Metrostroi-rs crashed", &format!("{text}
+
+(also saved to metrostroi-rs-crash.txt)"));
+    }));
+    if let Err(e) = run() {
+        let mut text = format!("{e}");
+        for cause in e.chain().skip(1) {
+            text.push_str(&format!("
+  caused by: {cause}"));
+        }
+        let hint = "
+
+The game needs your Steam Workshop content for Metrostroi (see SETUP.md) or an assets.mpak in game/content.";
+        error_box("Metrostroi-rs", &format!("{text}{hint}"));
+        std::process::exit(1);
+    }
+}
+
+fn run() -> Result<()> {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info,wgpu=warn,naga=warn")).init();
     let args: Vec<String> = std::env::args().skip(1).collect();
     let shot: Option<PathBuf> = arg_value(&args, "--shot").map(PathBuf::from);
@@ -124,6 +168,18 @@ fn main() -> Result<()> {
                     })
                     .collect();
                 menu::set_lines(lines);
+            }
+        }
+    }
+    // without the Crossline BSP (third-party, not shipped) the generated Moscow line is the better default
+    if let Some(g) = &game {
+        let have_bsp = g.join(&cfg.map).join("map.bsp").exists();
+        let have_asset_map = !cfg.map.is_empty() && g.join(&cfg.map).join("stations.json").exists();
+        if !have_bsp && !have_asset_map && arg_value(&args, "--map").is_none() && !menu::lines().is_empty() {
+            let first = menu::lines().into_iter().find(|l| l.label.starts_with('1')).or_else(|| menu::lines().into_iter().next());
+            if let Some(l) = first {
+                log::info!("no map.bsp: starting on the generated line {}", l.label);
+                cfg.map = format!("content/maps/moscow/{}", l.id);
             }
         }
     }

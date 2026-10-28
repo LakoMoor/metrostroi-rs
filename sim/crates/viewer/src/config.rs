@@ -52,6 +52,34 @@ pub fn game_dir() -> Option<PathBuf> {
     None
 }
 
+/// The Steam Workshop folder of Garry's Mod (`.../steamapps/workshop/content/4000`), looked up through the Steam
+/// install and its library folders when the configured path does not exist.
+pub fn find_workshop() -> Option<String> {
+    let mut libraries: Vec<PathBuf> = Vec::new();
+    let steam = std::process::Command::new("reg")
+        .args(["query", r"HKCU\Software\Valve\Steam", "/v", "SteamPath"])
+        .output()
+        .ok()
+        .and_then(|o| String::from_utf8(o.stdout).ok())
+        .and_then(|t| t.lines().find(|l| l.contains("SteamPath")).and_then(|l| l.split("REG_SZ").nth(1)).map(|p| PathBuf::from(p.trim())));
+    let defaults = [r"C:\Program Files (x86)\Steam", r"C:\Program Files\Steam"].map(PathBuf::from);
+    for root in steam.into_iter().chain(defaults) {
+        if let Ok(text) = std::fs::read_to_string(root.join("steamapps/libraryfolders.vdf")) {
+            for line in text.lines().filter(|l| l.contains("\"path\"")) {
+                if let Some(p) = line.split('"').nth(3) {
+                    libraries.push(PathBuf::from(p.replace("\\\\", "\\")));
+                }
+            }
+        }
+        libraries.push(root);
+    }
+    libraries
+        .into_iter()
+        .map(|l| l.join("steamapps/workshop/content/4000"))
+        .find(|p| p.is_dir())
+        .map(|p| p.to_string_lossy().replace('\\', "/"))
+}
+
 impl Config {
     pub fn load() -> (Config, Option<PathBuf>) {
         let dir = game_dir();
@@ -66,6 +94,19 @@ impl Config {
                 }
             })
             .unwrap_or_default();
+        let mut cfg: Config = cfg;
+        if !Path::new(&cfg.workshop).is_dir() {
+            if let Some(w) = find_workshop() {
+                log::info!("Workshop folder found at {w}");
+                cfg.workshop = w;
+            }
+        }
+        // the bundled Metrostroi scripts when the configured folder is not there
+        if let Some(d) = &dir {
+            if !cfg.resolve(Some(d), &cfg.lua_root).is_dir() && d.join("lua").is_dir() {
+                cfg.lua_root = "lua".into();
+            }
+        }
         (cfg, dir)
     }
 

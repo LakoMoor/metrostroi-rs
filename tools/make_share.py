@@ -53,10 +53,13 @@ d["lua_root"] = "lua"
 d["workshop"] = "C:/Program Files (x86)/Steam/steamapps/workshop/content/4000"
 cfg.write_text(json.dumps(d, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
-for f in ("README.md", "AGENTS.md", "CLAUDE.md", "SETUP.md"):
+for f in ("README.md", "AGENTS.md", "CLAUDE.md", "SETUP.md", "LICENSE", "CHANGELOG.md"):
     src = ROOT / "share_docs" / f
     if src.exists():
         shutil.copy2(src, OUT / f)
+
+if (ROOT / "share_docs" / "dot_github").exists():
+    copy_tree(ROOT / "share_docs" / "dot_github", OUT / ".github")
 
 GITIGNORE = "\n".join(["sim/target/", "*.exe", "game/content/maps/*/map.bsp", "*.mpak", "game/screenshots/", "game/logs/", ""])
 (OUT / ".gitignore").write_text(GITIGNORE, encoding="utf-8")

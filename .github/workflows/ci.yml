@@ -1,0 +1,20 @@
+name: CI
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: sim
+      - name: Build
+        working-directory: sim
+        run: cargo build --release -p viewer
+      - name: Test (tests that need Workshop content skip themselves)
+        working-directory: sim
+        run: cargo test --release

@@ -188,7 +188,7 @@ impl App {
         let window = Arc::new(
             el.create_window(
                 Window::default_attributes()
-                    .with_title("Metrostroi-rs")
+                    .with_title(concat!("Metrostroi-rs ", env!("CARGO_PKG_VERSION")))
                     .with_window_icon(window_icon())
                     .with_inner_size(LogicalSize::new(1600.0, 900.0)),
             )?,
