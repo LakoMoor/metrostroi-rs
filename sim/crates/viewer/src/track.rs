@@ -357,3 +357,31 @@ mod ars_tests {
         assert_eq!(aspect(&signs, t.main(), first, &[]), first.ars);
     }
 }
+
+#[cfg(test)]
+mod moscow_profile {
+    use super::*;
+
+    /// The generated saddle profile: flat at the platform, falling after it, rising into the next one, never steeper than 35 per mille.
+    #[test]
+    fn moscow_lines_dip_between_stations() {
+        let f = std::path::Path::new("E:/metrostroi2pz/game/content/maps/moscow/305810/track.lua");
+        if !f.exists() {
+            return;
+        }
+        let t = Track::load(f).unwrap();
+        let p = t.main();
+        let (mut down, mut up, mut steepest) = (false, false, 0.0f32);
+        let mut s = 20.0;
+        while s < 1500.0 {
+            let g = p.grade_over(s, 30.0);
+            down |= g < -3.0;
+            up |= g > 3.0;
+            steepest = steepest.max(g.abs());
+            s += 20.0;
+        }
+        assert!(down && up, "no dip between the first two stations");
+        assert!(steepest < 36.0, "steepest {steepest}");
+        assert!(p.grade_over(2.0, 30.0).abs() < 3.0, "not flat at the first platform");
+    }
+}
