@@ -2,7 +2,23 @@
 
 pub const HDR_FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba16Float;
 
+/// What the SSAO pass needs to turn depth back into distances.
+#[derive(Clone, Copy, bytemuck::Pod, bytemuck::Zeroable)]
+#[repr(C)]
+pub struct Params {
+    pub near: f32,
+    pub far: f32,
+    /// tan(fovy / 2)
+    pub tan_half: f32,
+    pub aspect: f32,
+    /// 0 = off
+    pub ao: f32,
+    pub radius: f32,
+    pub _pad: [f32; 2],
+}
+
 pub struct Post {
+    params: wgpu::Buffer,
     /// The resolved HDR scene colour (the main pass resolves into it).
     pub scene: wgpu::TextureView,
     half: [wgpu::TextureView; 2],
@@ -43,7 +59,20 @@ impl Post {
         };
         let layout = device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
             label: Some("post layout"),
-            entries: &[tex(0), wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering), count: None }, tex(2)],
+            entries: &[tex(0), wgpu::BindGroupLayoutEntry { binding: 1, visibility: wgpu::ShaderStages::FRAGMENT, ty: wgpu::BindingType::Sampler(wgpu::SamplerBindingType::Filtering), count: None }, tex(2),
+                wgpu::BindGroupLayoutEntry {
+                    binding: 3,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Texture { sample_type: wgpu::TextureSampleType::Depth, view_dimension: wgpu::TextureViewDimension::D2, multisampled: true },
+                    count: None,
+                },
+                wgpu::BindGroupLayoutEntry {
+                    binding: 4,
+                    visibility: wgpu::ShaderStages::FRAGMENT,
+                    ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: None },
+                    count: None,
+                },
+            ],
         });
         let pl = device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor { label: Some("post pl"), bind_group_layouts: &[Some(&layout)], immediate_size: 0 });
         let make = |fs: &str, format: wgpu::TextureFormat| {
@@ -72,7 +101,9 @@ impl Post {
             ..Default::default()
         });
         let rt = wgpu::TextureUsages::RENDER_ATTACHMENT | wgpu::TextureUsages::TEXTURE_BINDING;
+        let params = device.create_buffer(&wgpu::BufferDescriptor { label: Some("post params"), size: std::mem::size_of::<Params>() as u64, usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST, mapped_at_creation: false });
         Post {
+            params,
             scene: texture(device, w, h, rt),
             half: [texture(device, w / 4, h / 4, rt), texture(device, w / 4, h / 4, rt)],
             sampler,
@@ -85,7 +116,7 @@ impl Post {
         }
     }
 
-    fn pass(&self, device: &wgpu::Device, enc: &mut wgpu::CommandEncoder, pipe: &wgpu::RenderPipeline, a: &wgpu::TextureView, b: &wgpu::TextureView, out: &wgpu::TextureView) {
+    fn pass(&self, device: &wgpu::Device, enc: &mut wgpu::CommandEncoder, pipe: &wgpu::RenderPipeline, a: &wgpu::TextureView, b: &wgpu::TextureView, depth: &wgpu::TextureView, out: &wgpu::TextureView) {
         let bind = device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("post bind"),
             layout: &self.layout,
@@ -93,6 +124,8 @@ impl Post {
                 wgpu::BindGroupEntry { binding: 0, resource: wgpu::BindingResource::TextureView(a) },
                 wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&self.sampler) },
                 wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(b) },
+                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(depth) },
+                wgpu::BindGroupEntry { binding: 4, resource: self.params.as_entire_binding() },
             ],
         });
         let mut p = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
@@ -109,12 +142,13 @@ impl Post {
     }
 
     /// Bloom and composite the resolved HDR scene into `out`.
-    pub fn run(&self, device: &wgpu::Device, queue: &wgpu::Queue, out: &wgpu::TextureView) {
+    pub fn run(&self, device: &wgpu::Device, queue: &wgpu::Queue, depth: &wgpu::TextureView, params: Params, out: &wgpu::TextureView) {
+        queue.write_buffer(&self.params, 0, bytemuck::bytes_of(&params));
         let mut enc = device.create_command_encoder(&Default::default());
-        self.pass(device, &mut enc, &self.bright, &self.scene, &self.dummy, &self.half[0]);
-        self.pass(device, &mut enc, &self.blur_h, &self.half[0], &self.dummy, &self.half[1]);
-        self.pass(device, &mut enc, &self.blur_v, &self.half[1], &self.dummy, &self.half[0]);
-        self.pass(device, &mut enc, &self.composite, &self.scene, &self.half[0], out);
+        self.pass(device, &mut enc, &self.bright, &self.scene, &self.dummy, depth, &self.half[0]);
+        self.pass(device, &mut enc, &self.blur_h, &self.half[0], &self.dummy, depth, &self.half[1]);
+        self.pass(device, &mut enc, &self.blur_v, &self.half[1], &self.dummy, depth, &self.half[0]);
+        self.pass(device, &mut enc, &self.composite, &self.scene, &self.half[0], depth, out);
         queue.submit(Some(enc.finish()));
     }
 }

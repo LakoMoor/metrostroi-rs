@@ -65,6 +65,16 @@ struct Camera {
 }
 
 impl Camera {
+    /// Near / far planes and the vertical field of view the matrices above use (for turning depth back into metres).
+    fn depth_params(&self, aspect: f32, fov: f32) -> crate::post::Params {
+        let (near, far, fovy) = match self.mode {
+            Mode::Orbit => ((self.radius * 0.005).max(0.02), self.radius * 20.0, 45.0f32),
+            Mode::Cab => (0.03, 200.0, fov),
+            Mode::Walk => (0.03, 400.0, fov),
+        };
+        crate::post::Params { near, far, tan_half: (fovy.to_radians() / 2.0).tan(), aspect, ao: 0.85, radius: 0.5, _pad: [0.0; 2] }
+    }
+
     fn view_proj(&self, aspect: f32, fov: f32) -> Mat4 {
         match self.mode {
             Mode::Orbit => renderer::orbit_view_proj(self.center, self.radius, self.yaw, self.pitch, self.dist, aspect),
@@ -470,7 +480,7 @@ impl App {
         let aspect = g.config.width as f32 / g.config.height as f32;
         if let Some(post) = &g.post {
             g.renderer.render_ms(scene, cam.view_proj(aspect, self.menu.settings.fov), g.msaa.as_ref(), &post.scene, &g.depth);
-            post.run(&g.renderer.device, &g.renderer.queue, &view);
+            post.run(&g.renderer.device, &g.renderer.queue, &g.depth, cam.depth_params(aspect, self.menu.settings.fov), &view);
         } else {
             g.renderer.render_ms(scene, cam.view_proj(aspect, self.menu.settings.fov), g.msaa.as_ref(), &view, &g.depth);
         }
