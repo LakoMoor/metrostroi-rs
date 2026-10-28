@@ -161,6 +161,10 @@ fn main() -> Result<()> {
                     if let Ok(s) = track::load_signs(&dir.join("signs.lua"), t.main()) {
                         sim.set_signs(s);
                     }
+                    if dir.join("stations.json").exists() {
+                        let stops: Vec<f32> = station::from_json(&dir.join("stations.json")).map(|(p, _)| p.iter().map(|p| (p.from + p.to) / 2.0).collect()).unwrap_or_default();
+                        sim.set_signs(track::generate_signs(t.main(), &stops, 700.0, app::car_above_rail() - 2.22));
+                    }
                     match station::from_json(&dir.join("stations.json")) {
                         Some((platforms, names)) => {
                             sim.set_platforms(platforms);

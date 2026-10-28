@@ -246,6 +246,36 @@ mod sign_tests {
     }
 }
 
+/// Automatic block signals for a generated line: one every `spacing` metres on the right of the track, none within
+/// 120 m of a station stop (`stops` = distances along the path), codes 0/40/60/80 for 0..3 clear blocks ahead.
+pub fn generate_signs(main: &Path3, stops: &[f32], spacing: f32, rail_z: f32) -> Vec<Sign> {
+    let mut out = Vec::new();
+    let mut s = spacing;
+    while s < main.length() - 50.0 {
+        if !stops.iter().any(|&st| (st - s).abs() < 120.0) {
+            let a = main.at(s);
+            let d = Vec3::new(a.dir.x, a.dir.y, 0.0).normalize_or_zero();
+            let right = Vec3::new(d.y, -d.x, 0.0);
+            out.push(Sign {
+                class: "gmod_track_signal".into(),
+                pos: a.pos + right * 2.3 + Vec3::Z * rail_z,
+                yaw: d.y.atan2(d.x).to_degrees(),
+                settings: 0,
+                name: format!("{}", out.len() + 1),
+                light_type: 0,
+                lenses: "YGR".into(),
+                left: false,
+                plate: (0, 0.0, 0.0),
+                ars: Some(8),
+                codes: vec![0, 4, 6, 8],
+                on_main: Some((s, 2.3)),
+            });
+        }
+        s += spacing;
+    }
+    out
+}
+
 /// The next signal ahead on the main line that faces the direction of travel: (distance ahead, sign).
 pub fn next_signal<'a>(signs: &'a [Sign], main: &Path3, s: f32) -> Option<(f32, &'a Sign)> {
     let dir = main.at(s).dir;
