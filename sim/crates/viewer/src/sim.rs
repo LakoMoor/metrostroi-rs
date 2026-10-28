@@ -574,7 +574,9 @@ impl Sim {
     fn physics(&self, dt: f64) {
         if let Some(tr) = self.track.borrow().as_ref() {
             let pos = self.dynamics.borrow().pos as f32;
-            self.dynamics.borrow_mut().grade = tr.main().grade_over(pos, 30.0) as f64;
+            let mut d = self.dynamics.borrow_mut();
+            d.grade = tr.main().grade_over(pos, 30.0) as f64;
+            d.radius = tr.main().radius_over(pos, 40.0) as f64;
         }
         if let Some((_, name, code)) = self.next_signal() {
             if let Ok(f) = self.rt.lua.globals().get::<mlua::Function>("__ars") {
@@ -733,14 +735,21 @@ impl Sim {
         if v > 1.0 {
             self.moving.set(true);
         } else if v < 0.05 && self.moving.replace(false) {
-            if let Some((_, _, d, _, left)) = self.platform_ahead() {
-                if d <= 0.0 {
-                    self.stop_report.set(Some((left, 10.0)));
-                    let name = self.station_name(self.platform_ahead().map(|p| p.0).unwrap_or(0)).unwrap_or_else(|| "станция".into());
-                    self.trip.borrow_mut().stopped(name, left);
-                }
+            // a stop counts at the platform whose end is nearest, also a few metres past it (an overrun is scored too)
+            let pos = self.dynamics.borrow().pos as f32;
+            let hit = self.platform_at(pos).map(|p| (p.station, p.to - pos));
+            if let Some((station, left)) = hit {
+                self.stop_report.set(Some((left, 10.0)));
+                let name = self.station_name(station).unwrap_or_else(|| "станция".into());
+                self.trip.borrow_mut().stopped(name, left);
             }
         }
+    }
+
+    /// The platform a train standing at `pos` belongs to: the one whose end is nearest within its length and a short overrun.
+    fn platform_at(&self, pos: f32) -> Option<crate::station::Platform> {
+        let ps = self.platforms.borrow();
+        ps.iter().filter(|p| pos >= p.from - 8.0 && pos <= p.to + 25.0).min_by(|a, b| (a.to - pos).abs().total_cmp(&(b.to - pos).abs())).cloned()
     }
 
     /// Samples the facts the trip record needs five times a second.
@@ -752,12 +761,13 @@ impl Sim {
         }
         self.trip_clock.set(0.0);
         let (dl, dr) = self.doors_open();
-        let wrong = match self.platform_ahead() {
-            Some((_, _, d, side, _)) if d <= 0.0 => {
-                let left = side == crate::station::Side::Left;
+        let pos = self.dynamics.borrow().pos as f32;
+        let wrong = match self.platform_at(pos) {
+            Some(p) => {
+                let left = p.side == crate::station::Side::Left;
                 (dl && !left) || (dr && left)
             }
-            _ => true,
+            None => true,
         };
         let kmh = self.dynamics.borrow().v.abs() as f32 * 3.6;
         self.trip.borrow_mut().observe(t, kmh, dl || dr, wrong, self.ars_tripped.get());

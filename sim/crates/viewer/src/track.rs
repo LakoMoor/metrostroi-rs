@@ -28,6 +28,15 @@ pub struct Track {
 }
 
 impl Path3 {
+    /// Curve radius (m) over `window` metres around `s`: the chord's heading change against its length. Straight = infinity.
+    pub fn radius_over(&self, s: f32, window: f32) -> f32 {
+        let (a, b, c) = (self.at(s - window / 2.0), self.at(s), self.at(s + window / 2.0));
+        let (d1, d2) = (a.dir.truncate().normalize_or_zero(), c.dir.truncate().normalize_or_zero());
+        let turn = d1.perp_dot(d2).abs().asin().max(1e-6);
+        let _ = b;
+        window / turn
+    }
+
     pub fn length(&self) -> f32 {
         *self.cum.last().unwrap_or(&0.0)
     }
@@ -363,6 +372,29 @@ mod moscow_profile {
     use super::*;
 
     /// The generated saddle profile: flat at the platform, falling after it, rising into the next one, never steeper than 35 per mille.
+    #[test]
+    fn moscow_curve_radii_are_plausible() {
+        let f = std::path::Path::new("E:/metrostroi2pz/game/content/maps/moscow/305810/track.lua");
+        if !f.exists() {
+            return;
+        }
+        let p = Track::load(f).unwrap();
+        let p = p.main();
+        let mut tight = 0;
+        let mut min = f32::MAX;
+        let mut s = 0.0;
+        while s < p.length() {
+            let r = p.radius_over(s, 40.0);
+            min = min.min(r);
+            if r < 150.0 {
+                tight += 1;
+            }
+            s += 20.0;
+        }
+        println!("tightest {min:.0} m, {tight} samples under 150 m of {}", (p.length() / 20.0) as u32);
+        assert!(min > 80.0, "tightest curve {min} m");
+    }
+
     #[test]
     fn moscow_lines_dip_between_stations() {
         let f = std::path::Path::new("E:/metrostroi2pz/game/content/maps/moscow/305810/track.lua");

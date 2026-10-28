@@ -49,6 +49,8 @@ pub struct Dynamics {
     pub pos: f64,
     /// Track gradient, per mille, positive uphill in the +x direction.
     pub grade: f64,
+    /// Curve radius under the train, m (0 or infinity = straight).
+    pub radius: f64,
     prev_speed: Vec<f64>,
 }
 
@@ -109,7 +111,9 @@ impl Dynamics {
 
         let v_kmh = self.v.abs() * 3.6;
         let resist = (RES_0 + RES_2 * v_kmh * v_kmh) * if self.v < 0.0 { -1.0 } else { 1.0 };
-        let a = force / (MASS * cars) - 9.81 * self.grade / 1000.0 - if self.v == 0.0 { 0.0 } else { resist };
+        // curve resistance (Röckl): 700 / (R - 55) kgf per tonne
+        let curve = if self.radius > 60.0 && self.radius.is_finite() { 700.0 / (self.radius - 55.0) * 0.00981 } else { 0.0 };
+        let a = force / (MASS * cars) - 9.81 * self.grade / 1000.0 - if self.v == 0.0 { 0.0 } else { resist + curve * self.v.signum() };
         let mut v = self.v + a * dt;
         if self.v != 0.0 && v * self.v < 0.0 {
             v = 0.0; // brakes and drag stop the car, they never reverse it
@@ -183,6 +187,19 @@ mod tests {
             d.step(1.0 / 60.0, &forward(0.0, 0.0));
         }
         assert!(d.v < v0);
+    }
+
+    #[test]
+    fn curves_slow_a_coasting_train() {
+        let coast = |radius: f64| {
+            let mut d = Dynamics { v: 20.0, radius, ..Default::default() };
+            for _ in 0..600 {
+                d.step(1.0 / 60.0, &forward(0.0, 0.0));
+            }
+            d.v
+        };
+        assert!(coast(150.0) < coast(f64::INFINITY) - 0.1);
+        assert!(coast(1500.0) <= coast(f64::INFINITY));
     }
 
     #[test]
