@@ -5,7 +5,7 @@
 //! by two calibration constants chosen so the 81-717 reaches roughly its real performance
 //! (about 1 m/s^2 under full traction, about 1 m/s^2 service braking).
 
-/// Effective mass the bogey forces act on, kg-equivalent.
+/// Effective mass the bogey forces of ONE car act on, kg-equivalent (a consist scales it with its car count).
 const MASS: f64 = 40_000.0;
 /// Brake forces in the Lua are tuned for Source's friction model; scale to real-world deceleration.
 const BRAKE_SCALE: f64 = 0.33;
@@ -49,7 +49,7 @@ pub struct Dynamics {
     pub pos: f64,
     /// Track gradient, per mille, positive uphill in the +x direction.
     pub grade: f64,
-    prev_speed: [f64; 2],
+    prev_speed: Vec<f64>,
 }
 
 impl Dynamics {
@@ -64,15 +64,18 @@ impl Dynamics {
         }
     }
 
-    pub fn step(&mut self, dt: f64, bogeys: [BogeyIn; 2]) -> [BogeyOut; 2] {
+    /// `bogeys` holds front, rear of the head car, then front, rear of each coupled car.
+    pub fn step(&mut self, dt: f64, bogeys: &[BogeyIn]) -> Vec<BogeyOut> {
         let dt = dt.clamp(1e-4, 0.1);
         let mut force = 0.0;
         let mut hold = false;
         let mut traction = 0.0f64;
-        let mut out = [BogeyOut::default(); 2];
+        let mut out = vec![BogeyOut::default(); bogeys.len()];
+        self.prev_speed.resize(bogeys.len(), 0.0);
+        let cars = (bogeys.len() / 2).max(1) as f64;
 
         for (i, b) in bogeys.iter().enumerate() {
-            let e = Self::push_dir(i == 0, b.reversed);
+            let e = Self::push_dir(i % 2 == 0, b.reversed);
             let local = self.v * e * 3.6;
             let sign = if local < 0.0 { -1.0 } else { 1.0 };
             let abs = local.abs();
@@ -106,7 +109,7 @@ impl Dynamics {
 
         let v_kmh = self.v.abs() * 3.6;
         let resist = (RES_0 + RES_2 * v_kmh * v_kmh) * if self.v < 0.0 { -1.0 } else { 1.0 };
-        let a = force / MASS - 9.81 * self.grade / 1000.0 - if self.v == 0.0 { 0.0 } else { resist };
+        let a = force / (MASS * cars) - 9.81 * self.grade / 1000.0 - if self.v == 0.0 { 0.0 } else { resist };
         let mut v = self.v + a * dt;
         if self.v != 0.0 && v * self.v < 0.0 {
             v = 0.0; // brakes and drag stop the car, they never reverse it
@@ -117,7 +120,7 @@ impl Dynamics {
         self.pos += 0.5 * (self.v + v) * dt;
         self.v = v;
         for (i, b) in bogeys.iter().enumerate() {
-            let local = v * Self::push_dir(i == 0, b.reversed) * 3.6;
+            let local = v * Self::push_dir(i % 2 == 0, b.reversed) * 3.6;
             let abs = local.abs();
             let sign = if local < 0.0 { -1.0 } else { 1.0 };
             out[i] = BogeyOut { speed: abs, speed_sign: if b.reversed { -sign } else { sign }, acceleration: 0.277778 * (abs - self.prev_speed[i]) / dt };
@@ -144,7 +147,7 @@ mod tests {
     fn full_traction_accelerates_about_one_ms2() {
         let mut d = Dynamics::default();
         for _ in 0..60 {
-            d.step(1.0 / 60.0, forward(0.5, 0.0));
+            d.step(1.0 / 60.0, &forward(0.5, 0.0));
         }
         // 1 s of full traction (each bogey at 0.5) from rest
         assert!(d.v > 0.4 && d.v < 1.5, "v = {}", d.v);
@@ -154,13 +157,13 @@ mod tests {
     fn reaches_sensible_top_speed_and_brakes_to_a_stop() {
         let mut d = Dynamics::default();
         for _ in 0..(60 * 30) {
-            d.step(1.0 / 60.0, forward(0.5, 0.0));
+            d.step(1.0 / 60.0, &forward(0.5, 0.0));
         }
         let kmh = d.v * 3.6;
         assert!(kmh > 50.0 && kmh < 200.0, "speed after 30 s {kmh}");
         let mut t = 0.0;
         while d.v > 0.0 && t < 60.0 {
-            d.step(1.0 / 60.0, forward(0.0, 3.5));
+            d.step(1.0 / 60.0, &forward(0.0, 3.5));
             t += 1.0 / 60.0;
         }
         assert!(d.v == 0.0, "never stopped");
@@ -171,13 +174,13 @@ mod tests {
     fn downhill_rolls_and_uphill_slows() {
         let mut d = Dynamics { grade: -40.0, ..Default::default() };
         for _ in 0..600 {
-            d.step(1.0 / 60.0, forward(0.0, 0.0));
+            d.step(1.0 / 60.0, &forward(0.0, 0.0));
         }
         assert!(d.v > 2.0, "rolled only to {}", d.v);
         d.grade = 40.0;
         let v0 = d.v;
         for _ in 0..120 {
-            d.step(1.0 / 60.0, forward(0.0, 0.0));
+            d.step(1.0 / 60.0, &forward(0.0, 0.0));
         }
         assert!(d.v < v0);
     }
@@ -186,7 +189,7 @@ mod tests {
     fn parked_train_with_brakes_does_not_creep() {
         let mut d = Dynamics::default();
         for _ in 0..120 {
-            d.step(1.0 / 60.0, forward(0.0, 4.0));
+            d.step(1.0 / 60.0, &forward(0.0, 4.0));
         }
         assert_eq!(d.v, 0.0);
     }
@@ -194,9 +197,9 @@ mod tests {
     #[test]
     fn bogeys_report_matching_speed() {
         let mut d = Dynamics::default();
-        let mut o = [BogeyOut::default(); 2];
+        let mut o = vec![];
         for _ in 0..120 {
-            o = d.step(1.0 / 60.0, forward(0.5, 0.0));
+            o = d.step(1.0 / 60.0, &forward(0.5, 0.0));
         }
         assert!((o[0].speed - o[1].speed).abs() < 1e-9);
         assert!((o[0].speed - d.v * 3.6).abs() < 1e-6);

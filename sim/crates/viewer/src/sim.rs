@@ -118,15 +118,22 @@ const HELPERS: &str = r#"
     -- bogey inputs for the Rust dynamics: motor force/power, reversed, brake force/cylinder/parking/pow
     function __phys_in()
         local r = {}
-        for i, b in ipairs({ T.FrontBogey, T.RearBogey }) do
+        local list = {}
+        for _, c in ipairs(__cars) do list[#list + 1] = c.FrontBogey list[#list + 1] = c.RearBogey end
+        for i, b in ipairs(list) do
             r[i] = { b.MotorForce or 30000, b.MotorPower or 0, b.Reversed and 1 or 0, b.PneumaticBrakeForce or 100000,
                      b.BrakeCylinderPressure or 0, b.ParkingBrakePressure or 0, b.PneumaticPow or 1 }
         end
         return r
     end
-    function __phys_out(f, fs, fa, r, rs, ra)
-        T.FrontBogey.Speed, T.FrontBogey.SpeedSign, T.FrontBogey.Acceleration = f, fs, fa
-        T.RearBogey.Speed, T.RearBogey.SpeedSign, T.RearBogey.Acceleration = r, rs, ra
+    function __phys_out(o)
+        local i = 1
+        for _, c in ipairs(__cars) do
+            for _, b in ipairs({ c.FrontBogey, c.RearBogey }) do
+                b.Speed, b.SpeedSign, b.Acceleration = o[i], o[i + 1], o[i + 2]
+                i = i + 3
+            end
+        end
     end
     -- Stand-in for the rail network's ARS section under the train: Rust fills in the code of the next signal.
     ARS_SIGNAL = { Name = "?", Red = false, ARSSpeedLimit = nil, TwoToSix = false, Approve0 = false }
@@ -573,13 +580,16 @@ impl Sim {
         let g = self.rt.lua.globals();
         let (Ok(fi), Ok(fo)) = (g.get::<mlua::Function>("__phys_in"), g.get::<mlua::Function>("__phys_out")) else { return };
         let Ok(t) = fi.call::<mlua::Table>(()) else { return };
+        let n = t.raw_len() as i64;
         let read = |i: i64| -> BogeyIn {
             let r: mlua::Table = t.get(i).unwrap();
             let n = |k: i64| r.get::<f64>(k).unwrap_or(0.0);
             BogeyIn { motor_force: n(1), motor_power: n(2), reversed: n(3) > 0.5, pneumatic_force: n(4), brake_cylinder: n(5), parking: n(6), pneumatic_pow: n(7) }
         };
-        let out = self.dynamics.borrow_mut().step(dt, [read(1), read(2)]);
-        let _ = fo.call::<()>((out[0].speed, out[0].speed_sign, out[0].acceleration, out[1].speed, out[1].speed_sign, out[1].acceleration));
+        let ins: Vec<BogeyIn> = (1..=n).map(read).collect();
+        let out = self.dynamics.borrow_mut().step(dt, &ins);
+        let flat: Vec<f64> = out.iter().flat_map(|o| [o.speed, o.speed_sign, o.acceleration]).collect();
+        let _ = fo.call::<()>(flat);
     }
 
     /// Start the scripted cab start-up (battery, brake valve, reverser, overload reset); KV ends in 0.
@@ -1054,6 +1064,12 @@ mod tests {
         println!("{r}");
         let same: bool = sim.rt.lua.load("return __cars[2]:ReadTrainWire(1) == T:ReadTrainWire(1) and __cars[2]:ReadTrainWire(6) == T:ReadTrainWire(6)").eval().unwrap();
         assert!(same && r.starts_with("wagons=2"), "{r}");
+        // the trailer's bogeys read the same speed as the head car's (door interlocks and the like depend on it)
+        sim.set_position(0.0);
+        sim.rt.lua.load("__cars[2].FrontBogey.Speed = -1").exec().unwrap();
+        sim.tick(1.0 / 60.0);
+        let ok: bool = sim.rt.lua.load("return __cars[2].FrontBogey.Speed == T.FrontBogey.Speed").eval().unwrap();
+        assert!(ok, "trailer bogey speed not fed by the dynamics");
     }
 
     #[test]
