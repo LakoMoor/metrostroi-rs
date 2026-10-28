@@ -269,6 +269,33 @@ impl App {
         match act {
             Action::None | Action::Resume => {}
             Action::Quit => el.exit(),
+            Action::PickLine(i) => {
+                // a line is a different world: remember it and start a fresh process on it
+                let Some(line) = crate::menu::lines().get(i).cloned() else { return };
+                self.menu.settings.map = format!("content/maps/moscow/{}", line.id);
+                self.menu.settings.save(&self.menu.settings_path());
+                if let Ok(exe) = std::env::current_exe() {
+                    let mut skip = false;
+                    let args: Vec<String> = std::env::args()
+                        .skip(1)
+                        .filter(|a| {
+                            if skip {
+                                skip = false;
+                                false
+                            } else if a == "--map" {
+                                skip = true;
+                                false
+                            } else {
+                                a != "--nomenu"
+                            }
+                        })
+                        .collect();
+                    match std::process::Command::new(exe).args(args).spawn() {
+                        Ok(_) => el.exit(),
+                        Err(e) => log::error!("restart: {e}"),
+                    }
+                }
+            }
             Action::Start { quick } => {
                 if quick {
                     if let Some(s) = &self.sim {

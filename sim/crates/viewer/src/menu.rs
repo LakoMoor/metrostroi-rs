@@ -12,6 +12,24 @@ pub enum Screen {
     Pause,
     Settings,
     Help,
+    Lines,
+}
+
+/// A selectable line (`lines.json` of a generated map set): folder under `content/maps/moscow` and the menu text.
+#[derive(Clone, Debug)]
+pub struct LineInfo {
+    pub id: String,
+    pub label: String,
+}
+
+static LINES: std::sync::Mutex<Vec<LineInfo>> = std::sync::Mutex::new(Vec::new());
+
+pub fn set_lines(l: Vec<LineInfo>) {
+    *LINES.lock().unwrap() = l;
+}
+
+pub fn lines() -> Vec<LineInfo> {
+    LINES.lock().unwrap().clone()
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -24,13 +42,15 @@ pub struct Settings {
     pub hud: bool,
     /// Reserved for the sound phase.
     pub volume: f32,
+    /// Map folder chosen in the line menu (relative to the game folder); empty = the configured default.
+    pub map: String,
     /// 0 = standard, 1 = high (4x MSAA), 2 = ultra (4x MSAA + the heavier effects as they land).
     pub quality: u8,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, quality: 1 }
+        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, map: String::new(), quality: 1 }
     }
 }
 
@@ -57,6 +77,8 @@ pub enum Action {
     ResetTrain,
     ToMain,
     Quit,
+    /// Restart on the line with this index in the line list.
+    PickLine(usize),
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -65,6 +87,7 @@ enum Item {
     Goto(&'static str, Screen),
     Slider(&'static str, Field),
     Toggle(&'static str, Field),
+    Line(usize),
     Back,
 }
 
@@ -87,6 +110,7 @@ pub struct Menu {
     /// Item rectangles from the last draw, for the mouse.
     rects: Vec<(f32, f32, f32, f32)>,
     pub dirty: bool,
+    lines: Vec<LineInfo>,
 }
 
 const KEYS_HELP: &[(&str, &str)] = &[
@@ -107,7 +131,11 @@ const KEYS_HELP: &[(&str, &str)] = &[
 
 impl Menu {
     pub fn new(settings_path: PathBuf, start: Screen) -> Menu {
-        Menu { settings: Settings::load(&settings_path), settings_path, screen: start, selected: 0, back_to: Screen::Main, rects: Vec::new(), dirty: false }
+        Menu { settings: Settings::load(&settings_path), settings_path, screen: start, selected: 0, back_to: Screen::Main, rects: Vec::new(), dirty: false, lines: LINES.lock().unwrap().clone() }
+    }
+
+    pub fn settings_path(&self) -> PathBuf {
+        self.settings_path.clone()
     }
 
     fn items(&self) -> Vec<Item> {
@@ -118,7 +146,11 @@ impl Menu {
                 Item::Goto("Настройки", Screen::Settings),
                 Item::Goto("Управление", Screen::Help),
                 Item::Button("Выход", Action::Quit),
-            ],
+            ]
+            .into_iter()
+            .enumerate()
+            .flat_map(|(i, it)| if i == 2 && !self.lines.is_empty() { vec![Item::Goto("Выбрать линию", Screen::Lines), it] } else { vec![it] })
+            .collect(),
             Screen::Pause => vec![
                 Item::Button("Продолжить", Action::Resume),
                 Item::Button("Быстрый запуск поезда", Action::QuickStart),
@@ -138,6 +170,7 @@ impl Menu {
                 Item::Back,
             ],
             Screen::Help => vec![Item::Back],
+            Screen::Lines => (0..self.lines.len()).map(Item::Line).chain(std::iter::once(Item::Back)).collect(),
             Screen::Playing => vec![],
         }
     }
@@ -148,6 +181,7 @@ impl Menu {
             Screen::Pause => "Пауза",
             Screen::Settings => "Настройки",
             Screen::Help => "Управление",
+            Screen::Lines => "Выбор линии",
             Screen::Playing => "",
         }
     }
@@ -176,7 +210,7 @@ impl Menu {
     }
 
     fn go(&mut self, s: Screen) {
-        if matches!(s, Screen::Settings | Screen::Help) {
+        if matches!(s, Screen::Settings | Screen::Help | Screen::Lines) {
             self.back_to = self.screen;
         }
         self.screen = s;
@@ -213,6 +247,7 @@ impl Menu {
                 self.adjust(f, if dir == 0.0 { 1.0 } else { dir });
                 Action::None
             }
+            Item::Line(i) => Action::PickLine(i),
             Item::Back => {
                 self.back();
                 Action::None
@@ -232,7 +267,7 @@ impl Menu {
                 self.screen = Screen::Playing;
                 Action::Resume
             }
-            Screen::Settings | Screen::Help => {
+            Screen::Settings | Screen::Help | Screen::Lines => {
                 self.back();
                 Action::None
             }
@@ -296,8 +331,15 @@ impl Menu {
         let (iw, ih, gap) = (560.0f32, 52.0f32, 12.0f32);
         let top = if self.screen == Screen::Help { sh * 0.12 + 96.0 + KEYS_HELP.len() as f32 * 34.0 } else { sh * 0.30 };
         self.rects.clear();
+        // long lists (the line menu) show a window of rows that follows the selection
+        let rows = (((sh - top - 70.0) / (ih + gap)).floor() as usize).max(3);
+        let first = if self.screen == Screen::Lines { self.selected.saturating_sub(rows - 1).min(items.len().saturating_sub(rows)) } else { 0 };
         for (i, item) in items.iter().enumerate() {
-            let (x, y) = ((sw - iw) / 2.0, top + i as f32 * (ih + gap));
+            if i < first || i >= first + rows {
+                self.rects.push((-1000.0, -1000.0, 0.0, 0.0));
+                continue;
+            }
+            let (x, y) = ((sw - iw) / 2.0, top + (i - first) as f32 * (ih + gap));
             self.rects.push((x, y, iw, ih));
             let sel = i == self.selected;
             let bg: Color = if sel { [0.16, 0.42, 0.85, 0.95] } else { [0.1, 0.16, 0.28, 0.85] };
@@ -305,11 +347,12 @@ impl Menu {
             if sel {
                 ui.rect(x, y, 6.0, ih, [1.0, 0.85, 0.3, 1.0]);
             }
-            let label = match *item {
+            let label: &str = match *item {
                 Item::Button(l, _) | Item::Goto(l, _) | Item::Slider(l, _) | Item::Toggle(l, _) => l,
+                Item::Line(n) => &self.lines[n].label,
                 Item::Back => "Назад",
             };
-            ui.text(x + 24.0, y + 11.0, 28.0, label, [1.0, 1.0, 1.0, 1.0]);
+            ui.text(x + 24.0, y + 11.0, if matches!(item, Item::Line(_)) { 19.0 } else { 28.0 }, label, [1.0, 1.0, 1.0, 1.0]);
             if let Item::Slider(_, f) | Item::Toggle(_, f) = *item {
                 let (txt, frac) = self.value_text(f);
                 let w = ui.text_width(&txt, 28.0);

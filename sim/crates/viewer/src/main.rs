@@ -6,6 +6,7 @@ mod dynamics;
 mod ground;
 mod menu;
 mod panels;
+mod procgen;
 mod renderer;
 mod signals;
 mod station;
@@ -98,7 +99,33 @@ fn main() -> Result<()> {
     let look: Option<Vec<f32>> = arg_value(&args, "--look")
         .map(|s| s.split(',').filter_map(|v| v.parse().ok()).collect());
     let single = arg_value(&args, "--model");
-    let (cfg, game) = config::Config::load();
+    let (mut cfg, game) = config::Config::load();
+    if let Some(m) = arg_value(&args, "--map") {
+        cfg.map = m;
+    } else if let Some(g) = &game {
+        // the line picked last time in the menu
+        let last = menu::Settings::load(&g.join("config").join("settings.json")).map;
+        if !last.is_empty() && g.join(&last).join("track.lua").exists() {
+            cfg.map = last;
+        }
+    }
+    if let Some(g) = &game {
+        // the generated Moscow lines, for the line menu
+        if let Ok(text) = std::fs::read_to_string(g.join("content/maps/moscow/lines.json")) {
+            if let Ok(serde_json::Value::Array(list)) = serde_json::from_str(&text) {
+                let lines = list
+                    .iter()
+                    .map(|l| {
+                        let s = |k: &str| l.get(k).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                        let km = l.get("length_km").and_then(|v| v.as_f64()).unwrap_or(0.0);
+                        let n = l.get("stations").and_then(|v| v.as_u64()).unwrap_or(0);
+                        menu::LineInfo { id: s("id"), label: format!("{} · {} → {} · {km:.1} км · {n} ст.", s("ref"), s("from"), s("to")) }
+                    })
+                    .collect();
+                menu::set_lines(lines);
+            }
+        }
+    }
     log::info!("game folder: {:?}", game);
     let controls = arg_value(&args, "--controls").unwrap_or_else(|| cfg.resolve(game.as_deref(), &cfg.controls).to_string_lossy().into_owned());
 
@@ -117,6 +144,8 @@ fn main() -> Result<()> {
     if let Some(b) = arg_value(&args, "--block").and_then(|s| s.parse().ok()) {
         obstacles.push(b);
     }
+    // a generated line (tools/build_moscow.py) has stations.json and no BSP: the world is built from the track
+    let proc_dir = map_dir.clone().filter(|d| d.join("stations.json").exists());
     let map_ents = map_dir
         .as_ref()
         .and_then(|d| std::fs::read(d.join("map.bsp")).ok())
@@ -132,8 +161,16 @@ fn main() -> Result<()> {
                     if let Ok(s) = track::load_signs(&dir.join("signs.lua"), t.main()) {
                         sim.set_signs(s);
                     }
-                    sim.set_platforms(station::load(&map_ents, t.main()));
-                    sim.set_station_names(station::names(&std::path::Path::new(&lua_root).join("metrostroi/maps/crossline.lua")));
+                    match station::from_json(&dir.join("stations.json")) {
+                        Some((platforms, names)) => {
+                            sim.set_platforms(platforms);
+                            sim.set_station_names(names);
+                        }
+                        None => {
+                            sim.set_platforms(station::load(&map_ents, t.main()));
+                            sim.set_station_names(station::names(&std::path::Path::new(&lua_root).join("metrostroi/maps/crossline.lua")));
+                        }
+                    }
                     sim.set_track(t);
                 }
                 Err(e) => log::warn!("no track: {e:#}"),
@@ -193,7 +230,31 @@ fn main() -> Result<()> {
                     let mut vfs = vfs.lock().unwrap();
                     *r.skin.borrow_mut() = skin;
                     let mut scene = car::load(r, &vfs, &body_model, &props)?;
-                    if with_world {
+                    if let Some(dir) = &proc_dir {
+                        let track = track::Track::load(&dir.join("track.lua"))?;
+                        let halls: Vec<procgen::Station> = station::from_json(&dir.join("stations.json"))
+                            .map(|(p, _)| p.iter().map(|p| procgen::Station { from: p.from - 12.0, to: p.to + 12.0, left: p.side == station::Side::Left }).collect())
+                            .unwrap_or_default();
+                        let chunks = procgen::build(track.main(), &halls, app::car_above_rail() - 2.22);
+                        // walkable ground and walls from the generated geometry, in map space
+                        let abs: Vec<formats::mdl::Mesh> = chunks
+                            .iter()
+                            .flat_map(|c| {
+                                let off = c.origin / renderer::SCALE;
+                                c.meshes.iter().map(move |m| formats::mdl::Mesh {
+                                    material: m.material.clone(),
+                                    vertices: m.vertices.iter().map(|v| formats::mdl::Vertex { pos: [v.pos[0] + off.x, v.pos[1] + off.y, v.pos[2] + off.z], ..*v }).collect(),
+                                    indices: m.indices.clone(),
+                                })
+                            })
+                            .collect();
+                        ground::store(ground::Ground::build(&abs, renderer::SCALE));
+                        // an empty object carries the world transform the app moves around the train
+                        let stub = [formats::mdl::Mesh { material: "dev/dev_measuregeneric01".into(), vertices: vec![formats::mdl::Vertex::default(); 3], indices: vec![0, 1, 2] }];
+                        let id = r.load_meshes(&mut scene, &vfs, "world", &stub, renderer::SCALE);
+                        r.add_object(&mut scene, "world", id, Mat4::IDENTITY, true);
+                        signals::store(signals::Signals::spawn(r, &mut scene, &vfs, &lua_root, signs, standing, n_lead).with_chunks(r, &mut scene, &vfs, &chunks));
+                    } else if with_world {
                         let data = std::fs::read(&map_bsp)?;
                         let (mut meshes, lightmap) = formats::bsp::load_lit(&data)?;
                         vfs.mount_files(formats::bsp::pakfile(&data)?);

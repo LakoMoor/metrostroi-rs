@@ -28,6 +28,31 @@ fn origin(e: &HashMap<String, String>) -> Option<Vec3> {
     (c.len() == 3).then(|| Vec3::new(c[0], c[1], c[2]) * SCALE)
 }
 
+/// Half the length of a generated platform, metres (an 8-car 81-717 is about 155 m long).
+pub const HALF_PLATFORM: f32 = 78.0;
+
+/// Stations of a generated line (`stations.json`: name, s along the path, platform side): platforms and names.
+pub fn from_json(file: &std::path::Path) -> Option<(Vec<Platform>, HashMap<u32, String>)> {
+    let v: serde_json::Value = serde_json::from_str(&std::fs::read_to_string(file).ok()?).ok()?;
+    let list = v.as_array()?;
+    let mut platforms = Vec::new();
+    let mut names = HashMap::new();
+    for (i, st) in list.iter().enumerate() {
+        let s = st.get("s")?.as_f64()? as f32;
+        let id = i as u32 + 1;
+        platforms.push(Platform {
+            station: id,
+            index: 1,
+            from: (s - HALF_PLATFORM).max(0.0),
+            to: s + HALF_PLATFORM,
+            side: if st.get("side").and_then(|x| x.as_str()) == Some("left") { Side::Left } else { Side::Right },
+            last: i + 1 == list.len(),
+        });
+        names.insert(id, st.get("name").and_then(|x| x.as_str()).unwrap_or("").to_string());
+    }
+    Some((platforms, names))
+}
+
 /// Platforms within reach of the main line, ordered along it.
 pub fn load(ents: &[HashMap<String, String>], main: &Path3) -> Vec<Platform> {
     let named: HashMap<&str, Vec3> =

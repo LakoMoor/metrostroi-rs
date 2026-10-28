@@ -310,6 +310,20 @@ impl Signals {
         self
     }
 
+    /// Generated world chunks (see `procgen`): drawn as statics near the train, lit like their surroundings.
+    pub fn with_chunks(mut self, r: &Renderer, scene: &mut Scene, vfs: &Vfs, chunks: &[crate::procgen::Chunk]) -> Signals {
+        for (i, c) in chunks.iter().enumerate() {
+            let id = r.load_meshes(scene, vfs, &format!("chunk{i}"), &c.meshes, SCALE);
+            let pose = Mat4::from_translation(c.origin);
+            self.statics.push((scene.objects.len(), pose, c.origin));
+            self.ambient.push(c.light * 0.23);
+            r.add_object(scene, "generated world", id, pose, false);
+            scene.objects.last_mut().unwrap().tint = [c.light, c.light, c.light, 1.0];
+        }
+        log::info!("{} generated world chunks", chunks.len());
+        self
+    }
+
     /// Ambient light around `train` (map space): mean luminance of the static props within 25 m, if any.
     pub fn ambient_near(&self, train: Vec3) -> Option<f32> {
         let (mut sum, mut n) = (0.0, 0);
