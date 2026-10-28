@@ -302,4 +302,26 @@ mod tests {
         println!("{ok}/{tried}");
         assert_eq!(ok, tried);
     }
+
+    /// The outside controls (end cocks, main switch, air distributor, ...) answer to a walker standing 1 m away but not 3 m away.
+    #[test]
+    fn outside_controls_have_a_limited_reach() {
+        let path = Path::new(r"E:\metrostroi2pz\out\controls/717_mvm.json");
+        if !path.exists() {
+            return;
+        }
+        let ps = Panels::load(path).unwrap();
+        for name in ["FrontPneumatic", "RearPneumatic", "GV", "AirDistributor", "Stopkran"] {
+            let p = ps.panels.iter().find(|p| p.name == name).unwrap_or_else(|| panic!("no panel {name}"));
+            let b = p.buttons.iter().find(|b| !b.id.starts_with('!')).unwrap_or_else(|| panic!("{name} has no button"));
+            let (cx, cy) = match b.shape {
+                Shape::Rect { w, h } => (b.x + w / 2.0, b.y + h / 2.0),
+                Shape::Circle { .. } => (b.x, b.y),
+            };
+            let target = p.origin + (p.axes.x_axis.truncate() * cx + p.axes.y_axis.truncate() * cy) * p.scale;
+            let n = p.axes.z_axis.truncate();
+            assert!(ps.pick(target + n * 1.0, -n, 2.2, &Default::default()).is_some(), "{name} not reachable from 1 m");
+            assert!(ps.pick(target + n * 3.0, -n, 2.2, &Default::default()).is_none(), "{name} reachable from 3 m");
+        }
+    }
 }
