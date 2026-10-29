@@ -95,7 +95,7 @@
   "from": "Белорусская",
   "to": "Новослободская",
   "length_km": 19.36,
-  "stations": 13,
+  "stations": 12,
   "loop": true
  },
  {
@@ -106,7 +106,7 @@
   "from": "Белорусская",
   "to": "Краснопресненская",
   "length_km": 19.18,
-  "stations": 13,
+  "stations": 12,
   "loop": true
  },
  {
@@ -227,7 +227,7 @@
   "from": "Сокольники",
   "to": "Сокольники",
   "length_km": 57.38,
-  "stations": 30,
+  "stations": 29,
   "loop": true
  },
  {
@@ -238,7 +238,7 @@
   "from": "Сокольники",
   "to": "Рижская",
   "length_km": 57.36,
-  "stations": 30,
+  "stations": 29,
   "loop": true
  },
  {

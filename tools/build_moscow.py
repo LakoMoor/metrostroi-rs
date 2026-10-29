@@ -154,6 +154,8 @@ def main():
             st.append({"name": name, "name_en": en, "s": round(s, 1), "side": "left" if side > 0 else "right"})
             last_s = s
         st.sort(key=lambda x: x["s"])
+        # the same stop can come twice (both ends of a ring project to the start): keep one
+        st = [x for i, x in enumerate(st) if not (i and x["name"] == st[i - 1]["name"] and x["s"] - st[i - 1]["s"] < 150.0)]
         if len(st) < 2:
             print(f"{rid}: fewer than two stations, skipped")
             continue
