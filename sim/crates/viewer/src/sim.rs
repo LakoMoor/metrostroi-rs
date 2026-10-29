@@ -159,7 +159,7 @@ const HELPERS: &str = r#"
     end
     function __quickstart()
         __qs = coroutine.create(function()
-            for _, n in ipairs({ "VB", "VAH", "VAD" }) do
+            for _, n in ipairs({ "VB", "VAH", "VAD", "VMK" }) do
                 if T[n] and T[n].Value < 0.5 then T:ButtonEvent(n .. "Toggle", true) T:ButtonEvent(n .. "Toggle", false) end
             end
             for _, id in ipairs({ "DriverValveBLDisconnectToggle", "DriverValveTLDisconnectToggle", "DriverValveDisconnectToggle" }) do
@@ -1070,6 +1070,94 @@ mod tests {
         assert_eq!(trip.stops.len(), 1, "no stop recorded: {:?}", trip.stops);
         assert!(trip.stops[0].short > -3.0 && trip.stops[0].short < 12.0, "stopped {} m short of the end", trip.stops[0].short);
         assert_eq!(trip.autostops, 0);
+    }
+
+    /// A whole generated line driven by the automatic driver: every station is stopped at, nothing trips.
+    /// Takes minutes, so run it on purpose: `cargo test --release whole_line -- --ignored --nocapture`.
+    #[test]
+    #[ignore]
+    fn whole_line_is_driveable_station_to_station() {
+        let dir = Path::new("E:/metrostroi2pz/game/content/maps/moscow/326491");
+        if !Path::new(LUA_ROOT).exists() || !dir.join("stations.json").exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        let t = crate::track::Track::load(&dir.join("track.lua")).unwrap();
+        let (plats, names) = crate::station::from_json(&dir.join("stations.json")).unwrap();
+        sim.set_platforms(plats.clone());
+        sim.set_station_names(names);
+        sim.set_signs(Vec::new());
+        sim.set_track(t);
+        sim.set_position(plats[0].to - 10.0);
+        run(&sim, 2.0);
+        sim.quick_start();
+        while sim.quick_start_active() {
+            sim.tick(1.0 / 60.0);
+        }
+        let limit: usize = std::env::var("MS_LINE_STATIONS").ok().and_then(|v| v.parse().ok()).unwrap_or(usize::MAX);
+        for (i, p) in plats.iter().enumerate().skip(1).take(limit) {
+            let target = p.to - 3.0;
+            // pull away: valve to the running position, controller to X3
+            sim.key("PAD_1", true);
+            sim.key("PAD_1", false);
+            sim.key("4", true);
+            sim.key("4", false);
+            sim.key("3", true);
+            let mut state = "power";
+            let mut steps = 0;
+            loop {
+                sim.tick(1.0 / 60.0);
+                steps += 1;
+                assert!(steps < 60 * 900, "station {i}: never arrived (state {state}, pos {:.0}, target {target:.0})", sim.motion().1);
+                if steps % 6 != 0 {
+                    continue;
+                }
+                let (kmh, pos) = sim.motion();
+                let (v, left) = (kmh / 3.6, target as f64 - pos);
+                if steps % 600 == 0 {
+                    println!("st {i} t={:.0}s state={state} pos={pos:.0} target={target:.0} kmh={kmh:.1}", steps as f32 / 60.0);
+                    if kmh < 0.5 {
+                        let dbg: String = sim.rt.lua.load("return string.format('BC=%.2f TL=%.2f BL=%.2f KV=%s Emer=%s RC1=%s Doors=%s ARS=%s KK=%s A22=%s TRK=%s Aux=%s w22=%s RD=%s', T.Pneumatic.BrakeCylinderPressure or -1, T.Pneumatic.TrainLinePressure or -1, T.Pneumatic.BrakeLinePressure or -1, tostring(T.KV and T.KV.Position), tostring(T.Pneumatic.EmergencyValveEPK), tostring(T.RC1 and T.RC1.Value), tostring(T.DoorsAllClosed or T.Doors), tostring(T.ALSCoil and T.ALSCoil.Speed), tostring(T.KK.Value), tostring(T.A22.Value), tostring(T.TRK.Value), tostring(T.Electric.Aux750V), tostring(T.Electric.T and T.Electric.T[22]), tostring(T.RD and T.RD.Value))").eval().unwrap_or_default();
+                        println!("   stalled: {dbg}");
+                    }
+                }
+                match state {
+                    "power" if kmh > 55.0 => {
+                        sim.key("3", false);
+                        sim.key("4", true);
+                        sim.key("4", false);
+                        state = "coast";
+                    }
+                    // a climb or a long run bleeds the speed: take power again
+                    "coast" if kmh < 35.0 && left > 250.0 => {
+                        sim.key("3", true);
+                        state = "power";
+                    }
+                    _ => {}
+                }
+                if matches!(state, "power" | "coast") && left < v * v / (2.0 * 1.1) + 8.0 {
+                    sim.key("3", false);
+                    sim.key("7", true);
+                    sim.key("7", false);
+                    state = "brake";
+                }
+                if state == "brake" && kmh < 12.0 {
+                    sim.rt.lua.load("T.Pneumatic:TriggerInput('BrakeSet', 5)").exec().unwrap();
+                    state = "hold";
+                }
+                if state == "hold" && kmh < 0.1 {
+                    break;
+                }
+            }
+            run(&sim, 5.0); // dwell
+        }
+        let trip = sim.trip.borrow();
+        println!("{}", trip.lines().join("
+"));
+        assert_eq!(trip.stops.len(), (plats.len() - 1).min(limit), "stops: {:?}", trip.stops);
+        assert_eq!(trip.autostops, 0);
+        // the test driver brakes by a rule of thumb, so only demand a stop at every platform, not a perfect score
+        assert!(trip.stops.iter().all(|s| s.short > -15.0 && s.short < 15.0), "stops: {:?}", trip.stops);
     }
 
     /// With a track and signs loaded, the ALS coil receives the next signal's ARS code.
