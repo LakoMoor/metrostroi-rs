@@ -1077,7 +1077,8 @@ mod tests {
     #[test]
     #[ignore]
     fn whole_line_is_driveable_station_to_station() {
-        let dir = Path::new("E:/metrostroi2pz/game/content/maps/moscow/326491");
+        let id = std::env::var("MS_LINE_MAP").unwrap_or_else(|_| "326491".into());
+        let dir = &Path::new("E:/metrostroi2pz/game/content/maps/moscow").join(id);
         if !Path::new(LUA_ROOT).exists() || !dir.join("stations.json").exists() {
             return;
         }

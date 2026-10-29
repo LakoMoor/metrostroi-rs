@@ -133,6 +133,9 @@ footer { margin-top: 80px; padding: 30px 0 50px; border-top: 1px solid var(--lin
     <div class="grid">
       <div class="card"><div class="ico">🎛️</div><h3>Кабина 1:1</h3><p>Все 353 кнопки и тумблера нажимаются мышью и вызывают настоящие <code>ButtonEvent</code> Lua. Подсказки — русские описания из языковых файлов Metrostroi.</p></div>
       <div class="card"><div class="ico">🚆</div><h3>Физика и ARS</h3><p>Тяга, торможение и уклон из полей тележек, которые пишет Lua. АРС-заглушка ограничивает скорость по кодам и срабатывает автостоп.</p></div>
+      <div class="card"><div class="ico">🗺️</div><h3>Метро Москвы</h3><p>34 маршрута по реальным станциям и расстояниям между ними (OpenStreetMap), профиль глубины и кривые с сопротивлением. Выбор линии в меню.</p></div>
+      <div class="card"><div class="ico">🚃</div><h3>Составы и физика</h3><p>Несколько вагонов с общими поездными проводами Metrostroi, динамика по силам тележек, сопротивление в кривых, проверка разгона и торможения тестом.</p></div>
+      <div class="card"><div class="ico">✨</div><h3>Графика</h3><p>Уровни качества до Ультра: HDR, свечение, затенение в углах (SSAO), масштаб рендера 50–100 %.</p></div>
       <div class="card"><div class="ico">🗺️</div><h3>Трасса и мир</h3><p>Путь и знаки из данных карты, геометрия BSP с встроенными текстурами. Машина стоит в начале координат, мир движется вокруг.</p></div>
       <div class="card"><div class="ico">🚦</div><h3>Сигналы и блоки</h3><p>Светофоры и путевые знаки расставлены по таблицам сущностей Metrostroi. Стоящий впереди поезд делает сигналы красными и жёлтыми.</p></div>
       <div class="card"><div class="ico">🚉</div><h3>Станции</h3><p>Платформы из сущностей карты: расстояние, сторона дверей, предупреждения об открытых дверях и точность остановки.</p></div>
@@ -148,14 +151,16 @@ footer { margin-top: 80px; padding: 30px 0 50px; border-top: 1px solid var(--lin
     <h2>Скриншоты</h2>
     <p class="sub">Снято в самой программе. Нажмите, чтобы увеличить. Поверхности карты без текстур Half-Life 2 пока закрашены цветом-заменителем.</p>
     <div class="gallery">
+      <figure><div class="imgbox"><img loading="lazy" src="img/moscow_cab.jpg" alt=""></div><figcaption><b>Москва</b> — сгенерированная линия по реальным станциям и расстояниям (34 маршрута), кабина с HUD</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/trip.jpg" alt=""></div><figcaption><b>Статистика рейса</b> — оценка, точность остановок, автостопы и нарушения дверей</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/station.jpg" alt=""></div><figcaption><b>Станция</b> — геометрия карты, лайтмапы, мраморный пол и колонны (вид с пути)</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/tunnel.jpg" alt=""></div><figcaption><b>Туннель</b> — модели туннеля, лайтмапы и статичные объекты карты Crossline</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/tooltip.jpg" alt=""></div><figcaption><b>Кабина</b> — подсказка у кнопки, HUD станции и скорости</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/signals.jpg" alt=""></div><figcaption><b>Сигналы и блок</b> — светофоры впереди и стоящий состав за ними</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/salon.jpg" alt=""></div><figcaption><b>Салон</b> — прогулка по вагону от первого лица</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/orbit.jpg" alt=""></div><figcaption><b>Вид снаружи</b> — 81-717 с оригинальным скином из Lua</figcaption></figure>
-      <figure><div class="imgbox"><img loading="lazy" src="img/menu.jpg" alt=""></div><figcaption><b>Главное меню</b> — начать с нуля или быстрый старт</figcaption></figure>
-      <figure><div class="imgbox"><img loading="lazy" src="img/pause.jpg" alt=""></div><figcaption><b>Пауза</b> — сброс автостопа, поезд в начало, настройки</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/menu.jpg" alt=""></div><figcaption><b>Главное меню</b> — холодный старт, быстрый старт, выбор линии Москвы</figcaption></figure>
+      <figure><div class="imgbox"><img loading="lazy" src="img/pause.jpg" alt=""></div><figcaption><b>Пауза</b> — быстрый запуск, сохранить/загрузить кабину, статистика рейса, настройки</figcaption></figure>
       <figure><div class="imgbox"><img loading="lazy" src="img/help.jpg" alt=""></div><figcaption><b>Управление</b> — все клавиши в одном месте</figcaption></figure>
     </div>
   </div>
@@ -209,14 +214,16 @@ footer { margin-top: 80px; padding: 30px 0 50px; border-top: 1px solid var(--lin
         <li><b>BSP-мир, сигналы, знаки</b><span>светофоры и таблички по таблицам Metrostroi</span></li>
         <li><b>Блоки, станции, двери</b><span>стоящий поезд, платформы, предупреждения</span></li>
         <li><b>Звук, меню, HUD</b><span>циклы и одиночные звуки, настройки</span></li>
+        <li><b>Составы, Москва, Ультра-графика</b><span>вагоны с общими проводами, 34 линии, HDR и SSAO</span></li>
+        <li><b>Статистика рейса, сохранение кабины</b><span>оценка остановок, переназначение клавиш</span></li>
         <li><b>Ходьба и коллизии</b><span>салон, выход через двери, стены</span></li>
       </ul>
       <ul class="timeline">
-        <li class="todo"><b>Движущиеся ИИ-поезда и стрелки</b><span>нужна связность путей</span></li>
-        <li class="todo"><b>Лайтмапы, статик-пропы, небо</b><span>сейчас мир закрашен заменителями</span></li>
-        <li class="todo"><b>Названия станций и объявления</b></li>
+        <li class="todo"><b>Движущиеся ИИ-поезда и стрелки</b><span>в картах нет данных о ветвлении</span></li>
+        <li class="todo"><b>Усилия в сцепках, проскальзывание колёс</b></li>
+        <li class="todo"><b>Настоящий профиль глубины Москвы</b><span>сейчас приближённый</span></li>
+        <li class="todo"><b>Android</b><span>план в ROADMAP</span></li>
         <li class="todo"><b>Настоящая цепочка БАРС</b><span>вместо заглушки</span></li>
-        <li class="todo"><b>Составы из нескольких вагонов</b></li>
         <li class="todo"><b>Второй тип поезда</b><span>доказать, что загрузчик не привязан к 717</span></li>
       </ul>
     </div>
@@ -226,7 +233,7 @@ footer { margin-top: 80px; padding: 30px 0 50px; border-top: 1px solid var(--lin
 <section id="build">
   <div class="wrap">
     <h2>Сборка и запуск</h2>
-    <p class="sub">Нужны Windows, Rust (MSVC), видеокарта с Vulkan/DX12 и ваши подписки на контент Metrostroi в Steam Workshop.</p>
+    <p class="sub">Нужны Windows, видеокарта с Vulkan/DX12 и ваши подписки на контент Metrostroi в Steam Workshop. Готовая сборка — архив <code>Metrostroi-rs-0.1.0-win64.zip</code>: распаковать и запустить <code>Metrostroi-rs.exe</code>, путь к Workshop находится сам. Сборка из исходников — ниже.</p>
     <div class="note" style="margin-bottom:20px"><b>Про ассеты.</b> Модели, текстуры и звуки Metrostroi принадлежат их авторам, поэтому в репозиторий и на этот сайт они не включены. Программа читает их из вашей установки Steam Workshop (GMod, appid 4000) во время запуска; на скриншотах — кадры из самой программы.</div>
 <pre>git clone https://github.com/LakoMoor/metrostroi-rs
 cd metrostroi-rs
