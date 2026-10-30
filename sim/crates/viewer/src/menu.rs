@@ -56,11 +56,13 @@ pub struct Settings {
     pub quality: u8,
     /// Ultra only: fraction of the window resolution the scene is drawn at (upscaled with a light sharpen).
     pub scale: f32,
+    /// Wet rails: the wheel-rail adhesion drops to about a third, so wheels spin and slide.
+    pub wet: bool,
 }
 
 impl Default for Settings {
     fn default() -> Self {
-        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, map: String::new(), quality: 1, scale: 1.0 }
+        Settings { fov: 65.0, mouse: 1.0, hud: true, volume: 0.8, map: String::new(), quality: 1, scale: 1.0, wet: false }
     }
 }
 
@@ -111,6 +113,7 @@ enum Field {
     Hud,
     Quality,
     Scale,
+    Rail,
 }
 
 pub struct Menu {
@@ -183,6 +186,7 @@ impl Menu {
                 Item::Slider("Громкость (на будущее)", Field::Volume),
                 Item::Slider("Графика", Field::Quality),
                 Item::Slider("Масштаб рендера (ультра)", Field::Scale),
+                Item::Toggle("Рельсы мокрые (скольжение колёс)", Field::Rail),
                 Item::Toggle("Показывать приборы на экране", Field::Hud),
                 Item::Back,
             ],
@@ -211,6 +215,7 @@ impl Menu {
             Field::Volume => (format!("{:.0}%", self.settings.volume * 100.0), self.settings.volume),
             Field::Quality => ((["обычная", "высокая", "ультра"][self.settings.quality.min(2) as usize]).to_string(), self.settings.quality as f32 / 2.0),
             Field::Scale => (format!("{:.0}%", self.settings.scale * 100.0), (self.settings.scale - 0.5) / 0.5),
+            Field::Rail => (if self.settings.wet { "мокрые".into() } else { "сухие".into() }, 0.0),
             Field::Hud => (if self.settings.hud { "вкл".into() } else { "выкл".into() }, 0.0),
         }
     }
@@ -222,6 +227,7 @@ impl Menu {
             Field::Volume => self.settings.volume = ((self.settings.volume + dir * 0.1) * 10.0).round() / 10.0,
             Field::Quality => self.settings.quality = (self.settings.quality as i32 + if dir < 0.0 { -1 } else { 1 }).clamp(0, 2) as u8,
             Field::Scale => self.settings.scale = ((self.settings.scale + dir * 0.1) * 10.0).round() / 10.0,
+            Field::Rail => self.settings.wet = !self.settings.wet,
             Field::Hud => self.settings.hud = !self.settings.hud,
         }
         self.settings.mouse = self.settings.mouse.clamp(0.3, 2.0);

@@ -489,6 +489,9 @@ impl App {
             _ => return,
         };
         prof(5, t_acq, self.fps);
+        if let Some(s) = &self.sim {
+            s.set_wet(self.menu.settings.wet);
+        }
         let hdr = self.menu.settings.quality >= 2;
         // the HDR path tone-maps in the composite pass
         g.renderer.tonemap.set(0.0);
@@ -958,6 +961,12 @@ fn draw_hud(ui: &mut Ui, s: &Sim) {
         let w = ui.text_width(&msg, 28.0);
         ui.rect((sw - w) / 2.0 - 20.0, sh - 110.0, w + 40.0, 48.0, [0.0, 0.25, 0.1, 0.85]);
         ui.text((sw - w) / 2.0, sh - 104.0, 28.0, &msg, [1.0, 1.0, 1.0, 1.0]);
+    }
+    if s.slipping() {
+        let msg = "ПРОСКАЛЬЗЫВАНИЕ КОЛЁС";
+        let w = ui.text_width(msg, 28.0);
+        ui.rect((sw - w) / 2.0 - 20.0, 110.0, w + 40.0, 48.0, [0.6, 0.4, 0.0, 0.85]);
+        ui.text((sw - w) / 2.0, 116.0, 28.0, msg, [1.0, 1.0, 1.0, 1.0]);
     }
     if s.ars_tripped() {
         let msg = "АВТОСТОП АРС — F6 сброс";

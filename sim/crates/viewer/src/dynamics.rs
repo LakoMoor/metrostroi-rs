@@ -12,6 +12,12 @@ const BRAKE_SCALE: f64 = 0.85;
 /// Rolling plus air resistance: a = R0 + R2 * v_kmh^2 (m/s^2).
 const RES_0: f64 = 0.005;
 const RES_2: f64 = 1.0e-5;
+/// Wheel load of one bogey, N: half the effective car mass.
+const BOGEY_LOAD: f64 = MASS / 2.0 * 9.81;
+/// Dry-rail coefficient of adhesion; wet or leafy rails are about 0.1 (see `Dynamics::adhesion`).
+pub const DRY_ADHESION: f64 = 0.30;
+/// Free play of one coupling, m: the cars traverse it when the tension changes sign and hit the stops.
+const COUPLER_SLACK: f64 = 0.04;
 
 /// What the train's Lua sets on one bogey each tick.
 #[derive(Clone, Copy, Debug)]
@@ -51,9 +57,16 @@ pub struct Dynamics {
     pub grade: f64,
     /// Curve radius under the train, m (0 or infinity = straight).
     pub radius: f64,
+    /// Coefficient of adhesion between wheel and rail (traction and braking forces beyond `adhesion x load` slip).
+    pub adhesion: f64,
+    /// True while some bogey is slipping or sliding (traction or brake force clipped by the adhesion limit).
+    pub slipping: bool,
     prev_speed: Vec<f64>,
     /// Tension in each coupling after the last step, N (positive = the cars pull on each other). One entry per coupling.
     pub coupler: Vec<f64>,
+    /// Speed of the hardest slack take-up so far, m/s (the cars cross the free play and hit the stops).
+    pub impact_peak: f64,
+    last_sign: Vec<f64>,
 }
 
 impl Dynamics {
@@ -78,6 +91,9 @@ impl Dynamics {
         let mut car_force = vec![0.0f64; bogeys.len().div_ceil(2)];
         self.prev_speed.resize(bogeys.len(), 0.0);
         let cars = (bogeys.len() / 2).max(1) as f64;
+        let mu = if self.adhesion > 0.0 { self.adhesion } else { DRY_ADHESION };
+        let limit = mu * BOGEY_LOAD;
+        let mut slip = false;
 
         for (i, b) in bogeys.iter().enumerate() {
             let e = Self::push_dir(i % 2 == 0, b.reversed);
@@ -108,11 +124,25 @@ impl Dynamics {
                 hold = true;
             }
 
+            // wheel-rail adhesion: past the limit the wheels spin (traction) or slide (brakes) and hold less
+            let motor = if motor.abs() > limit {
+                slip = true;
+                limit * motor.signum() * 0.8
+            } else {
+                motor
+            };
+            let pneumatic = if pneumatic.abs() > limit {
+                slip = true;
+                limit * pneumatic.signum() * 0.8
+            } else {
+                pneumatic
+            };
             force += e * (motor + pneumatic);
             car_force[i / 2] += e * (motor + pneumatic);
 
         }
 
+        self.slipping = slip;
         let v_kmh = self.v.abs() * 3.6;
         let resist = (RES_0 + RES_2 * v_kmh * v_kmh) * if self.v < 0.0 { -1.0 } else { 1.0 };
         // curve resistance (Röckl): 700 / (R - 55) kgf per tonne
@@ -127,7 +157,19 @@ impl Dynamics {
         for f in car_force.iter().take(car_force.len().saturating_sub(1)) {
             let own = f / per_car - 9.81 * self.grade / 1000.0 - drag;
             carry += per_car * (own - a);
+            let k = self.coupler.len();
             self.coupler.push(carry);
+            // slack: when the coupling goes from pulling to pushing (or back) the two groups of cars cross the
+            // free play under their relative acceleration and strike the stops at v = sqrt(2 a gap)
+            self.last_sign.resize(k + 1, 0.0);
+            let sign = if carry.abs() > 2_000.0 { carry.signum() } else { 0.0 };
+            if sign != 0.0 {
+                if self.last_sign[k] != 0.0 && sign != self.last_sign[k] {
+                    let a_rel = carry.abs() / (per_car / 2.0);
+                    self.impact_peak = self.impact_peak.max((2.0 * a_rel * 2.0 * COUPLER_SLACK).sqrt());
+                }
+                self.last_sign[k] = sign;
+            }
         }
         let mut v = self.v + a * dt;
         if self.v != 0.0 && v * self.v < 0.0 {
@@ -235,6 +277,57 @@ mod tests {
         let all: Vec<BogeyIn> = (0..4).flat_map(|_| forward(1.0, 0.0)).collect();
         e.step(0.05, &all);
         assert!(e.coupler.iter().all(|c| c.abs() < 1.0), "{:?}", e.coupler);
+    }
+
+    #[test]
+    fn slack_gives_an_impact_when_the_tension_reverses() {
+        let mut d = Dynamics::default();
+        let mut with = |d: &mut Dynamics, power: f64, brake: f64| {
+            let mut b = Vec::new();
+            for car in 0..4 {
+                // only the head car has motors and brakes: the others are towed
+                b.extend(if car == 0 { forward(power, brake) } else { forward(0.0, 0.0) });
+            }
+            d.step(0.05, &b);
+        };
+        for _ in 0..60 {
+            with(&mut d, 1.0, 0.0);
+        }
+        assert_eq!(d.impact_peak, 0.0, "pulling steadily is no impact");
+        for _ in 0..60 {
+            with(&mut d, 0.0, 3.5); // the head car brakes, the towed cars run into it
+        }
+        assert!(d.impact_peak > 0.1 && d.impact_peak < 3.0, "{}", d.impact_peak);
+    }
+
+    #[test]
+    fn a_wet_rail_limits_traction_and_braking() {
+        // dry: full traction does not slip
+        let mut dry = Dynamics::default();
+        for _ in 0..200 {
+            dry.step(0.05, &forward(1.0, 0.0));
+        }
+        assert!(!dry.slipping);
+        // wet rail (mu 0.08): the same traction exceeds the limit and the train accelerates more slowly
+        let mut wet = Dynamics { adhesion: 0.08, ..Default::default() };
+        let mut slipped = false;
+        for _ in 0..200 {
+            wet.step(0.05, &forward(1.0, 0.0));
+            slipped |= wet.slipping;
+        }
+        assert!(slipped);
+        assert!(wet.v < dry.v * 0.8, "wet {} dry {}", wet.v, dry.v);
+        // braking from speed takes longer on the wet rail
+        let stop = |mu: f64| {
+            let mut d = Dynamics { adhesion: mu, v: 20.0, ..Default::default() };
+            let mut t = 0.0;
+            while d.v > 0.1 && t < 120.0 {
+                d.step(0.05, &forward(0.0, 3.5));
+                t += 0.05;
+            }
+            d.pos
+        };
+        assert!(stop(0.08) > stop(0.30) * 1.1, "{} vs {}", stop(0.08), stop(0.30));
     }
 
     #[test]

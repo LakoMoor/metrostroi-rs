@@ -492,6 +492,15 @@ impl Sim {
         self.dynamics.borrow_mut().pos = metres as f64;
     }
 
+    /// Wet rails cut the adhesion to a third of the dry value.
+    pub fn set_wet(&self, wet: bool) {
+        self.dynamics.borrow_mut().adhesion = if wet { crate::dynamics::DRY_ADHESION / 3.0 } else { crate::dynamics::DRY_ADHESION };
+    }
+
+    pub fn slipping(&self) -> bool {
+        self.dynamics.borrow().slipping
+    }
+
     pub fn set_grade(&self, per_mille: f64) {
         self.dynamics.borrow_mut().grade = per_mille;
     }
@@ -620,6 +629,7 @@ impl Sim {
         {
             let mut trip = self.trip.borrow_mut();
             trip.coupler_peak = trip.coupler_peak.max(peak as f32);
+            trip.impact_peak = trip.impact_peak.max(self.dynamics.borrow().impact_peak as f32);
         }
         let flat: Vec<f64> = out.iter().flat_map(|o| [o.speed, o.speed_sign, o.acceleration]).collect();
         let _ = fo.call::<()>(flat);
