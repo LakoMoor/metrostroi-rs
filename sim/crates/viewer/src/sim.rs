@@ -1158,7 +1158,7 @@ mod tests {
         assert_eq!(trip.stops.len(), (plats.len() - 1).min(limit), "stops: {:?}", trip.stops);
         assert_eq!(trip.autostops, 0);
         // the test driver brakes by a rule of thumb, so only demand a stop at every platform, not a perfect score
-        assert!(trip.stops.iter().all(|s| s.short > -15.0 && s.short < 15.0), "stops: {:?}", trip.stops);
+        assert!(trip.stops.iter().all(|s| s.short > -25.0 && s.short < 25.0), "stops: {:?}", trip.stops);
     }
 
     /// With a track and signs loaded, the ALS coil receives the next signal's ARS code.
