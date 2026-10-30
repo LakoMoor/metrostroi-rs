@@ -72,6 +72,87 @@ DIP = 8.0
 MAX_GRADE = 0.035
 
 
+def norm_name(n):
+    return n.lower().replace("ё", "е").replace("-", " ").strip()
+
+
+def norm_ref(r):
+    return r.replace("A", "А").replace("a", "а").strip()  # latin A -> cyrillic
+
+
+def load_depths():
+    """(line ref, station) -> depth in metres below the street (Wikipedia list of Moscow metro stations, 2026);
+    negative = on an overpass."""
+    f = pathlib.Path(__file__).with_name("moscow_depths.json")
+    by_line, by_name = {}, {}
+    if f.exists():
+        for d in json.loads(f.read_text(encoding="utf-8")):
+            by_line[(norm_ref(d["line"]), norm_name(d["name"]))] = d["depth"]
+            by_name.setdefault(norm_name(d["name"]), []).append(d["depth"])
+    return by_line, by_name
+
+
+DEPTHS = load_depths()
+STEEP = 0.04  # steepest tunnel grade between stations (the real ones are 4 to 4.5 per cent)
+
+
+def platform_heights(ref, names, ss):
+    """Height of each platform (m, up is positive) from the real depths, with the missing ones interpolated and every
+    pair of neighbours kept within what a STEEP grade can climb over their distance."""
+    by_line, by_name = DEPTHS
+    h = []
+    for n in names:
+        d = by_line.get((norm_ref(ref), norm_name(n)))
+        h.append(None if d is None else -float(d))
+    known = [i for i, v in enumerate(h) if v is not None]
+    if not known:
+        return [0.0] * len(h)
+    for i in range(len(h)):
+        if h[i] is None:
+            lo = max((j for j in known if j < i), default=None)
+            hi = min((j for j in known if j > i), default=None)
+            if lo is None:
+                h[i] = h[hi]
+            elif hi is None:
+                h[i] = h[lo]
+            else:
+                t = (ss[i] - ss[lo]) / max(1.0, ss[hi] - ss[lo])
+                h[i] = h[lo] + (h[hi] - h[lo]) * t
+    # slope limit: pull neighbours towards each other until no pair is steeper than STEEP (a smooth transition peaks
+    # at pi/2 times the mean grade)
+    reach = [STEEP * (b - a) * 2.0 / math.pi for a, b in zip(ss, ss[1:])]
+    for _ in range(200):
+        moved = False
+        for i, r in enumerate(reach):
+            d = h[i + 1] - h[i]
+            if abs(d) > r + 0.01:
+                e = (abs(d) - r) / 2.0 * (1 if d > 0 else -1)
+                h[i] += e
+                h[i + 1] -= e
+                moved = True
+        if not moved:
+            break
+    return h
+
+
+def profile_real(s, ss, hs):
+    """Track height at path distance s: a smooth step between platform heights, plus the old saddle dip where there is
+    grade to spare."""
+    if s <= ss[0]:
+        return hs[0]
+    if s >= ss[-1]:
+        return hs[-1]
+    for i in range(len(ss) - 1):
+        a, b = ss[i], ss[i + 1]
+        if a <= s <= b and b - a > 1.0:
+            t = (s - a) / (b - a)
+            base = hs[i] + (hs[i + 1] - hs[i]) * (1 - math.cos(math.pi * t)) / 2.0
+            spare = max(0.0, STEEP - abs(hs[i + 1] - hs[i]) * math.pi / 2.0 / (b - a))
+            dip = min(DIP, spare * (b - a) / math.pi)
+            return base - dip * math.sin(math.pi * t) ** 2
+    return hs[-1]
+
+
 def profile(s, stops):
     """Height (m) relative to the platforms at path distance s."""
     for a, b in zip(stops, stops[1:]):
@@ -161,11 +242,13 @@ def main():
             continue
         folder = OUT / rid
         folder.mkdir(exist_ok=True)
-        # OSM has no depths. Moscow's lines run in "saddle" profiles (stations on shallow summits, the tunnel
+        # Platform depths come from tools/moscow_depths.json; between platforms the tunnel falls on a smooth curve.
+        # (Old stand-in: OSM has no depths. Moscow's lines run in "saddle" profiles (stations on shallow summits, the tunnel
         # falling away between them), so the stand-in is a smooth dip of up to DIP metres between stations,
         # flat at the platforms and never steeper than MAX_GRADE.
         stops_s = [x["s"] for x in st]
-        nodes = [f"[{x / UNIT:.1f} {y / UNIT:.1f} {(-1000.0 + profile(c, stops_s) / UNIT):.1f}]" for (x, y), c in zip(path, cum)]
+        heights = platform_heights(tags.get("ref", ""), [x["name"] for x in st], stops_s)
+        nodes = [f"[{x / UNIT:.1f} {y / UNIT:.1f} {(-1000.0 + profile_real(c, stops_s, heights) / UNIT):.1f}]" for (x, y), c in zip(path, cum)]
         (folder / "track.lua").write_text(json.dumps([nodes], ensure_ascii=False, indent=0), encoding="utf-8")
         (folder / "stations.json").write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
         full = tags.get("name", rid)
