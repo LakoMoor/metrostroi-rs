@@ -2,6 +2,7 @@
 
 ## 0.1.0 — first release
 - Original 81-717 cab and Metrostroi Lua logic run directly from your Steam Workshop content (all 353 cab buttons).
+- Trip statistics also show the peak coupling tension of the consist (computed from the per-car force difference).
 - Physics: the bogey force law of the original with a calibrated 1-D model (see ROADMAP.md, "Physics status"), slopes,
   rail voltage sag, coupled multi-car consists with shared train wires (`--cars N`).
 - Failure system (F7 trigger, F8 auto, F9 reset), announcer, sounds for every switch.

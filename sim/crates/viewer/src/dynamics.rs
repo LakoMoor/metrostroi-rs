@@ -52,6 +52,8 @@ pub struct Dynamics {
     /// Curve radius under the train, m (0 or infinity = straight).
     pub radius: f64,
     prev_speed: Vec<f64>,
+    /// Tension in each coupling after the last step, N (positive = the cars pull on each other). One entry per coupling.
+    pub coupler: Vec<f64>,
 }
 
 impl Dynamics {
@@ -73,6 +75,7 @@ impl Dynamics {
         let mut hold = false;
         let mut traction = 0.0f64;
         let mut out = vec![BogeyOut::default(); bogeys.len()];
+        let mut car_force = vec![0.0f64; bogeys.len().div_ceil(2)];
         self.prev_speed.resize(bogeys.len(), 0.0);
         let cars = (bogeys.len() / 2).max(1) as f64;
 
@@ -106,6 +109,7 @@ impl Dynamics {
             }
 
             force += e * (motor + pneumatic);
+            car_force[i / 2] += e * (motor + pneumatic);
 
         }
 
@@ -114,6 +118,17 @@ impl Dynamics {
         // curve resistance (Röckl): 700 / (R - 55) kgf per tonne
         let curve = if self.radius > 60.0 && self.radius.is_finite() { 700.0 / (self.radius - 55.0) * 0.00981 } else { 0.0 };
         let a = force / (MASS * cars) - 9.81 * self.grade / 1000.0 - if self.v == 0.0 { 0.0 } else { resist + curve * self.v.signum() };
+        // a rigid consist: each car would accelerate on its own by `own`, the couplings carry the difference
+        // (along the car axis, from the head car backwards)
+        let per_car = MASS;
+        let drag = if self.v == 0.0 { 0.0 } else { resist + curve * self.v.signum() };
+        let mut carry = 0.0;
+        self.coupler.clear();
+        for f in car_force.iter().take(car_force.len().saturating_sub(1)) {
+            let own = f / per_car - 9.81 * self.grade / 1000.0 - drag;
+            carry += per_car * (own - a);
+            self.coupler.push(carry);
+        }
         let mut v = self.v + a * dt;
         if self.v != 0.0 && v * self.v < 0.0 {
             v = 0.0; // brakes and drag stop the car, they never reverse it
@@ -200,6 +215,26 @@ mod tests {
         };
         assert!(coast(150.0) < coast(f64::INFINITY) - 0.1);
         assert!(coast(1500.0) <= coast(f64::INFINITY));
+    }
+
+    #[test]
+    fn couplings_carry_the_difference_between_cars() {
+        // four cars, only the head car has motors: every coupling pulls the unpowered cars along
+        let mut d = Dynamics::default();
+        let mut b = Vec::new();
+        for car in 0..4 {
+            let p = if car == 0 { 1.0 } else { 0.0 };
+            b.extend(forward(p, 0.0));
+        }
+        d.step(0.05, &b);
+        assert_eq!(d.coupler.len(), 3);
+        // the first coupling pulls three cars, the last one car: 3/4 and 1/4 of the head car's push
+        assert!(d.coupler[0] > d.coupler[1] && d.coupler[1] > d.coupler[2] && d.coupler[2] > 0.0, "{:?}", d.coupler);
+        // motors on every car: nothing is left for the couplings
+        let mut e = Dynamics::default();
+        let all: Vec<BogeyIn> = (0..4).flat_map(|_| forward(1.0, 0.0)).collect();
+        e.step(0.05, &all);
+        assert!(e.coupler.iter().all(|c| c.abs() < 1.0), "{:?}", e.coupler);
     }
 
     #[test]

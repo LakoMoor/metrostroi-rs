@@ -616,6 +616,11 @@ impl Sim {
         };
         let ins: Vec<BogeyIn> = (1..=n).map(read).collect();
         let out = self.dynamics.borrow_mut().step(dt, &ins);
+        let peak = self.dynamics.borrow().coupler.iter().fold(0.0f64, |m, c| m.max(c.abs()));
+        {
+            let mut trip = self.trip.borrow_mut();
+            trip.coupler_peak = trip.coupler_peak.max(peak as f32);
+        }
         let flat: Vec<f64> = out.iter().flat_map(|o| [o.speed, o.speed_sign, o.acceleration]).collect();
         let _ = fo.call::<()>(flat);
     }

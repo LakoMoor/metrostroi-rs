@@ -18,6 +18,8 @@ pub struct Trip {
     /// Doors opened on the side without a platform.
     pub doors_wrong_side: u32,
     pub seconds: f32,
+    /// Largest coupling tension of the trip, N (a rough ride shows as a high number).
+    pub coupler_peak: f32,
     was_moving_open: bool,
     was_wrong_side: bool,
     was_tripped: bool,
@@ -67,6 +69,9 @@ impl Trip {
     pub fn lines(&self) -> Vec<String> {
         let mut out = vec![format!("Оценка: {} / 100 · время {}:{:02}", self.score(), self.seconds as u32 / 60, self.seconds as u32 % 60)];
         out.push(format!("Автостопов АРС: {} · двери в движении: {} · двери не с той стороны: {}", self.autostops, self.doors_moving, self.doors_wrong_side));
+        if self.coupler_peak > 0.0 {
+            out.push(format!("Макс. усилие в сцепках: {:.0} кН", self.coupler_peak / 1000.0));
+        }
         if self.stops.is_empty() {
             out.push("Остановок у платформ пока не было".into());
         }
