@@ -1,11 +1,12 @@
 # Changelog
 
+## 0.1.1
+- Wheel slip: traction and braking are limited by wheel-rail adhesion; a settings toggle makes the rails wet and the HUD warns.
+- Coupling tension per coupling and the strike speed of the slack take-up in the trip statistics.
+- Quick start switches the compressor on (the air no longer runs out after ~5 min); duplicate first stations removed from 4 Moscow lines.
+
 ## 0.1.0 — first release
 - Original 81-717 cab and Metrostroi Lua logic run directly from your Steam Workshop content (all 353 cab buttons).
-- Wheel slip: traction and braking forces are limited by the wheel-rail adhesion; a settings toggle makes the rails wet
-  (adhesion drops to a third) and the HUD shows a wheel-slip warning.
-- Coupling slack: the strike speed of the cars crossing the free play when the tension reverses is shown in the trip statistics.
-- Trip statistics also show the peak coupling tension of the consist (computed from the per-car force difference).
 - Physics: the bogey force law of the original with a calibrated 1-D model (see ROADMAP.md, "Physics status"), slopes,
   rail voltage sag, coupled multi-car consists with shared train wires (`--cars N`).
 - Failure system (F7 trigger, F8 auto, F9 reset), announcer, sounds for every switch.
