@@ -186,7 +186,7 @@ impl Menu {
                 Item::Slider("Громкость (на будущее)", Field::Volume),
                 Item::Slider("Графика", Field::Quality),
                 Item::Slider("Масштаб рендера (ультра)", Field::Scale),
-                Item::Toggle("Рельсы мокрые (скольжение колёс)", Field::Rail),
+                Item::Toggle("Мокрые рельсы", Field::Rail),
                 Item::Toggle("Показывать приборы на экране", Field::Hud),
                 Item::Back,
             ],
