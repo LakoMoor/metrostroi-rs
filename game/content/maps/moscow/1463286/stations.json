@@ -3,36 +3,54 @@
   "name": "Москва-Сити",
   "name_en": "Moscow-City",
   "s": 146.1,
-  "side": "right"
+  "side": "right",
+  "x": -5374.0,
+  "y": -196.4,
+  "depth": 25.0
  },
  {
   "name": "Деловой Центр",
   "name_en": "Delovoy Tsentr",
   "s": 648.9,
-  "side": "right"
+  "side": "right",
+  "x": -4922.4,
+  "y": 3.0,
+  "depth": 25.0
  },
  {
   "name": "Киевская",
   "name_en": "",
   "s": 3078.0,
-  "side": "right"
+  "side": "right",
+  "x": -3374.0,
+  "y": -693.7,
+  "depth": 25.0
  },
  {
   "name": "Смоленская",
   "name_en": "",
   "s": 4394.2,
-  "side": "right"
+  "side": "right",
+  "x": -2334.6,
+  "y": -138.9,
+  "depth": 25.0
  },
  {
   "name": "Арбатская",
   "name_en": "",
   "s": 5588.4,
-  "side": "right"
+  "side": "right",
+  "x": -1212.4,
+  "y": 199.5,
+  "depth": 25.0
  },
  {
   "name": "Александровский сад",
   "name_en": "",
   "s": 6100.2,
-  "side": "left"
+  "side": "left",
+  "x": -710.2,
+  "y": 264.4,
+  "depth": 25.0
  }
 ]

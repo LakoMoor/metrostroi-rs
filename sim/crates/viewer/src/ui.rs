@@ -10,6 +10,10 @@ struct V {
     pos: [f32; 2],
     uv: [f32; 2],
     color: [f32; 4],
+    /// Offset from the shape centre in pixels (shapes only).
+    lp: [f32; 2],
+    /// Half width, half height, corner radius, 1.0 = a shape (rounded box) instead of an atlas texel.
+    shape: [f32; 4],
 }
 
 pub type Color = [f32; 4];
@@ -137,7 +141,7 @@ impl Ui {
                 buffers: &[Some(wgpu::VertexBufferLayout {
                     array_stride: std::mem::size_of::<V>() as u64,
                     step_mode: wgpu::VertexStepMode::Vertex,
-                    attributes: &wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Float32x4],
+                    attributes: &wgpu::vertex_attr_array![0 => Float32x2, 1 => Float32x2, 2 => Float32x4, 3 => Float32x2, 4 => Float32x4],
                 })],
             },
             primitive: Default::default(),
@@ -174,9 +178,64 @@ impl Ui {
     }
 
     fn quad(&mut self, x: f32, y: f32, w: f32, h: f32, uv: (f32, f32, f32, f32), c: Color) {
-        let p = |px: f32, py: f32, u: f32, v: f32| V { pos: [px, py], uv: [u / self.atlas.0, v / self.atlas.1], color: c };
+        let p = |px: f32, py: f32, u: f32, v: f32| V { pos: [px, py], uv: [u / self.atlas.0, v / self.atlas.1], color: c, lp: [0.0, 0.0], shape: [0.0; 4] };
         let (u0, v0, u1, v1) = uv;
         let q = [p(x, y, u0, v0), p(x + w, y, u1, v0), p(x + w, y + h, u1, v1), p(x, y + h, u0, v1)];
+        self.verts.extend_from_slice(&[q[0], q[1], q[2], q[0], q[2], q[3]]);
+    }
+
+    /// A rounded box with a 1 px antialiased edge. `top`/`bottom` colours give a vertical gradient.
+    pub fn round_rect_grad(&mut self, x: f32, y: f32, w: f32, h: f32, r: f32, top: Color, bottom: Color) {
+        let r = r.min(w / 2.0).min(h / 2.0);
+        let (hw, hh) = (w / 2.0, h / 2.0);
+        let (cx, cy) = (x + hw, y + hh);
+        let e = 1.0;
+        let v = |dx: f32, dy: f32, c: Color| V { pos: [cx + dx, cy + dy], uv: [0.0, 0.0], color: c, lp: [dx, dy], shape: [hw, hh, r, 1.0] };
+        let (a, b) = (hw + e, hh + e);
+        let q = [v(-a, -b, top), v(a, -b, top), v(a, b, bottom), v(-a, b, bottom)];
+        self.verts.extend_from_slice(&[q[0], q[1], q[2], q[0], q[2], q[3]]);
+    }
+
+    pub fn round_rect(&mut self, x: f32, y: f32, w: f32, h: f32, r: f32, c: Color) {
+        self.round_rect_grad(x, y, w, h, r, c, c);
+    }
+
+    /// Outline of a rounded box, `t` px thick, drawn inside the box.
+    pub fn round_outline(&mut self, x: f32, y: f32, w: f32, h: f32, r: f32, t: f32, c: Color) {
+        // two fills would need a hole; approximate with four thin capsules along the edges
+        let r = r.min(w / 2.0).min(h / 2.0);
+        self.line(x + r, y + t / 2.0, x + w - r, y + t / 2.0, t, c);
+        self.line(x + r, y + h - t / 2.0, x + w - r, y + h - t / 2.0, t, c);
+        self.line(x + t / 2.0, y + r, x + t / 2.0, y + h - r, t, c);
+        self.line(x + w - t / 2.0, y + r, x + w - t / 2.0, y + h - r, t, c);
+    }
+
+    pub fn circle(&mut self, cx: f32, cy: f32, r: f32, c: Color) {
+        self.round_rect(cx - r, cy - r, r * 2.0, r * 2.0, r, c);
+    }
+
+    /// A line segment with round ends, `w` px wide.
+    pub fn line(&mut self, x0: f32, y0: f32, x1: f32, y1: f32, w: f32, c: Color) {
+        let (dx, dy) = (x1 - x0, y1 - y0);
+        let len = (dx * dx + dy * dy).sqrt();
+        if len < 1e-3 {
+            return;
+        }
+        let (ux, uy) = (dx / len, dy / len);
+        let (nx, ny) = (-uy, ux);
+        let (hl, hw) = (len / 2.0 + w / 2.0, w / 2.0);
+        let (cx, cy) = ((x0 + x1) / 2.0, (y0 + y1) / 2.0);
+        let e = 1.0;
+        let corner = |a: f32, b: f32| V { pos: [cx + ux * a + nx * b, cy + uy * a + ny * b], uv: [0.0, 0.0], color: c, lp: [a, b], shape: [hl, hw, hw, 1.0] };
+        let q = [corner(-hl - e, -hw - e), corner(hl + e, -hw - e), corner(hl + e, hw + e), corner(-hl - e, hw + e)];
+        self.verts.extend_from_slice(&[q[0], q[1], q[2], q[0], q[2], q[3]]);
+    }
+
+    /// Vertical gradient rectangle without rounding.
+    pub fn grad(&mut self, x: f32, y: f32, w: f32, h: f32, top: Color, bottom: Color) {
+        let (u, v) = self.white;
+        let p = |px: f32, py: f32, c: Color| V { pos: [px, py], uv: [u / self.atlas.0, v / self.atlas.1], color: c, lp: [0.0, 0.0], shape: [0.0; 4] };
+        let q = [p(x, y, top), p(x + w, y, top), p(x + w, y + h, bottom), p(x, y + h, bottom)];
         self.verts.extend_from_slice(&[q[0], q[1], q[2], q[0], q[2], q[3]]);
     }
 

@@ -3,144 +3,216 @@
   "name": "Ховрино",
   "name_en": "",
   "s": 532.6,
-  "side": "right"
+  "side": "right",
+  "x": -8701.7,
+  "y": 14165.5,
+  "depth": 14.0
  },
  {
   "name": "Беломорская",
   "name_en": "",
   "s": 2115.4,
-  "side": "right"
+  "side": "right",
+  "x": -9080.9,
+  "y": 12794.7,
+  "depth": 18.0
  },
  {
   "name": "Речной вокзал",
   "name_en": "",
   "s": 3368.8,
-  "side": "right"
+  "side": "right",
+  "x": -9014.9,
+  "y": 11668.7,
+  "depth": 6.0
  },
  {
   "name": "Водный стадион",
   "name_en": "",
   "s": 5157.5,
-  "side": "right"
+  "side": "right",
+  "x": -8357.8,
+  "y": 10005.6,
+  "depth": 6.0
  },
  {
   "name": "Войковская",
   "name_en": "",
   "s": 7649.0,
-  "side": "right"
+  "side": "right",
+  "x": -7649.4,
+  "y": 7670.1,
+  "depth": 7.0
  },
  {
   "name": "Сокол",
   "name_en": "",
   "s": 9608.3,
-  "side": "right"
+  "side": "right",
+  "x": -6574.0,
+  "y": 6135.5,
+  "depth": 9.6
  },
  {
   "name": "Аэропорт",
   "name_en": "",
   "s": 10862.0,
-  "side": "right"
+  "side": "right",
+  "x": -5445.3,
+  "y": 5597.6,
+  "depth": 10.0
  },
  {
   "name": "Динамо",
   "name_en": "",
   "s": 12830.0,
-  "side": "right"
+  "side": "right",
+  "x": -3879.3,
+  "y": 4406.4,
+  "depth": 39.6
  },
  {
   "name": "Белорусская",
   "name_en": "",
   "s": 14983.1,
-  "side": "right"
+  "side": "right",
+  "x": -2291.0,
+  "y": 2958.2,
+  "depth": 33.1
  },
  {
   "name": "Маяковская",
   "name_en": "",
   "s": 16006.5,
-  "side": "right"
+  "side": "right",
+  "x": -1566.8,
+  "y": 2235.6,
+  "depth": 33.1
  },
  {
   "name": "Тверская",
   "name_en": "",
   "s": 16944.0,
-  "side": "right"
+  "side": "right",
+  "x": -850.3,
+  "y": 1634.6,
+  "depth": 42.0
  },
  {
   "name": "Театральная",
   "name_en": "",
   "s": 18095.1,
-  "side": "right"
+  "side": "right",
+  "x": -62.0,
+  "y": 827.1,
+  "depth": 33.9
  },
  {
   "name": "Новокузнецкая",
   "name_en": "",
   "s": 20006.2,
-  "side": "right"
+  "side": "right",
+  "x": 566.4,
+  "y": -953.7,
+  "depth": 37.5
  },
  {
   "name": "Павелецкая",
   "name_en": "",
   "s": 21407.5,
-  "side": "right"
+  "side": "right",
+  "x": 1110.8,
+  "y": -2172.6,
+  "depth": 33.5
  },
  {
   "name": "Автозаводская",
   "name_en": "",
   "s": 24323.0,
-  "side": "right"
+  "side": "right",
+  "x": 2357.9,
+  "y": -4743.2,
+  "depth": 11.0
  },
  {
   "name": "Технопарк",
   "name_en": "",
   "s": 25986.1,
-  "side": "right"
+  "side": "right",
+  "x": 2782.0,
+  "y": -6265.3,
+  "depth": 0.0
  },
  {
   "name": "Коломенская",
   "name_en": "",
   "s": 27673.7,
-  "side": "right"
+  "side": "right",
+  "x": 2745.2,
+  "y": -7947.9,
+  "depth": 9.0
  },
  {
   "name": "Каширская",
   "name_en": "",
   "s": 30485.0,
-  "side": "right"
+  "side": "right",
+  "x": 1797.2,
+  "y": -10551.4,
+  "depth": 7.0
  },
  {
   "name": "Кантемировская",
   "name_en": "",
   "s": 33068.9,
-  "side": "right"
+  "side": "right",
+  "x": 2283.6,
+  "y": -12701.9,
+  "depth": 8.0
  },
  {
   "name": "Царицыно",
   "name_en": "",
   "s": 34841.4,
-  "side": "right"
+  "side": "right",
+  "x": 3079.0,
+  "y": -14285.3,
+  "depth": 8.0
  },
  {
   "name": "Орехово",
   "name_en": "",
   "s": 36888.2,
-  "side": "right"
+  "side": "right",
+  "x": 4692.0,
+  "y": -15213.1,
+  "depth": 9.0
  },
  {
   "name": "Домодедовская",
   "name_en": "",
   "s": 38610.1,
-  "side": "right"
+  "side": "right",
+  "x": 6183.4,
+  "y": -15471.3,
+  "depth": 9.5
  },
  {
   "name": "Красногвардейская",
   "name_en": "",
   "s": 40259.4,
-  "side": "right"
+  "side": "right",
+  "x": 7795.7,
+  "y": -15154.4,
+  "depth": 9.0
  },
  {
   "name": "Алма-Атинская",
   "name_en": "",
   "s": 43332.4,
-  "side": "right"
+  "side": "right",
+  "x": 9148.6,
+  "y": -13021.9,
+  "depth": 10.0
  }
 ]

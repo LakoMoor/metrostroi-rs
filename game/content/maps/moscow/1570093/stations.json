@@ -3,150 +3,225 @@
   "name": "Бульвар Дмитрия Донского",
   "name_en": "",
   "s": 84.7,
-  "side": "right"
+  "side": "right",
+  "x": -2695.3,
+  "y": -20090.7,
+  "depth": 10.0
  },
  {
   "name": "Аннино",
   "name_en": "",
   "s": 2177.3,
-  "side": "right"
+  "side": "right",
+  "x": -1459.5,
+  "y": -18613.7,
+  "depth": 8.0
  },
  {
   "name": "Улица Академика Янгеля",
   "name_en": "",
   "s": 3586.3,
-  "side": "right"
+  "side": "right",
+  "x": -1217.7,
+  "y": -17227.3,
+  "depth": 8.0
  },
  {
   "name": "Пражская",
   "name_en": "",
   "s": 5562.9,
-  "side": "right"
+  "side": "right",
+  "x": -963.2,
+  "y": -15295.5,
+  "depth": 9.5
  },
  {
   "name": "Южная",
   "name_en": "",
   "s": 6699.9,
-  "side": "right"
+  "side": "right",
+  "x": -668.5,
+  "y": -14197.4,
+  "depth": 10.0
  },
  {
   "name": "Чертановская",
   "name_en": "",
   "s": 8905.1,
-  "side": "right"
+  "side": "right",
+  "x": -830.1,
+  "y": -12168.9,
+  "depth": 10.5
  },
  {
   "name": "Севастопольская",
   "name_en": "",
   "s": 10451.5,
-  "side": "right"
+  "side": "right",
+  "x": -1344.7,
+  "y": -10815.9,
+  "depth": 13.0
  },
  {
   "name": "Нахимовский проспект",
   "name_en": "",
   "s": 11693.2,
-  "side": "right"
+  "side": "right",
+  "x": -894.7,
+  "y": -9710.5,
+  "depth": 9.5
  },
  {
   "name": "Нагорная",
   "name_en": "",
   "s": 12796.9,
-  "side": "right"
+  "side": "right",
+  "x": -602.9,
+  "y": -8675.4,
+  "depth": 9.0
  },
  {
   "name": "Нагатинская",
   "name_en": "",
   "s": 14285.3,
-  "side": "right"
+  "side": "right",
+  "x": 157.5,
+  "y": -7450.6,
+  "depth": 13.5
  },
  {
   "name": "Тульская",
   "name_en": "",
   "s": 17397.9,
-  "side": "right"
+  "side": "right",
+  "x": 182.9,
+  "y": -4593.6,
+  "depth": 9.5
  },
  {
   "name": "Серпуховская",
   "name_en": "",
   "s": 19626.2,
-  "side": "right"
+  "side": "right",
+  "x": 312.5,
+  "y": -2448.3,
+  "depth": 43.0
  },
  {
   "name": "Полянка",
   "name_en": "",
   "s": 20879.8,
-  "side": "right"
+  "side": "right",
+  "x": -166.8,
+  "y": -1309.3,
+  "depth": 36.5
  },
  {
   "name": "Боровицкая",
   "name_en": "",
   "s": 22470.5,
-  "side": "right"
+  "side": "right",
+  "x": -800.0,
+  "y": 109.1,
+  "depth": 46.5
  },
  {
   "name": "Чеховская",
   "name_en": "",
   "s": 24083.6,
-  "side": "right"
+  "side": "right",
+  "x": -677.2,
+  "y": 1640.6,
+  "depth": 62.0
  },
  {
   "name": "Цветной бульвар",
   "name_en": "",
   "s": 24972.6,
-  "side": "right"
+  "side": "right",
+  "x": -122.3,
+  "y": 2316.7,
+  "depth": 50.0
  },
  {
   "name": "Менделеевская",
   "name_en": "",
   "s": 26709.3,
-  "side": "right"
+  "side": "right",
+  "x": -1123.9,
+  "y": 3450.6,
+  "depth": 48.5
  },
  {
   "name": "Савёловская",
   "name_en": "",
   "s": 28270.5,
-  "side": "right"
+  "side": "right",
+  "x": -1943.4,
+  "y": 4726.4,
+  "depth": 52.0
  },
  {
   "name": "Дмитровская",
   "name_en": "",
   "s": 29911.1,
-  "side": "right"
+  "side": "right",
+  "x": -2376.2,
+  "y": 6289.8,
+  "depth": 59.0
  },
  {
   "name": "Тимирязевская",
   "name_en": "",
   "s": 31134.2,
-  "side": "right"
+  "side": "right",
+  "x": -2725.7,
+  "y": 7461.8,
+  "depth": 63.5
  },
  {
   "name": "Петровско-Разумовская",
   "name_en": "",
   "s": 33133.3,
-  "side": "right"
+  "side": "right",
+  "x": -2839.8,
+  "y": 9413.7,
+  "depth": 57.9
  },
  {
   "name": "Владыкино",
   "name_en": "",
   "s": 34871.0,
-  "side": "right"
+  "side": "right",
+  "x": -1878.5,
+  "y": 10798.1,
+  "depth": 13.6
  },
  {
   "name": "Отрадное",
   "name_en": "",
   "s": 36883.2,
-  "side": "right"
+  "side": "right",
+  "x": -956.0,
+  "y": 12575.2,
+  "depth": 9.0
  },
  {
   "name": "Бибирево",
   "name_en": "",
   "s": 39450.5,
-  "side": "right"
+  "side": "right",
+  "x": -1026.0,
+  "y": 14882.4,
+  "depth": 9.5
  },
  {
   "name": "Алтуфьево",
   "name_en": "",
   "s": 41440.3,
-  "side": "right"
+  "side": "right",
+  "x": -2038.3,
+  "y": 16438.1,
+  "depth": 9.0
  }
 ]

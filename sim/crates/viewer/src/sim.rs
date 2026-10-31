@@ -1176,6 +1176,45 @@ mod tests {
         assert!(trip.stops.iter().all(|s| s.short > -25.0 && s.short < 25.0), "stops: {:?}", trip.stops);
     }
 
+    /// Prints every lit lamp prop and the needle poses of a cold cab, then of a started one.
+    #[test]
+    #[ignore]
+    fn dump_cab_lamps() {
+        if !Path::new(LUA_ROOT).exists() {
+            return;
+        }
+        let sim = Sim::new("gmod_subway_81-717_mvm", LUA_ROOT).unwrap();
+        run(&sim, 3.0);
+        let show = |tag: &str, sim: &Sim| {
+            let st = sim.state();
+            let mut names: Vec<_> = st.iter().filter(|(n, (_, a))| (n.contains("lamp") || n.contains("speed") || n.contains("arrow") || n.contains("pointer")) && *a > 0.0).collect();
+            names.sort_by(|a, b| a.0.cmp(b.0));
+            println!("== {tag}: {} visible lamp/needle props", names.len());
+            for (n, (pose, a)) in names {
+                let var: String = sim.rt.lua.load(format!("local c = C.ClientProps['{n}'] return c and c.config and tostring(c.config.var) or '-'")).eval().unwrap_or_default();
+                println!("  {n}  pose={pose:?} alpha={a} var={var}");
+            }
+        };
+        show("cold", &sim);
+        sim.quick_start();
+        while sim.quick_start_active() {
+            sim.tick(1.0 / 60.0);
+        }
+        run(&sim, 3.0);
+        show("started", &sim);
+        sim.rt.lua.load("local o = T.SetPackedRatio T.SetPackedRatio = function(s, i, v) if i == 'Speed' then v = 0.4 end return o(s, i, v) end").exec().unwrap();
+        run(&sim, 2.0);
+        let v: String = sim.rt.lua.load("local r = {} for _, k in ipairs({'GreenRP','AVU','LKVP','LSP','L1','RZP','LVD','HvLamp'}) do r[#r+1] = k..'='..tostring(T:GetPackedBool(k)) end return table.concat(r, ' ')").eval().unwrap();
+        println!("lamp vars: {v}");
+        let v: String = sim.rt.lua.load("local P = T.Panel local r = {} for _, k in ipairs({'GreenRP','AVU','LKVP','LSP','RZP','HvLamp'}) do r[#r+1] = k..'='..tostring(P[k]) end r[#r+1] = 'Power='..tostring(P.Power)..' B='..tostring(T.Battery and T.Battery.Voltage) ..' Bat='..tostring(T.Electric.Battery80V)..' Pan='..tostring(P.PowerSource) return table.concat(r, ' ')").eval().unwrap();
+        println!("panel: {v}");
+        let v: String = sim.rt.lua.load("return string.format('T10=%s A27=%s A45=%s T36=%s T61=%s BPSNon=%s VB=%s A1=%s AVU=%s', tostring(T:ReadTrainWire(10)), tostring(T.A27.Value), tostring(T.A45.Value), tostring(T:ReadTrainWire(36)), tostring(T:ReadTrainWire(61)), tostring(T.BPSNon.Value), tostring(T.VB.Value), tostring(T.A1 and T.A1.Value), tostring(T.AVU.Value))").eval().unwrap();
+        println!("wires: {v}");
+        let v: String = sim.rt.lua.load("return string.format('Speed=%.1f ratio=%.3f', T.Speed, T:GetPackedRatio('Speed'))").eval().unwrap();
+        println!("{v}");
+        show("moving", &sim);
+    }
+
     /// With a track and signs loaded, the ALS coil receives the next signal's ARS code.
     #[test]
     fn als_coil_gets_code_from_next_signal() {

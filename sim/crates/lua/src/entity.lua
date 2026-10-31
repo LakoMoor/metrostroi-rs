@@ -20,7 +20,8 @@ for _, suffix in ipairs({ "Float", "Int", "Bool", "String", "Entity", "Vector", 
     local default = ({ Float = 0, Int = 0, Bool = false, String = "", Entity = nil, Vector = Vector(0, 0, 0), Angle = Angle(0, 0, 0) })[suffix]
     for _, prefix in ipairs({ "NW2", "NW", "" }) do
         Entity_MT["Get" .. prefix .. suffix] = getter(default)
-        Entity_MT["Set" .. prefix .. suffix] = setter
+        -- a Lua 0 is truthy, but the engine stores the bool; systems write 0 meaning "off"
+        Entity_MT["Set" .. prefix .. suffix] = suffix == "Bool" and function(self, key, v) if v == 0 then v = false end nw(self)[key] = v and true or false end or setter
     end
 end
 

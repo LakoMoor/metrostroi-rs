@@ -298,8 +298,13 @@ impl App {
         match act {
             Action::None | Action::Resume => {}
             Action::Quit => el.exit(),
-            Action::PickLine(i) => {
+            Action::PickLine(_) | Action::PickStation { .. } => {
                 // a line is a different world: remember it and start a fresh process on it
+                let (i, at) = match act {
+                    Action::PickLine(i) => (i, None),
+                    Action::PickStation { route, s } => (route, Some((s - 120.0).max(0.0))),
+                    _ => return,
+                };
                 let Some(line) = crate::menu::lines().get(i).cloned() else { return };
                 self.menu.settings.map = format!("content/maps/moscow/{}", line.id);
                 self.menu.settings.save(&self.menu.settings_path());
@@ -311,7 +316,7 @@ impl App {
                             if skip {
                                 skip = false;
                                 false
-                            } else if a == "--map" {
+                            } else if a == "--map" || a == "--at" {
                                 skip = true;
                                 false
                             } else {
@@ -319,6 +324,13 @@ impl App {
                             }
                         })
                         .collect();
+                    let mut args = args;
+                    if let Some(at) = at {
+                        args.push("--at".into());
+                        args.push(format!("{at:.0}"));
+                        args.push("--cab".into());
+                        args.push("--nomenu".into());
+                    }
                     match std::process::Command::new(exe).args(args).spawn() {
                         Ok(_) => el.exit(),
                         Err(e) => log::error!("restart: {e}"),
@@ -577,10 +589,9 @@ impl ApplicationHandler for App {
             }
             WindowEvent::MouseInput { state, button: MouseButton::Left, .. } => {
                 if self.menu.screen != Screen::Playing {
-                    if state == ElementState::Pressed {
-                        let act = self.menu.click(self.cursor.0 as f32, self.cursor.1 as f32);
-                        self.handle_action(el, act);
-                    }
+                    let (cx, cy) = (self.cursor.0 as f32, self.cursor.1 as f32);
+                    let act = if state == ElementState::Pressed { self.menu.click(cx, cy) } else { self.menu.release(cx, cy) };
+                    self.handle_action(el, act);
                     return;
                 }
                 if state == ElementState::Pressed {
@@ -639,6 +650,10 @@ impl ApplicationHandler for App {
                     MouseScrollDelta::LineDelta(_, y) => y,
                     MouseScrollDelta::PixelDelta(p) => p.y as f32 / 40.0,
                 };
+                if self.menu.screen != Screen::Playing {
+                    self.menu.wheel(y);
+                    return;
+                }
                 if let Some(cam) = &mut self.camera {
                     if cam.mode == Mode::Orbit {
                         cam.dist = (cam.dist * (1.0 - y * 0.1)).clamp(cam.radius * 0.05, cam.radius * 12.0);

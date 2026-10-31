@@ -3,66 +3,99 @@
   "name": "Кунцевская",
   "name_en": "",
   "s": 59.8,
-  "side": "left"
+  "side": "left",
+  "x": -10904.0,
+  "y": -2131.7,
+  "depth": 0.0
  },
  {
   "name": "Пионерская",
   "name_en": "",
   "s": 1514.3,
-  "side": "right"
+  "side": "right",
+  "x": -9573.5,
+  "y": -1563.5,
+  "depth": 0.0
  },
  {
   "name": "Филёвский парк",
   "name_en": "",
   "s": 2604.6,
-  "side": "right"
+  "side": "right",
+  "x": -8556.8,
+  "y": -1171.7,
+  "depth": 0.0
  },
  {
   "name": "Багратионовская",
   "name_en": "",
   "s": 3620.7,
-  "side": "right"
+  "side": "right",
+  "x": -7656.2,
+  "y": -702.1,
+  "depth": 0.0
  },
  {
   "name": "Фили",
   "name_en": "Fili",
   "s": 5061.0,
-  "side": "left"
+  "side": "left",
+  "x": -6591.7,
+  "y": -429.1,
+  "depth": 0.0
  },
  {
   "name": "Кутузовская",
   "name_en": "",
   "s": 6649.4,
-  "side": "left"
+  "side": "left",
+  "x": -5366.7,
+  "y": -1109.2,
+  "depth": 0.0
  },
  {
   "name": "Студенческая",
   "name_en": "",
   "s": 7749.0,
-  "side": "left"
+  "side": "left",
+  "x": -4486.2,
+  "y": -1244.0,
+  "depth": 0.0
  },
  {
   "name": "Киевская",
   "name_en": "",
   "s": 9003.4,
-  "side": "right"
+  "side": "right",
+  "x": -3374.0,
+  "y": -693.7,
+  "depth": 8.7
  },
  {
   "name": "Смоленская",
   "name_en": "",
   "s": 10319.6,
-  "side": "right"
+  "side": "right",
+  "x": -2334.6,
+  "y": -138.9,
+  "depth": 8.0
  },
  {
   "name": "Арбатская",
   "name_en": "",
   "s": 11513.9,
-  "side": "right"
+  "side": "right",
+  "x": -1212.3,
+  "y": 199.4,
+  "depth": 8.0
  },
  {
   "name": "Александровский сад",
   "name_en": "",
   "s": 12025.6,
-  "side": "left"
+  "side": "left",
+  "x": -710.3,
+  "y": 264.4,
+  "depth": 7.0
  }
 ]

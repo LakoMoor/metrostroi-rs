@@ -3,162 +3,243 @@
   "name": "Бульвар Рокоссовского",
   "name_en": "",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": 7160.7,
+  "y": 7182.6,
+  "depth": 8.0
  },
  {
   "name": "Черкизовская",
   "name_en": "",
   "s": 1584.4,
-  "side": "right"
+  "side": "right",
+  "x": 7827.1,
+  "y": 5987.7,
+  "depth": 9.0
  },
  {
   "name": "Преображенская площадь",
   "name_en": "",
   "s": 3760.6,
-  "side": "right"
+  "side": "right",
+  "x": 5971.4,
+  "y": 5159.7,
+  "depth": 8.0
  },
  {
   "name": "Сокольники",
   "name_en": "",
   "s": 6265.2,
-  "side": "right"
+  "side": "right",
+  "x": 3770.0,
+  "y": 4318.0,
+  "depth": 9.0
  },
  {
   "name": "Красносельская",
   "name_en": "",
   "s": 7497.1,
-  "side": "right"
+  "side": "right",
+  "x": 2981.9,
+  "y": 3377.4,
+  "depth": 8.0
  },
  {
   "name": "Комсомольская",
   "name_en": "",
   "s": 8422.5,
-  "side": "right"
+  "side": "right",
+  "x": 2253.8,
+  "y": 2806.7,
+  "depth": 8.8
  },
  {
   "name": "Красные Ворота",
   "name_en": "",
   "s": 9263.7,
-  "side": "right"
+  "side": "right",
+  "x": 1808.9,
+  "y": 2123.8,
+  "depth": 30.2
  },
  {
   "name": "Чистые пруды",
   "name_en": "",
   "s": 9987.8,
-  "side": "right"
+  "side": "right",
+  "x": 1184.0,
+  "y": 1771.9,
+  "depth": 35.0
  },
  {
   "name": "Лубянка",
   "name_en": "",
   "s": 10982.4,
-  "side": "right"
+  "side": "right",
+  "x": 491.8,
+  "y": 1109.7,
+  "depth": 32.5
  },
  {
   "name": "Охотный Ряд",
   "name_en": "",
   "s": 11755.0,
-  "side": "right"
+  "side": "right",
+  "x": -227.6,
+  "y": 872.1,
+  "depth": 15.0
  },
  {
   "name": "Библиотека имени Ленина",
   "name_en": "",
   "s": 12568.2,
-  "side": "right"
+  "side": "right",
+  "x": -610.7,
+  "y": 169.5,
+  "depth": 12.0
  },
  {
   "name": "Кропоткинская",
   "name_en": "",
   "s": 13368.3,
-  "side": "right"
+  "side": "right",
+  "x": -1022.8,
+  "y": -502.4,
+  "depth": 13.0
  },
  {
   "name": "Парк Культуры",
   "name_en": "",
   "s": 14672.9,
-  "side": "right"
+  "side": "right",
+  "x": -1626.3,
+  "y": -1635.2,
+  "depth": 10.5
  },
  {
   "name": "Фрунзенская",
   "name_en": "",
   "s": 16099.9,
-  "side": "right"
+  "side": "right",
+  "x": -2614.7,
+  "y": -2558.0,
+  "depth": 42.0
  },
  {
   "name": "Спортивная",
   "name_en": "",
   "s": 17072.8,
-  "side": "right"
+  "side": "right",
+  "x": -3502.2,
+  "y": -2947.3,
+  "depth": 40.5
  },
  {
   "name": "Воробьёвы горы",
   "name_en": "",
   "s": 18994.6,
-  "side": "right"
+  "side": "right",
+  "x": -3813.0,
+  "y": -4401.3,
+  "depth": -8.5
  },
  {
   "name": "Университет",
   "name_en": "",
   "s": 21569.0,
-  "side": "right"
+  "side": "right",
+  "x": -5441.2,
+  "y": -6363.3,
+  "depth": 26.5
  },
  {
   "name": "Проспект Вернадского",
   "name_en": "",
   "s": 23989.0,
-  "side": "right"
+  "side": "right",
+  "x": -7143.1,
+  "y": -8083.2,
+  "depth": 8.0
  },
  {
   "name": "Юго-Западная",
   "name_en": "",
   "s": 26104.4,
-  "side": "right"
+  "side": "right",
+  "x": -8575.7,
+  "y": -9593.9,
+  "depth": 8.0
  },
  {
   "name": "Тропарёво",
   "name_en": "",
   "s": 28289.1,
-  "side": "right"
+  "side": "right",
+  "x": -9244.3,
+  "y": -11567.8,
+  "depth": 12.0
  },
  {
   "name": "Румянцево",
   "name_en": "",
   "s": 30738.6,
-  "side": "right"
+  "side": "right",
+  "x": -11179.3,
+  "y": -13000.3,
+  "depth": 12.0
  },
  {
   "name": "Саларьево",
   "name_en": "",
   "s": 32498.9,
-  "side": "right"
+  "side": "right",
+  "x": -12274.1,
+  "y": -14229.4,
+  "depth": 12.0
  },
  {
   "name": "Филатов Луг",
   "name_en": "",
   "s": 35334.0,
-  "side": "right"
+  "side": "right",
+  "x": -13308.0,
+  "y": -16519.9,
+  "depth": 0.0
  },
  {
   "name": "Прокшино",
   "name_en": "",
   "s": 37701.4,
-  "side": "right"
+  "side": "right",
+  "x": -11666.1,
+  "y": -18206.7,
+  "depth": 0.0
  },
  {
   "name": "Ольховая",
   "name_en": "",
   "s": 40275.6,
-  "side": "right"
+  "side": "right",
+  "x": -10076.3,
+  "y": -20146.3,
+  "depth": 12.0
  },
  {
   "name": "Новомосковская",
   "name_en": "",
   "s": 41340.6,
-  "side": "right"
+  "side": "right",
+  "x": -9529.3,
+  "y": -21057.1,
+  "depth": 8.0
  },
  {
   "name": "Потапово",
   "name_en": "",
   "s": 43240.0,
-  "side": "right"
+  "side": "right",
+  "x": -7980.0,
+  "y": -21939.4,
+  "depth": 0.0
  }
 ]

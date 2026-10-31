@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+- Moscow metro map screen: pick any station on any of the 17 lines (depth, km from the start) and start a trip from it in either direction.
+- Cab panel: the IGLA error/fire lamps no longer light on a cold cab (bool state `0` was read as true).
+
 ## 0.1.1
 - Wheel slip: traction and braking are limited by wheel-rail adhesion; a settings toggle makes the rails wet and the HUD warns.
 - Coupling tension per coupling and the strike speed of the slack take-up in the trip statistics.

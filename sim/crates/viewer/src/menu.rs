@@ -14,6 +14,7 @@ pub enum Screen {
     Help,
     Lines,
     Trip,
+    Map,
 }
 
 /// A selectable line (`lines.json` of a generated map set): folder under `content/maps/moscow` and the menu text.
@@ -93,6 +94,8 @@ pub enum Action {
     Quit,
     /// Restart on the line with this index in the line list.
     PickLine(usize),
+    /// Restart on this route (index in the line list) with the train at this distance along it.
+    PickStation { route: usize, s: f32 },
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -127,6 +130,12 @@ pub struct Menu {
     rects: Vec<(f32, f32, f32, f32)>,
     pub dirty: bool,
     lines: Vec<LineInfo>,
+    pub map: crate::metromap::MapState,
+    press: Option<(f32, f32)>,
+    dragged: bool,
+    last_mouse: (f32, f32),
+    pub mouse: (f32, f32),
+    screen_size: (f32, f32),
 }
 
 const KEYS_HELP: &[(&str, &str)] = &[
@@ -147,7 +156,7 @@ const KEYS_HELP: &[(&str, &str)] = &[
 
 impl Menu {
     pub fn new(settings_path: PathBuf, start: Screen) -> Menu {
-        Menu { settings: Settings::load(&settings_path), settings_path, screen: start, selected: 0, back_to: Screen::Main, rects: Vec::new(), dirty: false, lines: LINES.lock().unwrap().clone() }
+        Menu { settings: Settings::load(&settings_path), settings_path, screen: start, selected: 0, back_to: Screen::Main, rects: Vec::new(), dirty: false, lines: LINES.lock().unwrap().clone(), map: crate::metromap::MapState::new(), press: None, dragged: false, last_mouse: (0.0, 0.0), mouse: (0.0, 0.0), screen_size: (1600.0, 900.0) }
     }
 
     pub fn settings_path(&self) -> PathBuf {
@@ -157,6 +166,7 @@ impl Menu {
     fn items(&self) -> Vec<Item> {
         match self.screen {
             Screen::Main => vec![
+                Item::Goto("Карта метро Москвы", Screen::Map),
                 Item::Button("Начать (холодный и тёмный)", Action::Start { quick: false }),
                 Item::Button("Быстрый старт", Action::Start { quick: true }),
                 Item::Goto("Настройки", Screen::Settings),
@@ -165,7 +175,7 @@ impl Menu {
             ]
             .into_iter()
             .enumerate()
-            .flat_map(|(i, it)| if i == 2 && !self.lines.is_empty() { vec![Item::Goto("Выбрать линию", Screen::Lines), it] } else { vec![it] })
+            .flat_map(|(i, it)| if i == 3 && !self.lines.is_empty() { vec![Item::Goto("Выбрать линию", Screen::Lines), it] } else { vec![it] })
             .collect(),
             Screen::Pause => vec![
                 Item::Button("Продолжить", Action::Resume),
@@ -191,6 +201,7 @@ impl Menu {
                 Item::Back,
             ],
             Screen::Help | Screen::Trip => vec![Item::Back],
+            Screen::Map => vec![],
             Screen::Lines => (0..self.lines.len()).map(Item::Line).chain(std::iter::once(Item::Back)).collect(),
             Screen::Playing => vec![],
         }
@@ -204,6 +215,7 @@ impl Menu {
             Screen::Help => "Управление",
             Screen::Trip => "Статистика рейса",
             Screen::Lines => "Выбор линии",
+            Screen::Map => "Карта метро",
             Screen::Playing => "",
         }
     }
@@ -237,7 +249,7 @@ impl Menu {
     }
 
     fn go(&mut self, s: Screen) {
-        if matches!(s, Screen::Settings | Screen::Help | Screen::Lines | Screen::Trip) {
+        if matches!(s, Screen::Settings | Screen::Help | Screen::Lines | Screen::Trip | Screen::Map) {
             self.back_to = self.screen;
         }
         self.screen = s;
@@ -294,7 +306,7 @@ impl Menu {
                 self.screen = Screen::Playing;
                 Action::Resume
             }
-            Screen::Settings | Screen::Help | Screen::Lines | Screen::Trip => {
+            Screen::Settings | Screen::Help | Screen::Lines | Screen::Trip | Screen::Map => {
                 self.back();
                 Action::None
             }
@@ -328,12 +340,60 @@ impl Menu {
     }
 
     pub fn hover(&mut self, x: f32, y: f32) {
+        self.mouse = (x, y);
+        if self.screen == Screen::Map {
+            if let Some(p) = self.press {
+                let (dx, dy) = (x - self.last_mouse.0, y - self.last_mouse.1);
+                if self.dragged || (x - p.0).hypot(y - p.1) > 5.0 {
+                    self.dragged = true;
+                    let m = self.map.meters_per_px(self.screen_size.0, self.screen_size.1);
+                    self.map.drag(dx, dy, m);
+                }
+            }
+            self.last_mouse = (x, y);
+            self.map.hover_at(x, y);
+            return;
+        }
         if let Some(i) = self.hit(x, y) {
             self.selected = i;
         }
     }
 
+    /// Mouse wheel over the map.
+    pub fn wheel(&mut self, dy: f32) {
+        if self.screen == Screen::Map {
+            self.map.wheel(dy);
+        }
+    }
+
+    /// Left button released: on the map this is where a click (as opposed to a drag) is decided.
+    pub fn release(&mut self, x: f32, y: f32) -> Action {
+        if self.screen != Screen::Map || self.press.take().is_none() {
+            return Action::None;
+        }
+        if std::mem::take(&mut self.dragged) {
+            return Action::None;
+        }
+        match self.map.click(x, y) {
+            Some(None) => {
+                self.back();
+                Action::None
+            }
+            Some(Some(p)) => {
+                self.screen = Screen::Playing;
+                Action::PickStation { route: p.route, s: p.s }
+            }
+            None => Action::None,
+        }
+    }
+
     pub fn click(&mut self, x: f32, y: f32) -> Action {
+        if self.screen == Screen::Map {
+            self.press = Some((x, y));
+            self.last_mouse = (x, y);
+            self.dragged = false;
+            return Action::None;
+        }
         let Some(i) = self.hit(x, y) else { return Action::None };
         self.selected = i;
         // sliders: the left third lowers, the rest raises
@@ -344,6 +404,11 @@ impl Menu {
 
     pub fn draw(&mut self, ui: &mut Ui) {
         let (sw, sh) = ui.screen;
+        self.screen_size = (sw, sh);
+        if self.screen == Screen::Map {
+            self.map.draw(ui);
+            return;
+        }
         ui.rect(0.0, 0.0, sw, sh, [0.0, 0.02, 0.06, if self.screen == Screen::Main { 0.55 } else { 0.7 }]);
         let title = self.title();
         let tp = 64.0;

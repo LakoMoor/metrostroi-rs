@@ -5,6 +5,7 @@ mod config;
 mod dynamics;
 mod ground;
 mod menu;
+mod metromap;
 mod panels;
 mod post;
 mod procgen;
@@ -169,6 +170,8 @@ fn run() -> Result<()> {
                     })
                     .collect();
                 menu::set_lines(lines);
+                let g = g.clone();
+                metromap::set_data(load_map(&g, &list));
             }
         }
     }
@@ -479,4 +482,51 @@ fn run() -> Result<()> {
             None => unreachable!("interactive mode returned earlier"),
         }
     })
+}
+
+/// The Moscow metro map: one entry per line (the first route of each `ref`), the opposite route kept for the other direction.
+fn load_map(game: &std::path::Path, list: &[serde_json::Value]) -> metromap::MapData {
+    let text = |l: &serde_json::Value, k: &str| l.get(k).and_then(|v| v.as_str()).unwrap_or("").to_string();
+    let stations = |l: &serde_json::Value| -> Vec<metromap::MapStation> {
+        let file = game.join("content/maps/moscow").join(text(l, "id")).join("stations.json");
+        let Some(serde_json::Value::Array(a)) = std::fs::read_to_string(file).ok().and_then(|t| serde_json::from_str(&t).ok()) else { return Vec::new() };
+        a.iter()
+            .map(|v| {
+                let f = |k: &str| v.get(k).and_then(|x| x.as_f64()).unwrap_or(0.0) as f32;
+                metromap::MapStation { name: text(v, "name"), x: f("x"), y: f("y"), depth: f("depth"), s: f("s") }
+            })
+            .collect()
+    };
+    let mut out: Vec<metromap::MapLine> = Vec::new();
+    for (i, l) in list.iter().enumerate() {
+        let reference = text(l, "ref");
+        if let Some(line) = out.iter_mut().find(|m| m.reference == reference) {
+            if line.reverse.is_none() {
+                line.reverse = Some(i);
+                line.reverse_stops = stations(l).into_iter().map(|s| (s.name, s.s)).collect();
+            }
+            continue;
+        }
+        let hex = text(l, "colour");
+        let c = u32::from_str_radix(hex.trim_start_matches('#'), 16).unwrap_or(0x888888);
+        let poly = l
+            .get("poly")
+            .and_then(|p| p.as_array())
+            .map(|p| p.iter().filter_map(|pt| Some([pt.get(0)?.as_f64()? as f32, pt.get(1)?.as_f64()? as f32])).collect())
+            .unwrap_or_default();
+        out.push(metromap::MapLine {
+            route: i,
+            reverse: None,
+            reference,
+            name: text(l, "name"),
+            colour: [((c >> 16) & 255) as f32 / 255.0, ((c >> 8) & 255) as f32 / 255.0, (c & 255) as f32 / 255.0].map(|v| v.powf(2.2)),
+            poly,
+            from: text(l, "from"),
+            to: text(l, "to"),
+            length_km: l.get("length_km").and_then(|v| v.as_f64()).unwrap_or(0.0) as f32,
+            stations: stations(l),
+            reverse_stops: Vec::new(),
+        });
+    }
+    metromap::MapData { lines: out }
 }

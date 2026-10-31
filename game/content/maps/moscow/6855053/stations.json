@@ -3,84 +3,126 @@
   "name": "Деловой центр",
   "name_en": "Delovoy Tsentr",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": -5068.0,
+  "y": -91.3,
+  "depth": 25.0
  },
  {
   "name": "Парк Победы",
   "name_en": "Park Pobedy",
   "s": 2419.2,
-  "side": "right"
+  "side": "right",
+  "x": -6443.4,
+  "y": -1463.1,
+  "depth": 73.6
  },
  {
   "name": "Минская",
   "name_en": "",
   "s": 5163.3,
-  "side": "right"
+  "side": "right",
+  "x": -7722.0,
+  "y": -2804.9,
+  "depth": 15.0
  },
  {
   "name": "Ломоносовский проспект",
   "name_en": "",
   "s": 8227.4,
-  "side": "right"
+  "side": "right",
+  "x": -6507.7,
+  "y": -4757.9,
+  "depth": 15.0
  },
  {
   "name": "Раменки",
   "name_en": "",
   "s": 9765.1,
-  "side": "right"
+  "side": "right",
+  "x": -7615.6,
+  "y": -5822.5,
+  "depth": 15.0
  },
  {
   "name": "Мичуринский проспект",
   "name_en": "",
   "s": 11115.3,
-  "side": "right"
+  "side": "right",
+  "x": -8600.2,
+  "y": -6736.6,
+  "depth": 13.0
  },
  {
   "name": "Озёрная",
   "name_en": "",
   "s": 14131.4,
-  "side": "right"
+  "side": "right",
+  "x": -10734.4,
+  "y": -8828.6,
+  "depth": 25.0
  },
  {
   "name": "Говорово",
   "name_en": "",
   "s": 16651.3,
-  "side": "right"
+  "side": "right",
+  "x": -12703.6,
+  "y": -10044.3,
+  "depth": 14.0
  },
  {
   "name": "Солнцево",
   "name_en": "",
   "s": 18808.8,
-  "side": "right"
+  "side": "right",
+  "x": -14340.3,
+  "y": -11144.1,
+  "depth": 13.0
  },
  {
   "name": "Боровское шоссе",
   "name_en": "",
   "s": 20355.9,
-  "side": "right"
+  "side": "right",
+  "x": -15639.1,
+  "y": -11356.5,
+  "depth": 20.0
  },
  {
   "name": "Новопеределкино",
   "name_en": "",
   "s": 21686.4,
-  "side": "right"
+  "side": "right",
+  "x": -16601.0,
+  "y": -12260.5,
+  "depth": 16.0
  },
  {
   "name": "Рассказовка",
   "name_en": "",
   "s": 23193.5,
-  "side": "right"
+  "side": "right",
+  "x": -17852.0,
+  "y": -12881.4,
+  "depth": 12.0
  },
  {
   "name": "Пыхтино",
   "name_en": "",
   "s": 25942.8,
-  "side": "right"
+  "side": "right",
+  "x": -20322.7,
+  "y": -13941.0,
+  "depth": 0.0
  },
  {
   "name": "Аэропорт Внуково",
   "name_en": "",
   "s": 28268.7,
-  "side": "right"
+  "side": "right",
+  "x": -20850.4,
+  "y": -15862.0,
+  "depth": 0.0
  }
 ]

@@ -3,132 +3,198 @@
   "name": "Пятницкое шоссе",
   "name_en": "",
   "s": 238.2,
-  "side": "right"
+  "side": "right",
+  "x": -16681.3,
+  "y": 11745.6,
+  "depth": 11.0
  },
  {
   "name": "Митино",
   "name_en": "",
   "s": 1646.3,
-  "side": "right"
+  "side": "right",
+  "x": -16107.2,
+  "y": 10602.7,
+  "depth": 14.0
  },
  {
   "name": "Волоколамская",
   "name_en": "",
   "s": 3299.4,
-  "side": "right"
+  "side": "right",
+  "x": -14901.1,
+  "y": 9499.9,
+  "depth": 14.0
  },
  {
   "name": "Мякинино",
   "name_en": "",
   "s": 4481.1,
-  "side": "right"
+  "side": "right",
+  "x": -14708.8,
+  "y": 8357.5,
+  "depth": 0.0
  },
  {
   "name": "Строгино",
   "name_en": "",
   "s": 7546.1,
-  "side": "right"
+  "side": "right",
+  "x": -13592.8,
+  "y": 5961.0,
+  "depth": 8.0
  },
  {
   "name": "Крылатское",
   "name_en": "",
   "s": 14159.0,
-  "side": "right"
+  "side": "right",
+  "x": -13279.8,
+  "y": 732.0,
+  "depth": 9.5
  },
  {
   "name": "Молодёжная",
   "name_en": "",
   "s": 16086.2,
-  "side": "right"
+  "side": "right",
+  "x": -12726.4,
+  "y": -1032.1,
+  "depth": 6.5
  },
  {
   "name": "Кунцевская",
   "name_en": "",
   "s": 18423.4,
-  "side": "right"
+  "side": "right",
+  "x": -10899.4,
+  "y": -2149.2,
+  "depth": 0.0
  },
  {
   "name": "Славянский бульвар",
   "name_en": "",
   "s": 20042.4,
-  "side": "right"
+  "side": "right",
+  "x": -9347.0,
+  "y": -2273.4,
+  "depth": 8.5
  },
  {
   "name": "Парк Победы",
   "name_en": "Park Pobedy",
   "s": 23327.7,
-  "side": "right"
+  "side": "right",
+  "x": -6389.2,
+  "y": -1527.0,
+  "depth": 73.6
  },
  {
   "name": "Киевская",
   "name_en": "",
   "s": 26567.8,
-  "side": "right"
+  "side": "right",
+  "x": -3385.4,
+  "y": -627.9,
+  "depth": 38.0
  },
  {
   "name": "Смоленская",
   "name_en": "",
   "s": 27655.0,
-  "side": "right"
+  "side": "right",
+  "x": -2353.7,
+  "y": -290.8,
+  "depth": 50.0
  },
  {
   "name": "Арбатская",
   "name_en": "",
   "s": 29308.5,
-  "side": "right"
+  "side": "right",
+  "x": -815.7,
+  "y": 222.5,
+  "depth": 41.0
  },
  {
   "name": "Площадь Революции",
   "name_en": "",
   "s": 30450.6,
-  "side": "right"
+  "side": "right",
+  "x": 111.8,
+  "y": 726.5,
+  "depth": 33.6
  },
  {
   "name": "Курская",
   "name_en": "",
   "s": 32779.7,
-  "side": "right"
+  "side": "right",
+  "x": 2413.5,
+  "y": 880.2,
+  "depth": 30.7
  },
  {
   "name": "Бауманская",
   "name_en": "",
   "s": 34986.1,
-  "side": "right"
+  "side": "right",
+  "x": 3799.3,
+  "y": 2548.7,
+  "depth": 32.5
  },
  {
   "name": "Электрозаводская",
   "name_en": "",
   "s": 36739.2,
-  "side": "right"
+  "side": "right",
+  "x": 5254.1,
+  "y": 3512.5,
+  "depth": 31.5
  },
  {
   "name": "Семёновская",
   "name_en": "",
   "s": 37848.7,
-  "side": "right"
+  "side": "right",
+  "x": 6344.7,
+  "y": 3688.7,
+  "depth": 40.0
  },
  {
   "name": "Партизанская",
   "name_en": "",
   "s": 39813.8,
-  "side": "right"
+  "side": "right",
+  "x": 8207.3,
+  "y": 4266.4,
+  "depth": 9.0
  },
  {
   "name": "Измайловская",
   "name_en": "",
   "s": 41762.9,
-  "side": "right"
+  "side": "right",
+  "x": 10128.1,
+  "y": 4188.4,
+  "depth": 0.0
  },
  {
   "name": "Первомайская",
   "name_en": "",
   "s": 43546.9,
-  "side": "right"
+  "side": "right",
+  "x": 11245.7,
+  "y": 4967.4,
+  "depth": 7.0
  },
  {
   "name": "Щёлковская",
   "name_en": "",
   "s": 45174.8,
-  "side": "right"
+  "side": "right",
+  "x": 11194.3,
+  "y": 6594.4,
+  "depth": 8.0
  }
 ]

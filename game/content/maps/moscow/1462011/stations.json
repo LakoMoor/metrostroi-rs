@@ -3,72 +3,108 @@
   "name": "Белорусская",
   "name_en": "",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": -2260.0,
+  "y": 2914.0,
+  "depth": 42.5
  },
  {
   "name": "Краснопресненская",
   "name_en": "",
   "s": 1786.7,
-  "side": "right"
+  "side": "right",
+  "x": -2686.7,
+  "y": 1244.5,
+  "depth": 35.5
  },
  {
   "name": "Киевская",
   "name_en": "",
   "s": 3799.3,
-  "side": "right"
+  "side": "right",
+  "x": -3426.6,
+  "y": -585.6,
+  "depth": 53.0
  },
  {
   "name": "Парк Культуры",
   "name_en": "",
   "s": 5947.1,
-  "side": "right"
+  "side": "right",
+  "x": -1804.5,
+  "y": -1587.2,
+  "depth": 40.0
  },
  {
   "name": "Октябрьская",
   "name_en": "",
   "s": 7264.4,
-  "side": "right"
+  "side": "right",
+  "x": -670.9,
+  "y": -2258.2,
+  "depth": 40.0
  },
  {
   "name": "Добрынинская",
   "name_en": "",
   "s": 8248.3,
-  "side": "right"
+  "side": "right",
+  "x": 278.3,
+  "y": -2334.4,
+  "depth": 35.5
  },
  {
   "name": "Павелецкая",
   "name_en": "",
   "s": 9200.5,
-  "side": "right"
+  "side": "right",
+  "x": 1144.6,
+  "y": -1975.3,
+  "depth": 40.0
  },
  {
   "name": "Таганская",
   "name_en": "",
   "s": 10553.8,
-  "side": "right"
+  "side": "right",
+  "x": 1974.7,
+  "y": -930.7,
+  "depth": 53.0
  },
  {
   "name": "Курская",
   "name_en": "",
   "s": 12368.8,
-  "side": "right"
+  "side": "right",
+  "x": 2476.1,
+  "y": 801.2,
+  "depth": 40.0
  },
  {
   "name": "Комсомольская",
   "name_en": "",
   "s": 14395.2,
-  "side": "right"
+  "side": "right",
+  "x": 2170.5,
+  "y": 2731.3,
+  "depth": 37.0
  },
  {
   "name": "Проспект Мира",
   "name_en": "",
   "s": 16248.3,
-  "side": "right"
+  "side": "right",
+  "x": 736.0,
+  "y": 3305.7,
+  "depth": 40.0
  },
  {
   "name": "Новослободская",
   "name_en": "",
   "s": 18038.1,
-  "side": "right"
+  "side": "right",
+  "x": -1038.1,
+  "y": 3330.0,
+  "depth": 40.0
  }
 ]

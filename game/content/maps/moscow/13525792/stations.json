@@ -3,174 +3,261 @@
   "name": "Сокольники",
   "name_en": "",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": 3705.8,
+  "y": 4460.7,
+  "depth": 34.0
  },
  {
   "name": "Электрозаводская",
   "name_en": "",
   "s": 1938.4,
-  "side": "right"
+  "side": "right",
+  "x": 5192.5,
+  "y": 3363.4,
+  "depth": 20.0
  },
  {
   "name": "Лефортово",
   "name_en": "",
   "s": 3734.8,
-  "side": "right"
+  "side": "right",
+  "x": 5426.8,
+  "y": 1636.7,
+  "depth": 26.0
  },
  {
   "name": "Авиамоторная",
   "name_en": "",
   "s": 5208.6,
-  "side": "right"
+  "side": "right",
+  "x": 6195.0,
+  "y": 433.9,
+  "depth": 19.4
  },
  {
   "name": "Нижегородская",
   "name_en": "",
   "s": 8307.9,
-  "side": "right"
+  "side": "right",
+  "x": 6873.9,
+  "y": -2041.6,
+  "depth": 21.8
  },
  {
   "name": "Текстильщики",
   "name_en": "",
   "s": 11398.4,
-  "side": "right"
+  "side": "right",
+  "x": 6793.9,
+  "y": -4772.9,
+  "depth": 22.0
  },
  {
   "name": "Печатники",
   "name_en": "",
   "s": 12904.7,
-  "side": "right"
+  "side": "right",
+  "x": 6725.2,
+  "y": -6154.3,
+  "depth": 30.0
  },
  {
   "name": "Нагатинский Затон",
   "name_en": "",
   "s": 14778.2,
-  "side": "right"
+  "side": "right",
+  "x": 5281.0,
+  "y": -7296.1,
+  "depth": 27.0
  },
  {
   "name": "Кленовый бульвар",
   "name_en": "",
   "s": 16661.0,
-  "side": "right"
+  "side": "right",
+  "x": 3804.3,
+  "y": -8390.0,
+  "depth": 24.3
  },
  {
   "name": "Каширская",
   "name_en": "",
   "s": 19728.9,
-  "side": "right"
+  "side": "right",
+  "x": 1787.5,
+  "y": -10542.9,
+  "depth": 7.0
  },
  {
   "name": "Варшавская",
   "name_en": "",
   "s": 21736.6,
-  "side": "right"
+  "side": "right",
+  "x": -31.2,
+  "y": -10736.2,
+  "depth": 9.0
  },
  {
   "name": "Каховская",
   "name_en": "",
   "s": 23065.4,
-  "side": "right"
+  "side": "right",
+  "x": -1353.1,
+  "y": -10784.4,
+  "depth": 8.0
  },
  {
   "name": "Зюзино",
   "name_en": "",
   "s": 24757.4,
-  "side": "right"
+  "side": "right",
+  "x": -2906.2,
+  "y": -10464.8,
+  "depth": 17.5
  },
  {
   "name": "Воронцовская",
   "name_en": "",
   "s": 27140.5,
-  "side": "right"
+  "side": "right",
+  "x": -5040.9,
+  "y": -10124.9,
+  "depth": 21.0
  },
  {
   "name": "Новаторская",
   "name_en": "",
   "s": 28842.4,
-  "side": "right"
+  "side": "right",
+  "x": -6148.5,
+  "y": -8877.4,
+  "depth": 11.0
  },
  {
   "name": "Проспект Вернадского",
   "name_en": "",
   "s": 30305.7,
-  "side": "right"
+  "side": "right",
+  "x": -7266.9,
+  "y": -7948.3,
+  "depth": 16.0
  },
  {
   "name": "Мичуринский проспект",
   "name_en": "",
   "s": 32014.2,
-  "side": "right"
+  "side": "right",
+  "x": -8440.3,
+  "y": -6850.9,
+  "depth": 19.0
  },
  {
   "name": "Аминьевская",
   "name_en": "",
   "s": 33713.1,
-  "side": "right"
+  "side": "right",
+  "x": -9707.1,
+  "y": -5866.8,
+  "depth": 14.0
  },
  {
   "name": "Давыдково",
   "name_en": "",
   "s": 35903.9,
-  "side": "right"
+  "side": "right",
+  "x": -10539.7,
+  "y": -3873.1,
+  "depth": 33.0
  },
  {
   "name": "Кунцевская",
   "name_en": "",
   "s": 37471.1,
-  "side": "left"
+  "side": "left",
+  "x": -10900.6,
+  "y": -2348.0,
+  "depth": 31.2
  },
  {
   "name": "Терехово",
   "name_en": "",
   "s": 39860.6,
-  "side": "right"
+  "side": "right",
+  "x": -10044.9,
+  "y": -220.2,
+  "depth": 22.0
  },
  {
   "name": "Мнёвники",
   "name_en": "",
   "s": 41513.5,
-  "side": "right"
+  "side": "right",
+  "x": -9302.9,
+  "y": 1241.0,
+  "depth": 27.0
  },
  {
   "name": "Народное Ополчение",
   "name_en": "Narodnoye Opolcheniye",
   "s": 43564.1,
-  "side": "right"
+  "side": "right",
+  "x": -8411.8,
+  "y": 2852.6,
+  "depth": 28.0
  },
  {
   "name": "Хорошёвская",
   "name_en": "",
   "s": 45740.9,
-  "side": "right"
+  "side": "right",
+  "x": -6318.4,
+  "y": 2959.0,
+  "depth": 21.0
  },
  {
   "name": "ЦСКА",
   "name_en": "",
   "s": 47295.4,
-  "side": "right"
+  "side": "right",
+  "x": -5432.6,
+  "y": 4058.2,
+  "depth": 28.0
  },
  {
   "name": "Петровский парк",
   "name_en": "",
   "s": 49100.0,
-  "side": "right"
+  "side": "right",
+  "x": -3935.0,
+  "y": 4654.9,
+  "depth": 25.0
  },
  {
   "name": "Савёловская",
   "name_en": "",
   "s": 51105.1,
-  "side": "right"
+  "side": "right",
+  "x": -2121.0,
+  "y": 4693.2,
+  "depth": 65.0
  },
  {
   "name": "Марьина Роща",
   "name_en": "",
   "s": 53112.4,
-  "side": "right"
+  "side": "right",
+  "x": -224.2,
+  "y": 5160.0,
+  "depth": 74.0
  },
  {
   "name": "Рижская",
   "name_en": "",
   "s": 54302.8,
-  "side": "right"
+  "side": "right",
+  "x": 897.0,
+  "y": 4866.0,
+  "depth": 63.5
  }
 ]

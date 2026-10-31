@@ -242,12 +242,19 @@ def main():
             continue
         folder = OUT / rid
         folder.mkdir(exist_ok=True)
+        stops_s = [x["s"] for x in st]
+        heights = platform_heights(tags.get("ref", ""), [x["name"] for x in st], stops_s)
+        for x, hgt in zip(st, heights):
+            # position on the map (metres) and depth under the street (metres, negative = overpass)
+            i = max(1, min(len(cum) - 1, next((k for k, c in enumerate(cum) if c >= x["s"]), len(cum) - 1)))
+            t = (x["s"] - cum[i - 1]) / max(1e-6, cum[i] - cum[i - 1])
+            x["x"] = round(path[i - 1][0] + (path[i][0] - path[i - 1][0]) * t, 1)
+            x["y"] = round(path[i - 1][1] + (path[i][1] - path[i - 1][1]) * t, 1)
+            x["depth"] = round(-hgt, 1)
         # Platform depths come from tools/moscow_depths.json; between platforms the tunnel falls on a smooth curve.
         # (Old stand-in: OSM has no depths. Moscow's lines run in "saddle" profiles (stations on shallow summits, the tunnel
         # falling away between them), so the stand-in is a smooth dip of up to DIP metres between stations,
         # flat at the platforms and never steeper than MAX_GRADE.
-        stops_s = [x["s"] for x in st]
-        heights = platform_heights(tags.get("ref", ""), [x["name"] for x in st], stops_s)
         nodes = [f"[{x / UNIT:.1f} {y / UNIT:.1f} {(-1000.0 + profile_real(c, stops_s, heights) / UNIT):.1f}]" for (x, y), c in zip(path, cum)]
         (folder / "track.lua").write_text(json.dumps([nodes], ensure_ascii=False, indent=0), encoding="utf-8")
         (folder / "stations.json").write_text(json.dumps(st, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -263,6 +270,7 @@ def main():
                 "length_km": round(cum[-1] / 1000.0, 2),
                 "stations": len(st),
                 "loop": closed,
+                "poly": [[round(path[i][0]), round(path[i][1])] for i in range(0, len(path), max(1, int(250 // STEP)))] + [[round(path[-1][0]), round(path[-1][1])]],
             }
         )
         print(f"{rid}: {full}  {cum[-1] / 1000:.1f} km, {len(st)} stations{'  (loop)' if closed else ''}")

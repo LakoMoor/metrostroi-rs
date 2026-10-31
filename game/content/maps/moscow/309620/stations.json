@@ -3,138 +3,207 @@
   "name": "Планерная",
   "name_en": "",
   "s": 104.7,
-  "side": "right"
+  "side": "right",
+  "x": -11501.5,
+  "y": 12296.3,
+  "depth": 6.0
  },
  {
   "name": "Сходненская",
   "name_en": "",
   "s": 1253.2,
-  "side": "right"
+  "side": "right",
+  "x": -11297.9,
+  "y": 11166.7,
+  "depth": 6.0
  },
  {
   "name": "Тушинская",
   "name_en": "",
   "s": 3930.7,
-  "side": "right"
+  "side": "right",
+  "x": -11473.7,
+  "y": 8506.1,
+  "depth": 10.5
  },
  {
   "name": "Спартак",
   "name_en": "",
   "s": 4871.2,
-  "side": "right"
+  "side": "right",
+  "x": -11549.0,
+  "y": 7589.3,
+  "depth": 10.0
  },
  {
   "name": "Щукинская",
   "name_en": "",
   "s": 7164.1,
-  "side": "right"
+  "side": "right",
+  "x": -9733.1,
+  "y": 6493.2,
+  "depth": 13.0
  },
  {
   "name": "Октябрьское Поле",
   "name_en": "",
   "s": 9642.4,
-  "side": "right"
+  "side": "right",
+  "x": -7908.9,
+  "y": 4815.8,
+  "depth": 9.0
  },
  {
   "name": "Полежаевская",
   "name_en": "",
   "s": 12282.0,
-  "side": "right"
+  "side": "right",
+  "x": -6309.6,
+  "y": 3057.0,
+  "depth": 10.0
  },
  {
   "name": "Беговая",
   "name_en": "",
   "s": 14080.2,
-  "side": "right"
+  "side": "right",
+  "x": -4595.6,
+  "y": 2629.1,
+  "depth": 9.0
  },
  {
   "name": "Улица 1905 года",
   "name_en": "",
   "s": 15493.4,
-  "side": "right"
+  "side": "right",
+  "x": -3680.5,
+  "y": 1648.1,
+  "depth": 11.0
  },
  {
   "name": "Баррикадная",
   "name_en": "",
   "s": 16766.2,
-  "side": "right"
+  "side": "right",
+  "x": -2553.2,
+  "y": 1225.5,
+  "depth": 30.0
  },
  {
   "name": "Пушкинская",
   "name_en": "",
   "s": 18758.7,
-  "side": "right"
+  "side": "right",
+  "x": -789.7,
+  "y": 1705.1,
+  "depth": 51.0
  },
  {
   "name": "Кузнецкий Мост",
   "name_en": "",
   "s": 20045.3,
-  "side": "right"
+  "side": "right",
+  "x": 378.0,
+  "y": 1187.8,
+  "depth": 39.5
  },
  {
   "name": "Китай-город",
   "name_en": "",
   "s": 20789.5,
-  "side": "right"
+  "side": "right",
+  "x": 809.5,
+  "y": 618.9,
+  "depth": 29.0
  },
  {
   "name": "Таганская",
   "name_en": "",
   "s": 22936.1,
-  "side": "right"
+  "side": "right",
+  "x": 1987.6,
+  "y": -1065.4,
+  "depth": 36.0
  },
  {
   "name": "Пролетарская",
   "name_en": "",
   "s": 24357.0,
-  "side": "right"
+  "side": "right",
+  "x": 2873.8,
+  "y": -2022.7,
+  "depth": 9.0
  },
  {
   "name": "Волгоградский проспект",
   "name_en": "",
   "s": 25895.7,
-  "side": "right"
+  "side": "right",
+  "x": 4187.8,
+  "y": -2756.2,
+  "depth": 8.0
  },
  {
   "name": "Текстильщики",
   "name_en": "",
   "s": 29277.3,
-  "side": "right"
+  "side": "right",
+  "x": 6985.6,
+  "y": -4583.6,
+  "depth": 13.0
  },
  {
   "name": "Кузьминки",
   "name_en": "",
   "s": 31459.6,
-  "side": "right"
+  "side": "right",
+  "x": 9131.8,
+  "y": -4938.8,
+  "depth": 8.0
  },
  {
   "name": "Рязанский проспект",
   "name_en": "",
   "s": 33929.2,
-  "side": "right"
+  "side": "right",
+  "x": 10863.3,
+  "y": -3675.0,
+  "depth": 6.0
  },
  {
   "name": "Выхино",
   "name_en": "",
   "s": 35831.5,
-  "side": "right"
+  "side": "right",
+  "x": 12399.2,
+  "y": -3819.5,
+  "depth": 0.0
  },
  {
   "name": "Лермонтовский проспект",
   "name_en": "",
   "s": 38508.5,
-  "side": "right"
+  "side": "right",
+  "x": 14528.5,
+  "y": -5381.1,
+  "depth": 12.0
  },
  {
   "name": "Жулебино",
   "name_en": "",
   "s": 40570.6,
-  "side": "right"
+  "side": "right",
+  "x": 14797.9,
+  "y": -7170.9,
+  "depth": 15.0
  },
  {
   "name": "Котельники",
   "name_en": "",
   "s": 42192.0,
-  "side": "right"
+  "side": "right",
+  "x": 14938.5,
+  "y": -8427.6,
+  "depth": 15.0
  }
 ]

@@ -3,156 +3,234 @@
   "name": "Физтех",
   "name_en": "",
   "s": 475.9,
-  "side": "right"
+  "side": "right",
+  "x": -4606.5,
+  "y": 19078.2,
+  "depth": 20.0
  },
  {
   "name": "Лианозово",
   "name_en": "",
   "s": 3129.4,
-  "side": "right"
+  "side": "right",
+  "x": -4726.3,
+  "y": 16461.5,
+  "depth": 20.0
  },
  {
   "name": "Яхромская",
   "name_en": "",
   "s": 5191.2,
-  "side": "right"
+  "side": "right",
+  "x": -4677.5,
+  "y": 14431.6,
+  "depth": 20.0
  },
  {
   "name": "Селигерская",
   "name_en": "",
   "s": 6728.0,
-  "side": "right"
+  "side": "right",
+  "x": -4564.8,
+  "y": 12922.5,
+  "depth": 23.5
  },
  {
   "name": "Верхние Лихоборы",
   "name_en": "",
   "s": 8220.8,
-  "side": "right"
+  "side": "right",
+  "x": -3667.6,
+  "y": 11766.2,
+  "depth": 61.5
  },
  {
   "name": "Окружная",
   "name_en": "",
   "s": 9595.7,
-  "side": "right"
+  "side": "right",
+  "x": -2903.5,
+  "y": 10670.2,
+  "depth": 65.0
  },
  {
   "name": "Петровско-Разумовская",
   "name_en": "",
   "s": 10872.0,
-  "side": "right"
+  "side": "right",
+  "x": -2846.5,
+  "y": 9441.8,
+  "depth": 61.0
  },
  {
   "name": "Фонвизинская",
   "name_en": "",
   "s": 12666.2,
-  "side": "right"
+  "side": "right",
+  "x": -2036.2,
+  "y": 8097.2,
+  "depth": 65.0
  },
  {
   "name": "Бутырская",
   "name_en": "",
   "s": 14075.8,
-  "side": "right"
+  "side": "right",
+  "x": -1106.6,
+  "y": 7037.6,
+  "depth": 60.0
  },
  {
   "name": "Марьина Роща",
   "name_en": "",
   "s": 16333.5,
-  "side": "right"
+  "side": "right",
+  "x": -242.4,
+  "y": 5058.8,
+  "depth": 60.0
  },
  {
   "name": "Достоевская",
   "name_en": "",
   "s": 17905.1,
-  "side": "right"
+  "side": "right",
+  "x": -317.9,
+  "y": 3498.5,
+  "depth": 60.0
  },
  {
   "name": "Трубная",
   "name_en": "",
   "s": 19379.8,
-  "side": "right"
+  "side": "right",
+  "x": -35.3,
+  "y": 2118.0,
+  "depth": 60.0
  },
  {
   "name": "Сретенский бульвар",
   "name_en": "",
   "s": 20789.0,
-  "side": "right"
+  "side": "right",
+  "x": 1257.5,
+  "y": 1877.0,
+  "depth": 60.0
  },
  {
   "name": "Чкаловская",
   "name_en": "",
   "s": 22458.8,
-  "side": "right"
+  "side": "right",
+  "x": 2329.0,
+  "y": 720.3,
+  "depth": 51.0
  },
  {
   "name": "Римская",
   "name_en": "",
   "s": 24561.8,
-  "side": "right"
+  "side": "right",
+  "x": 3951.3,
+  "y": -398.5,
+  "depth": 54.0
  },
  {
   "name": "Крестьянская Застава",
   "name_en": "",
   "s": 26395.6,
-  "side": "right"
+  "side": "right",
+  "x": 2976.1,
+  "y": -1853.5,
+  "depth": 47.0
  },
  {
   "name": "Дубровка",
   "name_en": "",
   "s": 28299.1,
-  "side": "right"
+  "side": "right",
+  "x": 3471.0,
+  "y": -3425.5,
+  "depth": 55.3
  },
  {
   "name": "Кожуховская",
   "name_en": "",
   "s": 29734.5,
-  "side": "right"
+  "side": "right",
+  "x": 4048.1,
+  "y": -4727.1,
+  "depth": 18.7
  },
  {
   "name": "Печатники",
   "name_en": "Pechatniki",
   "s": 32851.5,
-  "side": "right"
+  "side": "right",
+  "x": 6697.5,
+  "y": -6285.5,
+  "depth": 5.0
  },
  {
   "name": "Волжская",
   "name_en": "",
   "s": 34582.1,
-  "side": "right"
+  "side": "right",
+  "x": 8336.0,
+  "y": -6582.0,
+  "depth": 8.0
  },
  {
   "name": "Люблино",
   "name_en": "",
   "s": 36661.6,
-  "side": "right"
+  "side": "right",
+  "x": 8884.4,
+  "y": -8252.4,
+  "depth": 8.0
  },
  {
   "name": "Братиславская",
   "name_en": "",
   "s": 38676.7,
-  "side": "right"
+  "side": "right",
+  "x": 8182.5,
+  "y": -10024.3,
+  "depth": 8.0
  },
  {
   "name": "Марьино",
   "name_en": "",
   "s": 40027.8,
-  "side": "right"
+  "side": "right",
+  "x": 7709.0,
+  "y": -11112.7,
+  "depth": 8.0
  },
  {
   "name": "Борисово",
   "name_en": "",
   "s": 41957.0,
-  "side": "right"
+  "side": "right",
+  "x": 7747.3,
+  "y": -12966.2,
+  "depth": 10.0
  },
  {
   "name": "Шипиловская",
   "name_en": "",
   "s": 43350.5,
-  "side": "right"
+  "side": "right",
+  "x": 7739.8,
+  "y": -14333.6,
+  "depth": 10.0
  },
  {
   "name": "Зябликово",
   "name_en": "",
   "s": 44331.9,
-  "side": "right"
+  "side": "right",
+  "x": 7836.1,
+  "y": -15309.9,
+  "depth": 15.0
  }
 ]

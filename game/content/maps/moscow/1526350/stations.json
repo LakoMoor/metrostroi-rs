@@ -3,48 +3,72 @@
   "name": "Новокосино",
   "name_en": "",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": 15270.4,
+  "y": -539.0,
+  "depth": 9.0
  },
  {
   "name": "Новогиреево",
   "name_en": "",
   "s": 3191.4,
-  "side": "right"
+  "side": "right",
+  "x": 12327.8,
+  "y": 202.9,
+  "depth": 9.0
  },
  {
   "name": "Перово",
   "name_en": "",
   "s": 5162.2,
-  "side": "right"
+  "side": "right",
+  "x": 10428.2,
+  "y": 138.7,
+  "depth": 9.0
  },
  {
   "name": "Шоссе Энтузиастов",
   "name_en": "",
   "s": 8205.5,
-  "side": "right"
+  "side": "right",
+  "x": 8111.6,
+  "y": 852.2,
+  "depth": 53.0
  },
  {
   "name": "Авиамоторная",
   "name_en": "",
   "s": 10140.9,
-  "side": "right"
+  "side": "right",
+  "x": 6265.2,
+  "y": 290.7,
+  "depth": 53.0
  },
  {
   "name": "Площадь Ильича",
   "name_en": "",
   "s": 12527.7,
-  "side": "right"
+  "side": "right",
+  "x": 3968.2,
+  "y": -301.2,
+  "depth": 46.0
  },
  {
   "name": "Марксистская",
   "name_en": "",
   "s": 14580.4,
-  "side": "right"
+  "side": "right",
+  "x": 2103.3,
+  "y": -954.9,
+  "depth": 60.0
  },
  {
   "name": "Третьяковская",
   "name_en": "",
   "s": 16227.3,
-  "side": "right"
+  "side": "right",
+  "x": 466.2,
+  "y": -956.8,
+  "depth": 46.0
  }
 ]

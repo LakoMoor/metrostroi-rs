@@ -3,144 +3,216 @@
   "name": "Новоясеневская",
   "name_en": "",
   "s": 85.9,
-  "side": "right"
+  "side": "right",
+  "x": -4121.7,
+  "y": -16554.9,
+  "depth": 7.0
  },
  {
   "name": "Ясенево",
   "name_en": "",
   "s": 1527.9,
-  "side": "right"
+  "side": "right",
+  "x": -5422.9,
+  "y": -15963.0,
+  "depth": 8.0
  },
  {
   "name": "Тёплый Стан",
   "name_en": "",
   "s": 3705.4,
-  "side": "right"
+  "side": "right",
+  "x": -6995.0,
+  "y": -14575.5,
+  "depth": 8.0
  },
  {
   "name": "Коньково",
   "name_en": "",
   "s": 5532.6,
-  "side": "right"
+  "side": "right",
+  "x": -6323.3,
+  "y": -12988.5,
+  "depth": 8.0
  },
  {
   "name": "Беляево",
   "name_en": "",
   "s": 6682.3,
-  "side": "right"
+  "side": "right",
+  "x": -5903.3,
+  "y": -11918.3,
+  "depth": 12.0
  },
  {
   "name": "Калужская",
   "name_en": "",
   "s": 8547.8,
-  "side": "right"
+  "side": "right",
+  "x": -4965.2,
+  "y": -10313.3,
+  "depth": 10.0
  },
  {
   "name": "Новые Черёмушки",
   "name_en": "",
   "s": 10244.2,
-  "side": "right"
+  "side": "right",
+  "x": -4085.3,
+  "y": -8863.0,
+  "depth": 7.0
  },
  {
   "name": "Профсоюзная",
   "name_en": "",
   "s": 11237.9,
-  "side": "right"
+  "side": "right",
+  "x": -3571.9,
+  "y": -8012.1,
+  "depth": 7.0
  },
  {
   "name": "Академическая",
   "name_en": "",
   "s": 12521.0,
-  "side": "right"
+  "side": "right",
+  "x": -2906.8,
+  "y": -6914.9,
+  "depth": 8.5
  },
  {
   "name": "Ленинский проспект",
   "name_en": "",
   "s": 14931.6,
-  "side": "right"
+  "side": "right",
+  "x": -2112.5,
+  "y": -4713.6,
+  "depth": 16.0
  },
  {
   "name": "Шаболовская",
   "name_en": "",
   "s": 17077.6,
-  "side": "right"
+  "side": "right",
+  "x": -759.1,
+  "y": -3334.1,
+  "depth": 46.5
  },
  {
   "name": "Октябрьская",
   "name_en": "",
   "s": 18355.2,
-  "side": "right"
+  "side": "right",
+  "x": -563.4,
+  "y": -2176.9,
+  "depth": 50.0
  },
  {
   "name": "Третьяковская",
   "name_en": "",
   "s": 20054.6,
-  "side": "right"
+  "side": "right",
+  "x": 449.1,
+  "y": -1020.9,
+  "depth": 46.0
  },
  {
   "name": "Китай-город",
   "name_en": "",
   "s": 22253.4,
-  "side": "right"
+  "side": "right",
+  "x": 858.4,
+  "y": 630.5,
+  "depth": 29.0
  },
  {
   "name": "Тургеневская",
   "name_en": "",
   "s": 23530.3,
-  "side": "right"
+  "side": "right",
+  "x": 1106.1,
+  "y": 1832.1,
+  "depth": 49.0
  },
  {
   "name": "Сухаревская",
   "name_en": "",
   "s": 24398.1,
-  "side": "right"
+  "side": "right",
+  "x": 710.4,
+  "y": 2558.4,
+  "depth": 43.0
  },
  {
   "name": "Проспект Мира",
   "name_en": "",
   "s": 25373.8,
-  "side": "right"
+  "side": "right",
+  "x": 761.2,
+  "y": 3422.4,
+  "depth": 50.0
  },
  {
   "name": "Рижская",
   "name_en": "",
   "s": 26846.5,
-  "side": "right"
+  "side": "right",
+  "x": 1045.8,
+  "y": 4854.4,
+  "depth": 46.0
  },
  {
   "name": "Алексеевская",
   "name_en": "",
   "s": 28565.4,
-  "side": "right"
+  "side": "right",
+  "x": 1202.9,
+  "y": 6565.4,
+  "depth": 51.0
  },
  {
   "name": "ВДНХ",
   "name_en": "",
   "s": 29910.1,
-  "side": "right"
+  "side": "right",
+  "x": 1353.4,
+  "y": 7900.5,
+  "depth": 53.5
  },
  {
   "name": "Ботанический сад",
   "name_en": "",
   "s": 32640.9,
-  "side": "right"
+  "side": "right",
+  "x": 1149.0,
+  "y": 10538.3,
+  "depth": 7.0
  },
  {
   "name": "Свиблово",
   "name_en": "",
   "s": 34130.1,
-  "side": "right"
+  "side": "right",
+  "x": 2053.3,
+  "y": 11687.6,
+  "depth": 8.0
  },
  {
   "name": "Бабушкинская",
   "name_en": "",
   "s": 35939.9,
-  "side": "right"
+  "side": "right",
+  "x": 2769.3,
+  "y": 13293.7,
+  "depth": 10.0
  },
  {
   "name": "Медведково",
   "name_en": "",
   "s": 37984.1,
-  "side": "right"
+  "side": "right",
+  "x": 2608.9,
+  "y": 15244.4,
+  "depth": 10.0
  }
 ]

@@ -3,162 +3,243 @@
   "name": "Потапово",
   "name_en": "",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": -7981.1,
+  "y": -21926.7,
+  "depth": 0.0
  },
  {
   "name": "Новомосковская",
   "name_en": "",
   "s": 1892.8,
-  "side": "right"
+  "side": "right",
+  "x": -9516.0,
+  "y": -21046.8,
+  "depth": 8.0
  },
  {
   "name": "Ольховая",
   "name_en": "",
   "s": 2955.3,
-  "side": "right"
+  "side": "right",
+  "x": -10064.6,
+  "y": -20141.2,
+  "depth": 12.0
  },
  {
   "name": "Прокшино",
   "name_en": "",
   "s": 5531.7,
-  "side": "right"
+  "side": "right",
+  "x": -11659.1,
+  "y": -18195.9,
+  "depth": 0.0
  },
  {
   "name": "Филатов Луг",
   "name_en": "",
   "s": 7897.4,
-  "side": "right"
+  "side": "right",
+  "x": -13298.4,
+  "y": -16511.4,
+  "depth": 0.0
  },
  {
   "name": "Саларьево",
   "name_en": "",
   "s": 10738.5,
-  "side": "right"
+  "side": "right",
+  "x": -12261.4,
+  "y": -14238.5,
+  "depth": 12.0
  },
  {
   "name": "Румянцево",
   "name_en": "",
   "s": 12487.3,
-  "side": "right"
+  "side": "right",
+  "x": -11176.6,
+  "y": -13014.9,
+  "depth": 12.0
  },
  {
   "name": "Тропарёво",
   "name_en": "",
   "s": 14943.5,
-  "side": "right"
+  "side": "right",
+  "x": -9234.7,
+  "y": -11579.1,
+  "depth": 12.0
  },
  {
   "name": "Юго-Западная",
   "name_en": "",
   "s": 17138.9,
-  "side": "right"
+  "side": "right",
+  "x": -8563.4,
+  "y": -9597.6,
+  "depth": 8.0
  },
  {
   "name": "Проспект Вернадского",
   "name_en": "",
   "s": 19248.8,
-  "side": "right"
+  "side": "right",
+  "x": -7133.9,
+  "y": -8092.3,
+  "depth": 8.0
  },
  {
   "name": "Университет",
   "name_en": "",
   "s": 21667.9,
-  "side": "right"
+  "side": "right",
+  "x": -5424.5,
+  "y": -6380.6,
+  "depth": 26.5
  },
  {
   "name": "Воробьёвы горы",
   "name_en": "",
   "s": 24247.2,
-  "side": "right"
+  "side": "right",
+  "x": -3794.1,
+  "y": -4415.2,
+  "depth": -7.6
  },
  {
   "name": "Спортивная",
   "name_en": "",
   "s": 26096.9,
-  "side": "right"
+  "side": "right",
+  "x": -3488.4,
+  "y": -2967.0,
+  "depth": 39.6
  },
  {
   "name": "Фрунзенская",
   "name_en": "",
   "s": 27063.3,
-  "side": "right"
+  "side": "right",
+  "x": -2606.6,
+  "y": -2580.8,
+  "depth": 42.0
  },
  {
   "name": "Парк Культуры",
   "name_en": "",
   "s": 28579.0,
-  "side": "right"
+  "side": "right",
+  "x": -1591.2,
+  "y": -1567.8,
+  "depth": 10.5
  },
  {
   "name": "Кропоткинская",
   "name_en": "",
   "s": 29808.7,
-  "side": "right"
+  "side": "right",
+  "x": -1007.5,
+  "y": -512.0,
+  "depth": 13.0
  },
  {
   "name": "Библиотека имени Ленина",
   "name_en": "",
   "s": 30559.3,
-  "side": "right"
+  "side": "right",
+  "x": -616.7,
+  "y": 120.3,
+  "depth": 12.0
  },
  {
   "name": "Охотный Ряд",
   "name_en": "",
   "s": 31411.6,
-  "side": "right"
+  "side": "right",
+  "x": -211.2,
+  "y": 853.6,
+  "depth": 15.0
  },
  {
   "name": "Лубянка",
   "name_en": "",
   "s": 32173.1,
-  "side": "right"
+  "side": "right",
+  "x": 496.7,
+  "y": 1085.5,
+  "depth": 32.5
  },
  {
   "name": "Чистые пруды",
   "name_en": "",
   "s": 33179.2,
-  "side": "right"
+  "side": "right",
+  "x": 1199.8,
+  "y": 1755.0,
+  "depth": 35.0
  },
  {
   "name": "Красные Ворота",
   "name_en": "",
   "s": 33900.5,
-  "side": "right"
+  "side": "right",
+  "x": 1823.1,
+  "y": 2103.7,
+  "depth": 30.3
  },
  {
   "name": "Комсомольская",
   "name_en": "",
   "s": 34748.3,
-  "side": "right"
+  "side": "right",
+  "x": 2261.7,
+  "y": 2796.7,
+  "depth": 8.7
  },
  {
   "name": "Красносельская",
   "name_en": "",
   "s": 35674.8,
-  "side": "right"
+  "side": "right",
+  "x": 2989.3,
+  "y": 3369.4,
+  "depth": 8.0
  },
  {
   "name": "Сокольники",
   "name_en": "",
   "s": 36906.4,
-  "side": "right"
+  "side": "right",
+  "x": 3779.5,
+  "y": 4309.2,
+  "depth": 9.0
  },
  {
   "name": "Преображенская площадь",
   "name_en": "",
   "s": 39411.5,
-  "side": "right"
+  "side": "right",
+  "x": 5975.7,
+  "y": 5147.6,
+  "depth": 8.0
  },
  {
   "name": "Черкизовская",
   "name_en": "",
   "s": 41600.0,
-  "side": "right"
+  "side": "right",
+  "x": 7840.0,
+  "y": 5987.8,
+  "depth": 9.0
  },
  {
   "name": "Бульвар Рокоссовского",
   "name_en": "",
   "s": 43195.1,
-  "side": "right"
+  "side": "right",
+  "x": 7166.4,
+  "y": 7194.1,
+  "depth": 8.0
  }
 ]

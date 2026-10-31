@@ -3,84 +3,126 @@
   "name": "Аэропорт Внуково",
   "name_en": "",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": -20841.0,
+  "y": -15853.3,
+  "depth": 0.0
  },
  {
   "name": "Пыхтино",
   "name_en": "",
   "s": 2305.9,
-  "side": "right"
+  "side": "right",
+  "x": -20317.2,
+  "y": -13952.7,
+  "depth": 0.0
  },
  {
   "name": "Рассказовка",
   "name_en": "",
   "s": 5053.6,
-  "side": "right"
+  "side": "right",
+  "x": -17848.3,
+  "y": -12895.4,
+  "depth": 12.0
  },
  {
   "name": "Новопеределкино",
   "name_en": "",
   "s": 6568.7,
-  "side": "right"
+  "side": "right",
+  "x": -16591.3,
+  "y": -12271.6,
+  "depth": 16.0
  },
  {
   "name": "Боровское шоссе",
   "name_en": "",
   "s": 7895.3,
-  "side": "right"
+  "side": "right",
+  "x": -15632.5,
+  "y": -11369.6,
+  "depth": 20.0
  },
  {
   "name": "Солнцево",
   "name_en": "",
   "s": 9457.6,
-  "side": "right"
+  "side": "right",
+  "x": -14326.8,
+  "y": -11150.3,
+  "depth": 13.0
  },
  {
   "name": "Говорово",
   "name_en": "",
   "s": 11591.9,
-  "side": "right"
+  "side": "right",
+  "x": -12703.4,
+  "y": -10059.1,
+  "depth": 14.0
  },
  {
   "name": "Озёрная",
   "name_en": "",
   "s": 14121.1,
-  "side": "right"
+  "side": "right",
+  "x": -10726.1,
+  "y": -8841.0,
+  "depth": 25.0
  },
  {
   "name": "Мичуринский проспект",
   "name_en": "",
   "s": 17140.2,
-  "side": "right"
+  "side": "right",
+  "x": -8588.1,
+  "y": -6748.6,
+  "depth": 13.0
  },
  {
   "name": "Раменки",
   "name_en": "",
   "s": 18492.2,
-  "side": "right"
+  "side": "right",
+  "x": -7603.7,
+  "y": -5831.7,
+  "depth": 15.0
  },
  {
   "name": "Ломоносовский проспект",
   "name_en": "",
   "s": 20028.6,
-  "side": "right"
+  "side": "right",
+  "x": -6496.6,
+  "y": -4768.1,
+  "depth": 15.0
  },
  {
   "name": "Минская",
   "name_en": "",
   "s": 23120.4,
-  "side": "right"
+  "side": "right",
+  "x": -7710.5,
+  "y": -2799.1,
+  "depth": 15.0
  },
  {
   "name": "Парк Победы",
   "name_en": "Park Pobedy",
   "s": 25711.4,
-  "side": "right"
+  "side": "right",
+  "x": -6476.1,
+  "y": -1520.6,
+  "depth": 73.6
  },
  {
   "name": "Деловой центр",
   "name_en": "Delovoy Tsentr",
   "s": 28268.5,
-  "side": "right"
+  "side": "right",
+  "x": -5058.7,
+  "y": -106.4,
+  "depth": 25.0
  }
 ]

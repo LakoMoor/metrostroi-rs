@@ -3,30 +3,45 @@
   "name": "Бульвар Генерала Карбышева",
   "name_en": "Bulvar Generala Karbysheva",
   "s": 0.0,
-  "side": "right"
+  "side": "right",
+  "x": -9192.5,
+  "y": 3788.0,
+  "depth": 18.6
  },
  {
   "name": "Народное Ополчение",
   "name_en": "Narodnoye Opolcheniye",
   "s": 1339.9,
-  "side": "right"
+  "side": "right",
+  "x": -8271.1,
+  "y": 3057.0,
+  "depth": 24.0
  },
  {
   "name": "Звенигородская",
   "name_en": "Zvenigorodskaya",
   "s": 3360.9,
-  "side": "right"
+  "side": "right",
+  "x": -6931.6,
+  "y": 1781.2,
+  "depth": 28.4
  },
  {
   "name": "Шелепиха",
   "name_en": "Shelepikha",
   "s": 4746.1,
-  "side": "right"
+  "side": "right",
+  "x": -6021.1,
+  "y": 790.1,
+  "depth": 20.0
  },
  {
   "name": "Деловой центр",
   "name_en": "Delovoy Tsentr",
   "s": 6871.5,
-  "side": "right"
+  "side": "right",
+  "x": -5042.9,
+  "y": -132.7,
+  "depth": 24.5
  }
 ]
